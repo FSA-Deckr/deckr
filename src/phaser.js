@@ -37,6 +37,7 @@ function create() {
     chip.setBounce(1,1)
     chip.setCollideWorldBounds(true)
     chip.setInteractive();
+    chip.setCircle(26,0,0);
     this.input.setDraggable(chip);
   }
   this.physics.add.collider(chips)
