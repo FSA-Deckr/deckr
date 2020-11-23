@@ -32,20 +32,35 @@ function create() {
     const vY = 400 - Math.floor(Math.random() * 800)
     const chip = chips.create(rX, rY, 'chip')
     chip.setVelocity(vX,vY)
+    //chip.setAngularVelocity(100)
+    chip.setAngularDrag(20)
     chip.setDamping(true);
     chip.setDrag(0.98, 0.98);
     chip.setBounce(1,1)
+    //should also do some kind of spin w world bound collision
     chip.setCollideWorldBounds(true)
     chip.setInteractive();
     chip.setCircle(26,0,0);
+
     this.input.setDraggable(chip);
   }
-  this.physics.add.collider(chips)
+  this.physics.add.collider(chips, chips, function(chipA, chipB) {
+    //this should be more complex, spin depends on velocity and angle of impact, but this
+    //demonstrates spin on collision
+    if(chipB.body.x < chipA.body.x) {
+      chipA.setAngularVelocity(100)
+      chipB.setAngularVelocity(-100)
+    } else {
+      chipA.setAngularVelocity(-100)
+      chipB.setAngularVelocity(100)
+    }
+  })
   function stopChips() {
     chips.children.iterate(function(chip){
       chip.storedVelX = chip.body.velocity.x
       chip.storedVelY = chip.body.velocity.y
       chip.setVelocity(0,0)
+      chip.setAngularVelocity(0)
     })
   }
   function startChips() {
@@ -53,6 +68,7 @@ function create() {
       chip.setVelocity(chip.storedVelX,chip.storedVelY)
       chip.storedVelX = 0
       chip.storedVelY = 0
+
     })
   }
   stop.onclick = stopChips
