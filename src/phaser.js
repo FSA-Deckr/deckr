@@ -5,10 +5,18 @@ const cfg = {
   width: 800,
   height: 800,
   physics: {
-    default: 'arcade'
+    default: 'arcade',
+    arcade: { debug: false}
   },
   scene: { preload, create }
 }
+
+//// physics constants, can keep this in a separate file later/////
+const angularSpeedFactor = 0.5
+const chipRadius = 25
+const angularDrag = 500
+const boardDrag = 0.9
+////////////////////////////////////
 
 const stop = document.getElementById('stop')
 const start = document.getElementById('start')
@@ -25,35 +33,33 @@ function create() {
     storedVelY: 0
   });
 
-  for(let i = 0; i < 10; i++){
+  for(let i = 0; i < 20; i++){
     const rX = Math.floor(Math.random() * 400) + 200
     const rY = Math.floor(Math.random() * 400) + 200
     const vX = 400 - Math.floor(Math.random() * 800)
     const vY = 400 - Math.floor(Math.random() * 800)
     const chip = chips.create(rX, rY, 'chip')
     chip.setVelocity(vX,vY)
-    //chip.setAngularVelocity(100)
-    chip.setAngularDrag(20)
+    chip.setAngularVelocity(100)
+    chip.setAngularDrag(angularDrag)
     chip.setDamping(true);
-    chip.setDrag(0.98, 0.98);
+    chip.setDrag(boardDrag);
     chip.setBounce(1,1)
-    //should also do some kind of spin w world bound collision
     chip.setCollideWorldBounds(true)
     chip.setInteractive();
-    chip.setCircle(26,0,0);
+    chip.setCircle(chipRadius,0,0);
 
     this.input.setDraggable(chip);
   }
   this.physics.add.collider(chips, chips, function(chipA, chipB) {
-    //this should be more complex, spin depends on velocity and angle of impact, but this
-    //demonstrates spin on collision
-    if(chipB.body.x < chipA.body.x) {
-      chipA.setAngularVelocity(100)
-      chipB.setAngularVelocity(-100)
-    } else {
-      chipA.setAngularVelocity(-100)
-      chipB.setAngularVelocity(100)
-    }
+    const ax = chipA.body.x
+    const ay = chipA.body.y
+    const aSpeed = chipA.body.speed
+    const bx = chipB.body.x
+    const by = chipB.body.y
+    const bSpeed = chipB.body.speed
+    chipA.setAngularVelocity(angularSpeedFactor * angularSpeedFactor * (ax-bx)/chipRadius * (ay-by)/chipRadius * bSpeed)
+    chipB.setAngularVelocity(angularSpeedFactor * angularSpeedFactor * (bx-ax)/chipRadius * (by-ay)/chipRadius * aSpeed)
   })
   function stopChips() {
     chips.children.iterate(function(chip){
@@ -76,6 +82,7 @@ function create() {
   let dragHistory = [];
 
   this.input.on('drag', (function (pointer, chip, dragX, dragY) {
+    chip.setAngularVelocity(0)
     dragHistory.push([dragX, dragY]);
     if(dragHistory.length > 2) {
       const [lastX, lastY] = dragHistory[dragHistory.length - 1];
