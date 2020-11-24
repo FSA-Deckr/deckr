@@ -13,4 +13,3 @@ const PlayerSession = db.define('playerSession', {
 })
 
 module.exports = PlayerSession
-
