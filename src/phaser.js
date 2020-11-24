@@ -12,10 +12,10 @@ const cfg = {
 }
 
 //// physics constants, can keep this in a separate file later/////
-const angularSpeedFactor = 1
+const angularSpeedFactor = .4
 const chipRadius = 25
-const angularDrag = 500
-const boardDrag = 0.92
+const angularDrag = 1500
+const boardDrag = 0.85
 ////////////////////////////////////
 
 const stop = document.getElementById('stop')
@@ -25,6 +25,7 @@ let chips
 
 function preload() {
   this.load.image('chip','chip.png')
+  this.load.image('board','board.jpg')
 }
 
 function create() {
@@ -32,7 +33,7 @@ function create() {
     storedVelX: 0,
     storedVelY: 0
   });
-
+  this.add.image(400, 400, 'board');
   for(let i = 0; i < 10; i++){
     const rX = Math.floor(Math.random() * 400) + 200
     const rY = Math.floor(Math.random() * 400) + 200
