@@ -12,10 +12,10 @@ const cfg = {
 }
 
 //// physics constants, can keep this in a separate file later/////
-const angularSpeedFactor = 0.5
+const angularSpeedFactor = 1
 const chipRadius = 25
 const angularDrag = 500
-const boardDrag = 0.9
+const boardDrag = 0.92
 ////////////////////////////////////
 
 const stop = document.getElementById('stop')
@@ -33,7 +33,7 @@ function create() {
     storedVelY: 0
   });
 
-  for(let i = 0; i < 20; i++){
+  for(let i = 0; i < 10; i++){
     const rX = Math.floor(Math.random() * 400) + 200
     const rY = Math.floor(Math.random() * 400) + 200
     const vX = 400 - Math.floor(Math.random() * 800)
@@ -54,12 +54,22 @@ function create() {
   this.physics.add.collider(chips, chips, function(chipA, chipB) {
     const ax = chipA.body.x
     const ay = chipA.body.y
-    const aSpeed = chipA.body.speed
     const bx = chipB.body.x
     const by = chipB.body.y
-    const bSpeed = chipB.body.speed
-    chipA.setAngularVelocity(angularSpeedFactor * angularSpeedFactor * (ax-bx)/chipRadius * (ay-by)/chipRadius * bSpeed)
-    chipB.setAngularVelocity(angularSpeedFactor * angularSpeedFactor * (bx-ax)/chipRadius * (by-ay)/chipRadius * aSpeed)
+    const contactAngle = Math.atan2(bx-ax, by-ay)
+
+    const avx = chipA.body.velocity.x
+    const avy = chipA.body.velocity.y
+    const bvx = chipB.body.velocity.x
+    const bvy = chipB.body.velocity.y
+
+    const impulseAngle = Math.atan2(bvx-avx,bvy-avy)
+
+    let spinCoeff = contactAngle - impulseAngle
+    spinCoeff = ((spinCoeff + Math.PI) % (Math.PI*2) - Math.PI) / Math.PI
+    const spinSpeed = Math.sqrt(((avx+bvx)**2) + ((avy+bvy)**2))
+    chipA.setAngularVelocity(angularSpeedFactor * (spinCoeff) * spinSpeed * -1)
+    chipB.setAngularVelocity(angularSpeedFactor * (spinCoeff) * spinSpeed)
   })
   function stopChips() {
     chips.children.iterate(function(chip){
