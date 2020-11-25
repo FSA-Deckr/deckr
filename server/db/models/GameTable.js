@@ -4,7 +4,8 @@ const db = require('../db')
 const GameTable = db.define('gameTable', {
 accessCode: {
     type: Sequelize.STRING,
-    allowNull: false
+    allowNull: false,
+    unique: true
 }
 })
 

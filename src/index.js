@@ -1,3 +1,3 @@
-const A_DAY_IN_SECONDS = 24 * 60 * 60
+const constants = require('./constants')
 
-module.exports = {A_DAY_IN_SECONDS}
+module.exports = {constants}
