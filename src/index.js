@@ -3,7 +3,7 @@ var name;
 var connectedUser;
   
 //connecting to our signaling server
-var conn = new WebSocket('ws://localhost:8080');
+var conn = new WebSocket(window.location.origin.replace('http', 'ws'));
   
 conn.onopen = function () { 
    console.log("Connected to the signaling server"); 
