@@ -175,6 +175,7 @@ function handleOffer(offer, name) {
       }); 
 		
    }, function (error) { 
+      console.log(error)
       alert("Error when creating an answer"); 
    }); 
 };
