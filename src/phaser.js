@@ -1,7 +1,10 @@
 import Phaser from 'phaser'
+import Chip from './Chip'
+import Card from './Card'
 
 const cfg = {
-  type: Phaser.AUTO,
+  type: Phaser.CANVAS,
+  canvas: canvas,
   width: 800,
   height: 800,
   physics: {
@@ -11,47 +14,31 @@ const cfg = {
   scene: { preload, create }
 }
 
-//// physics constants, can keep this in a separate file later/////
-const angularSpeedFactor = .4
-const chipRadius = 25
-const angularDrag = 1500
-const boardDrag = 0.85
-////////////////////////////////////
-
-const stop = document.getElementById('stop')
-const start = document.getElementById('start')
 const game = new Phaser.Game(cfg)
-let chips
+//chips and cards are Phaser physics groups
+//the deck is just an array of numbers representing the cards 0-51
+let chips, cards, deck
 
 function preload() {
   this.load.image('chip','chip.png')
+  //these are fixed widths for the current deck image, probabbly should change later
+  this.load.spritesheet('cardSprite','cardSpriteSheet.png', { frameWidth: 125, frameHeight: 175})
+  this.load.image('flip','flip.png')
   this.load.image('board','board.jpg')
+  //probably not the cleanest way to make a shuffled deck but whatever
+  deck = makeDeck(52)
+  shuffleDeck(deck)
 }
 
 function create() {
-  chips = this.physics.add.group({
-    storedVelX: 0,
-    storedVelY: 0
-  });
+  //add background image
   this.add.image(400, 400, 'board');
-  for(let i = 0; i < 10; i++){
-    const rX = Math.floor(Math.random() * 400) + 200
-    const rY = Math.floor(Math.random() * 400) + 200
-    const vX = 400 - Math.floor(Math.random() * 800)
-    const vY = 400 - Math.floor(Math.random() * 800)
-    const chip = chips.create(rX, rY, 'chip')
-    chip.setVelocity(vX,vY)
-    chip.setAngularVelocity(100)
-    chip.setAngularDrag(angularDrag)
-    chip.setDamping(true);
-    chip.setDrag(boardDrag);
-    chip.setBounce(1,1)
-    chip.setCollideWorldBounds(true)
-    chip.setInteractive();
-    chip.setCircle(chipRadius,0,0);
 
-    this.input.setDraggable(chip);
-  }
+  //make Phaser physics groups
+  chips = this.physics.add.group();
+  cards = this.physics.add.group()
+
+  //detect collision between chips, with a callback that induces spin
   this.physics.add.collider(chips, chips, function(chipA, chipB) {
     const ax = chipA.body.x
     const ay = chipA.body.y
@@ -69,50 +56,66 @@ function create() {
     let spinCoeff = contactAngle - impulseAngle
     spinCoeff = ((spinCoeff + Math.PI) % (Math.PI*2) - Math.PI) / Math.PI
     const spinSpeed = Math.sqrt(((avx+bvx)**2) + ((avy+bvy)**2))
-    chipA.setAngularVelocity(angularSpeedFactor * (spinCoeff) * spinSpeed * -1)
-    chipB.setAngularVelocity(angularSpeedFactor * (spinCoeff) * spinSpeed)
+    chipA.setAngularVelocity(1 * (spinCoeff) * spinSpeed * -1)
+    chipB.setAngularVelocity(1 * (spinCoeff) * spinSpeed)
   })
-  function stopChips() {
-    chips.children.iterate(function(chip){
-      chip.storedVelX = chip.body.velocity.x
-      chip.storedVelY = chip.body.velocity.y
-      chip.setVelocity(0,0)
-      chip.setAngularVelocity(0)
-    })
+
+  //create a chip in the chip physics group and at random location
+  const addAChip = () => {
+    const chip = new Chip(this, Phaser.Math.Between(200, 600),Phaser.Math.Between(200, 600), chips)
+    //put all chips below all cards
+    chip.setDepth(0);
   }
-  function startChips() {
-    chips.children.iterate(function(chip){
-      chip.setVelocity(chip.storedVelX,chip.storedVelY)
-      chip.storedVelX = 0
-      chip.storedVelY = 0
 
-    })
+  //create a randomly numbered card in the card physics group
+  const dealACard = (_deck) => {
+    //only do it if there are cards in the deck
+    if (!_deck.length) return
+    //get a random card
+    const randomCardIndex = Math.floor(Math.random() * _deck.length);
+    //remove said card
+    _deck.splice(randomCardIndex, 1)
+    //show card count on button
+    newCard.innerText = `Deal a card (${_deck.length})`
+    //create the Phaser card
+    const card = new Card(this, Phaser.Math.Between(200, 600),Phaser.Math.Between(590, 610), cards, _deck[randomCardIndex])
+    //put it on top
+    card.setDepth(1);
   }
-  stop.onclick = stopChips
-  start.onclick = startChips
-  let dragHistory = [];
 
-  this.input.on('drag', (function (pointer, chip, dragX, dragY) {
-    chip.setAngularVelocity(0)
-    dragHistory.push([dragX, dragY]);
-    if(dragHistory.length > 2) {
-      const [lastX, lastY] = dragHistory[dragHistory.length - 1];
-      const [penX, penY] = dragHistory[dragHistory.length - 2];
-      const dx = (lastX - penX) * 50;
-      const dy = (lastY - penY) * 50;
-      chip.setVelocity(dx, dy);
-    } else chip.setVelocity(0,0)
-    chip.x = dragX;
-    chip.y = dragY;
-  }));
+  //some buttons for testing
+  newChip.onclick = addAChip
+  newCard.onclick = () =>dealACard(deck)
+  collectCards.onclick = () => collectAllCards(cards, deck)
+}
 
-  this.input.on('dragend', function(pointer, gameObject){
-    const [lastX, lastY] = dragHistory[dragHistory.length - 1];
-    const [penX, penY] = dragHistory[dragHistory.length - 2];
-    const dx = (lastX - penX) * 50;
-    const dy = (lastY - penY) * 50;
-    gameObject.setVelocity(dx, dy);
-    dragHistory = [];
-  });
+//clear all cards and make a new deck
+const collectAllCards = (_cards, _deck) => {
+  _cards.clear(true, true)
+  deck = makeDeck(52)
+  shuffleDeck(deck)
+}
+
+//fill deck w random numbers
+const makeDeck = (numCards) => {
+  const _deck = []
+  for(let i = 0; i < numCards; i++) {
+    _deck.push(i)
+  }
+  newCard.innerText = `Deal a card (${_deck.length})`
+  return _deck
+}
+
+//fisher-yates array shuffle
+const shuffleDeck = array => {
+  let currentIndex = array.length, temporaryValue, randomIndex;
+  while (0 !== currentIndex) {
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1;
+    temporaryValue = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = temporaryValue;
+  }
+  return array;
 }
 
