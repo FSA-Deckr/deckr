@@ -52,6 +52,7 @@ app.use((err, req, res, next) => {
         //accepting only JSON messages 
         try { 
            data = JSON.parse(message); 
+           console.log(data)
         } catch (e) { 
            console.log("Invalid JSON"); 
            data = {}; 

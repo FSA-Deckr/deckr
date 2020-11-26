@@ -107,7 +107,7 @@ function handleLogin(success) {
 			
          //using Google public stun server 
          var configuration = { 
-            "iceServers": [{ "url": "stun:stun.l.test.com:19000" }]
+            "iceServers": [{ "url": "stun:stun.l.google.com:19302" }]
          }; 
 			
          yourConn = new webkitRTCPeerConnection(configuration); 
