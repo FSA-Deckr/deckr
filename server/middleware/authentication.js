@@ -1,5 +1,5 @@
 const {PlayerSession} = require('../db')
-const {constants: {A_DAY_IN_SECONDS}} = require('../../src')
+const {A_DAY_IN_SECONDS} = require('../constants')
 
 const authentication = async (req, res, next) => {
 

@@ -1,8 +1,8 @@
 module.exports = {
 	entry: ["./src/index.js"],
 	output: {
-		path: __dirname,
-		filename: "./server/public/bundle.js",
+		path: __dirname + '/server/public',
+		filename: "bundle.js",
 	},
 	resolve: {
 		extensions: [".js", ".jsx"],
@@ -22,5 +22,5 @@ module.exports = {
 				},
 			},
 		],
-	},
+	}
 }
