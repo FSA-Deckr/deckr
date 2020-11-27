@@ -102,11 +102,12 @@ async function handleLogin(success) {
 
       const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
       localVideo.srcObject = stream;
+
       const configuration = { 
-         "iceServers": [{ "url": "stun:stun2.1.google.com:19302" }]
+         "iceServers": [{ "url": "stun:stun.l.google.com:19302" }]
       }; 
       yourConn = new RTCPeerConnection(configuration);
-      
+      console.log(yourConn)
       // setup stream listening 
       yourConn.addStream(stream); 
       
