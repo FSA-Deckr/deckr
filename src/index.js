@@ -106,11 +106,10 @@ function handleLogin(success) {
          localVideo.srcObject = stream;
 			
          //using Google public stun server 
-         var configuration = { 
-            "iceServers": [{ "url": "stun:stun.l.google.com:19302" }]
-         }; 
+         const configuration = {'iceServers': [{'urls': 'stun:stun.l.google.com:19302'}]}
+
 			
-         yourConn = new webkitRTCPeerConnection(configuration); 
+         yourConn = new RTCPeerConnection(configuration);
 			
          // setup stream listening 
          yourConn.addStream(stream); 
