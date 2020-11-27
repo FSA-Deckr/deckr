@@ -110,6 +110,7 @@ function handleLogin(success) {
 
 			
          yourConn = new RTCPeerConnection(configuration);
+         console.log(yourConn)
 			
          // setup stream listening 
          yourConn.addStream(stream); 
