@@ -1,5 +1,5 @@
 import Phaser from 'phaser'
-import { angularDrag, boardDrag, chipRadius } from './PhysicsConstants'
+import { angularDrag, boardDrag, chipRadius, chipDepth, activeDepth } from './Constants'
 
 export default class Chip extends Phaser.Physics.Arcade.Image {
   constructor(scene, x, y, physicsGroup){
@@ -7,6 +7,7 @@ export default class Chip extends Phaser.Physics.Arcade.Image {
     //phaser scene and physics
     scene.add.existing(this);
     physicsGroup.add(this)
+    this.setDepth(chipDepth)
 
     //phaser physics settings
     this.setAngularDrag(angularDrag)
@@ -25,7 +26,7 @@ export default class Chip extends Phaser.Physics.Arcade.Image {
 
   drag (ptr, dragX, dragY) {
     //put chips on top while dragging
-    this.setDepth(2)
+    this.setDepth(activeDepth)
     const { dragHistory } = this
       this.setAngularVelocity(0)
       dragHistory.push([dragX, dragY]);
@@ -42,7 +43,7 @@ export default class Chip extends Phaser.Physics.Arcade.Image {
 
   dragEnd (ptr) {
     //put chip back on bottom layer when done dragging
-    this.setDepth(0)
+    this.setDepth(chipDepth)
     const { dragHistory } = this
     const [lastX, lastY] = dragHistory[dragHistory.length - 1];
     const [penX, penY] = dragHistory[dragHistory.length - 2];

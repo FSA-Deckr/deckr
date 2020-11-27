@@ -1,124 +1,113 @@
 import Phaser from 'phaser'
-import { angularDrag, boardDrag } from './PhysicsConstants'
+import { boardDrag, cardDimensions, hoverButtonRadius, cardBackFrame, cardDepth, activeDepth } from './Constants'
+export default class Card extends Phaser.GameObjects.Container {
+  constructor(scene, x, y, physicsGroup, cardNumber) {
+    super(scene, x, y)
+    //add images to container
+    this.card = scene.add.sprite(0,0,'cardSprite')
+    this.card.setFrame(cardBackFrame)
+    this.flipButton = scene.add.image(cardDimensions.width/2 - hoverButtonRadius, hoverButtonRadius - cardDimensions.height/2,'flip').setVisible(false)
+    this.rotateButton = scene.add.image(hoverButtonRadius - cardDimensions.width/2, cardDimensions.height/2 - hoverButtonRadius,'rotate').setVisible(false)
+    this.add([this.card,this.flipButton,this.rotateButton])
 
-export default class Card extends Phaser.Physics.Arcade.Sprite {
-  constructor(scene, x, y, physicsGroup, cardNumber){
-    super(scene, x, y, 'cardSprite')
-
-    //frame 52 is the back of a card
-    this.setFrame(52)
-
-    //add to phaser scene and to the cards physics group
+    //set container size and add to scene, make interactive
     scene.add.existing(this);
-    physicsGroup.add(this)
-
-    //card physics settings
-    this.setDamping(true);
-    this.setDrag(boardDrag);
-    this.setBounce(1,1)
-    this.setCollideWorldBounds(true)
+    this.setSize(cardDimensions.width, cardDimensions.height)
+    this.setDepth(cardDepth)
     this.setInteractive({draggable: true});
-    this.dragHistory = []
+    this.flipButton.setInteractive({draggable: true})
+    this.rotateButton.setInteractive({draggable: true})
 
-    //card event listeners
+    //make card interact w physics
+    physicsGroup.add(this)
+    this.body.setDrag(boardDrag);
+    this.body.useDamping = true;
+    this.body.setBounce(1,1)
+    this.body.setCollideWorldBounds(true)
+
+    //event listeners
+    this.dragHistory = []
     this.on('drag', (ptr,dragX,dragY)=>this.drag(ptr, dragX, dragY));
     this.on('dragend', this.dragEnd);
     this.on('pointerover', (ptr,localX,localY)=>this.hover(ptr,localX,localY))
     this.on('pointerout', (ptr)=>this.unhover(ptr))
-    this.on('pointerdown', (ptr,localX,localY)=>this.startReveal(ptr,localX,localY))
-    this.on('pointerup',(ptr,localX,localY)=>this.reveal(ptr,localX,localY))
+    this.rotateButton.on('pointerover', (ptr,localX,localY)=>this.hover(ptr,localX,localY))
+    this.rotateButton.on('pointerout', (ptr)=>this.unhover(ptr))
+    this.rotateButton.on('drag', (ptr,dragX,dragY)=>this.spin(ptr, dragX, dragY));
+    this.rotateButton.on('dragend', (ptr)=>this.dragEnd(ptr));
+    this.flipButton.on('pointerover', (ptr,localX,localY)=>this.hover(ptr,localX,localY))
+    this.flipButton.on('pointerout', (ptr)=>this.unhover(ptr))
+    this.flipButton.on('pointerdown',()=>this.startFlip())
+    this.flipButton.on('pointerup',()=>this.flip())
 
     //card status variables
     this.cardNumber = cardNumber;
-    this.dragging = false
-    this.spinning = false
-    this.clickReveal = false
+    this.startFlipClickedDown = false
     this.revealed = false
+    this.spinning = false
   }
 
   drag (ptr, dragX, dragY) {
-    //get bottom left corner and check if drag action begins within 50 pixels of it to spin rather than drag card
-    const bottomLeft = this.getBottomLeft()
-    if(Phaser.Math.Distance.BetweenPoints(bottomLeft, {x:ptr.downX, y: ptr.downY}) <= 50) {
-      this.spinning = true
-    }
-    //do the same to check if click to begin to reveal card
-    const topRight = this.getTopRight()
-    if(Phaser.Math.Distance.BetweenPoints(topRight, {x:ptr.downX, y: ptr.downY}) <= 50) {
-      this.clickReveal = true
-    }
-    //if spinning then apply rotation based on pointer position, otherwise drag
-    if(this.spinning && !this.dragging) this.spin(ptr)
-    else if(!this.clickReveal) {
-      this.dragging = true
-      //put the card on top of everything while dragging
-      this.setDepth(2)
-      const { dragHistory } = this
-      dragHistory.push([dragX, dragY]);
-      if(dragHistory.length > 2) {
-        const [lastX, lastY] = dragHistory[dragHistory.length - 1];
-        const [penX, penY] = dragHistory[dragHistory.length - 2];
-        const dx = (lastX - penX) * 50;
-        const dy = (lastY - penY) * 50;
-        this.setVelocity(dx, dy);
-      } else this.setVelocity(0,0)
-      this.x = dragX;
-      this.y = dragY;
-    }
+    this.setDepth(activeDepth)
+    const { dragHistory } = this
+    dragHistory.push([dragX, dragY]);
+    if(dragHistory.length > 2) {
+      const [lastX, lastY] = dragHistory[dragHistory.length - 1];
+      const [penX, penY] = dragHistory[dragHistory.length - 2];
+      const dx = (lastX - penX) * 50;
+      const dy = (lastY - penY) * 50;
+      this.body.setVelocity(dx, dy);
+    } else this.body.setVelocity(0,0)
+    this.x = dragX;
+    this.y = dragY;
   }
 
   dragEnd (ptr) {
-    if(this.dragging) {
-      //put the card on top of the visible cards when you release
-      this.setDepth(1)
+    if(!this.spinning) {
       const { dragHistory } = this
       const [lastX, lastY] = dragHistory[dragHistory.length - 1];
       const [penX, penY] = dragHistory[dragHistory.length - 2];
       const dx = (lastX - penX) * 50;
       const dy = (lastY - penY) * 50;
-      this.setVelocity(dx, dy);
+      this.body.setVelocity(dx, dy);
       this.dragHistory = [];
     }
-    this.dragging = false
     this.spinning = false
-
-    //only reveal if drag begins and ends in the reveal zone
-    const topRight = this.getTopRight()
-    if(Phaser.Math.Distance.BetweenPoints(topRight, {x:ptr.upX, y: ptr.upY}) <= 50) {
-      this.clickReveal = true
-    } else this.clickReveal = false
+    this.setDepth(cardDepth)
   }
 
   hover (ptr,localX,localY) {
-    //for now, this changes the frame of the card sprite
-    //TODO:
-    //instead of changing the frame, make some sprites appears on both revealed and unrevealed cards
-    if(this.frame.name===52) this.setFrame(53)
+    this.flipButton.setVisible(true)
+    this.rotateButton.setVisible(true)
   }
 
   unhover (ptr) {
-    //TODO
-    //make those temp sprites disappear
-    if(this.frame.name===53) this.setFrame(52)
+    if(!this.spinning) {
+      this.flipButton.setVisible(false)
+      this.rotateButton.setVisible(false)
+    }
   }
 
   spin(ptr) {
+    this.setDepth(activeDepth)
+    this.spinning = true
     //some trig to spin the card relative to the pointer position
     this.rotation = Phaser.Math.Angle.Between(this.x, this.y, ptr.worldX, ptr.worldY) - 3*Math.PI/4
   }
 
-  startReveal(ptr, localX, localY) {
-    //mark that a click (without drag) begins in the reveal zone
-    const topRight = this.getTopRight()
-    if(Phaser.Math.Distance.BetweenPoints(topRight, {x:ptr.downX, y: ptr.downY}) <= 50) {
-      this.clickReveal = true
-    }
+  startFlip() {
+    this.setDepth(activeDepth)
+    //mark that a click down (without drag) begins in the reveal zone
+    this.startFlipClickedDown = true
   }
 
-  reveal() {
-    //reveal the card if the click began in the reveal zone, ends in reveal zone, and wasn't dragged/spun
-    if(!this.dragging && !this.spinning && this.clickReveal) this.setFrame(this.cardNumber)
-    this.clickReveal = false
-    this.revealed = true
+  flip() {
+    //flip
+    if(this.startFlipClickedDown) {
+      this.revealed ? this.card.setFrame(cardBackFrame) : this.card.setFrame(this.cardNumber)
+      this.revealed = !this.revealed
+    }
+    this.startFlipClickedDown = false
+    this.setDepth(cardDepth)
   }
 }

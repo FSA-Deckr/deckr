@@ -21,9 +21,11 @@ let chips, cards, deck
 
 function preload() {
   this.load.image('chip','chip.png')
+  this.load.image('card','card.png')
   //these are fixed widths for the current deck image, probabbly should change later
   this.load.spritesheet('cardSprite','cardSpriteSheet.png', { frameWidth: 125, frameHeight: 175})
   this.load.image('flip','flip.png')
+  this.load.image('rotate','rotate.png')
   this.load.image('board','board.jpg')
   //probably not the cleanest way to make a shuffled deck but whatever
   deck = makeDeck(52)
@@ -64,23 +66,18 @@ function create() {
   const addAChip = () => {
     const chip = new Chip(this, Phaser.Math.Between(200, 600),Phaser.Math.Between(200, 600), chips)
     //put all chips below all cards
-    chip.setDepth(0);
   }
 
   //create a randomly numbered card in the card physics group
   const dealACard = (_deck) => {
     //only do it if there are cards in the deck
     if (!_deck.length) return
-    //get a random card
-    const randomCardIndex = Math.floor(Math.random() * _deck.length);
-    //remove said card
-    _deck.splice(randomCardIndex, 1)
+    //get top card and remove from deck
+    const cardNumber = _deck.pop()
     //show card count on button
     newCard.innerText = `Deal a card (${_deck.length})`
     //create the Phaser card
-    const card = new Card(this, Phaser.Math.Between(200, 600),Phaser.Math.Between(590, 610), cards, _deck[randomCardIndex])
-    //put it on top
-    card.setDepth(1);
+    const card = new Card(this, Phaser.Math.Between(200, 600),Phaser.Math.Between(590, 610), cards, cardNumber)
   }
 
   //some buttons for testing
