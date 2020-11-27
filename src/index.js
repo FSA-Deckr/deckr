@@ -87,7 +87,7 @@ loginBtn.addEventListener("click", function (event) {
 	
 });
   
-function handleLogin(success) { 
+async function handleLogin(success) { 
    if (success === false) { 
       alert("Ooops...try a different username"); 
    } else { 
@@ -99,41 +99,28 @@ function handleLogin(success) {
       //********************** 
 		
       //getting local video stream 
-      navigator.webkitGetUserMedia({ video: true, audio: true }, function (myStream) { 
-         stream = myStream; 
-			
-         //displaying local video stream on the page 
-         localVideo.srcObject = stream;
-			
-         //using Google public stun server 
-         const configuration = {'iceServers': [{'urls': 'stun:stun.l.google.com:19302'}]}
 
-			
-         yourConn = new RTCPeerConnection(configuration);
-         console.log(yourConn)
-			
-         // setup stream listening 
-         yourConn.addStream(stream); 
-			
-         //when a remote user adds stream to the peer connection, we display it 
-         yourConn.onaddstream = function (e) { 
-            remoteVideo.srcObject = e.stream; 
-         };
-			
-         // Setup ice handling 
-         yourConn.onicecandidate = function (event) { 
-            if (event.candidate) { 
-               send({ 
-                  type: "candidate", 
-                  candidate: event.candidate 
-               }); 
-            } 
-         };  
-			
-      }, function (error) { 
-         console.log(error); 
-      }); 
-		
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      localVideo.srcObject = stream;
+      yourConn = new RTCPeerConnection(configuration);
+      
+      // setup stream listening 
+      yourConn.addStream(stream); 
+      
+      //when a remote user adds stream to the peer connection, we display it 
+      yourConn.onaddstream = function (e) { 
+         remoteVideo.srcObject = e.stream; 
+      };
+      
+      // Setup ice handling 
+      yourConn.onicecandidate = function (event) { 
+         if (event.candidate) { 
+            send({ 
+               type: "candidate", 
+               candidate: event.candidate 
+            }); 
+         } 
+      }; 
    } 
 };
   
