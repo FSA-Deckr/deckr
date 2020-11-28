@@ -30,8 +30,8 @@ async function renderTable(tableNumber) {
         const socket = io('http://localhost:8080');
         
         socket.on('connect', function() {
-           // Connected, let's sign-up for to receive messages for this room
-           socket.emit('room', tableNumber);
+            //send room number to connect to it
+            socket.emit('room', tableNumber);
         });
         
         socket.on('message', function(data) {
