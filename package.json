@@ -17,6 +17,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "agora-rtc-sdk": "^3.2.3",
     "express": "^4.17.1",
     "http": "0.0.1-security",
     "morgan": "^1.10.0",
