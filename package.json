@@ -18,10 +18,15 @@
   "license": "ISC",
   "dependencies": {
     "cookie-parser": "^1.4.5",
+    "ejs": "^3.1.5",
     "express": "^4.17.1",
     "morgan": "^1.10.0",
     "pg": "^8.5.1",
-    "sequelize": "^6.3.5"
+    "sequelize": "^6.3.5",
+    "socket.io": "^3.0.3",
+    "twilio-video": "^2.8.0",
+    "uuid": "^8.3.1",
+    "ws": "^7.4.0"
   },
   "devDependencies": {
     "babel-eslint": "^10.1.0",
