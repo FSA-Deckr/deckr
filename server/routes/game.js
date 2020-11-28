@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const {GameTable, PlayerSession} = require('../db');
 
+//this post request creates a new game room
 router.post('/', async (req, res, next) => {
     try {
         let accessCode;
@@ -27,8 +28,12 @@ router.post('/', async (req, res, next) => {
     }
 })
 
+//this get request will place someone in a room (if allowed) according to their cookie and db
+//206 if the table was full
+//204 if the table doesn't exist
 router.get('/:gameId', async (req, res, next) => {
     try {
+
         const gameTable = await GameTable.findOne({
             where: {
                 accessCode: req.params.gameId
@@ -44,30 +49,38 @@ router.get('/:gameId', async (req, res, next) => {
         if (gameTable) {
             const gameUsers = await PlayerSession.findAll({
                 where: {
-                    gameTableId: req.params.gameId
+                    gameTableId: gameTable.id
                 }
             })
-            const numPlayers = gameUsers.length
 
+            const playerNums = gameUsers.length ? gameUsers.map( user => user.playerNumber) : [];
             //if the player refreshes after being on a table
-            if (req.user.gameTableId === req.params.gameId) {
-                res.send('welcome back')
+            if (req.gameTableId === req.params.gameId) {
+                res.sendStatus(200)
             }
             else {
                 //if table full
-                if (numPlayers === 4) {
-                    res.send('Sorry, this table is full')
+                if (playerNums.length === 4) {
+                    res.sendStatus(206)
                 }
                 //if table not full
                 else {
-                    await player.update({gameTableId: req.params.gameId})
-                    req.user.gameTableId = req.params.gameId
-                    res.send('You are a new player')
+                    let newPlayerNum;
+                    for (let testNum = 1; testNum <= 4; testNum++) {
+                        if (!playerNums.includes(testNum)) {
+                            newPlayerNum = testNum;
+                            break;
+                        }
+                    }
+                    await player.update({gameTableId: gameTable.id, playerNumber: newPlayerNum})
+                    req.gameTableNum = req.params.gameId;
+                    req.playerNumber = newPlayerNum;
+                    res.sendStatus(200)
                 }
             }
         }
         else {
-            res.send('This game does not exist')
+            res.sendStatus(204)
         }
     }
     catch(err) {
