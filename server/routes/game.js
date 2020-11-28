@@ -79,6 +79,7 @@ router.get('/:gameId', async (req, res, next) => {
                 }
             }
         }
+        //if no game table found
         else {
             res.sendStatus(204)
         }
