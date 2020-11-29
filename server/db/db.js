@@ -1,7 +1,7 @@
 const Sequelize = require('sequelize')
 
 const db = new Sequelize(process.env.DATABASE_URL || 
-    'postgres://lalhost/deckr'
+    'postgres://lalhost:5432/deckr'
     // 'postgres://localhost/deckr'
     , {logging: false})
 
