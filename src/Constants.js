@@ -13,3 +13,7 @@ export const cardBackFrame = 52
 export const chipDepth = 1
 export const cardDepth = 2
 export const activeDepth = 3
+
+//game board
+export const canvasWidth = 800
+export const canvasHeight = 800

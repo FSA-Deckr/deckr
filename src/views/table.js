@@ -1,8 +1,7 @@
 const axios = require('axios')
 const io = require('socket.io-client');
 const renderLobby = require('./lobby');
-
-let socket, room
+const {DeckrTable} = require('../DeckrTable')
 
 async function attemptToRenderTable(tableNumber) {
     let gameTable = await axios.get(`/api/game/${tableNumber}`)
@@ -28,8 +27,8 @@ async function renderTable(tableNumber) {
             await axios.put('/api/player', {gameTableId: null, playerNumber: null})
         })
 
-        socket = io('http://localhost:8080');
-        room = tableNumber
+        const socket = io('http://localhost:8080');
+        const room = tableNumber
         socket.on('connect', function() {
             //send room number to connect to it
             socket.emit('room', tableNumber);
@@ -40,16 +39,8 @@ async function renderTable(tableNumber) {
         });
 
         root.innerHTML = `<div>You are in room ${tableNumber}</div>`
+
+        const game = new DeckrTable(socket, room)
 }
 
-const socketRoomInstance = async () => {
-    return new Promise(function(resolve, reject) {
-        if(socket && room) {
-            resolve({socket, room})
-        } else {
-            reject(Error('not yet'))
-        }
-    })
-}
-
-module.exports = {attemptToRenderTable, renderTable, socketRoomInstance}
+module.exports = {attemptToRenderTable, renderTable}

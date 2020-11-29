@@ -1,6 +1,6 @@
 const renderLobby = require('./views/lobby');
-const {attemptToRenderTable, socketRoomInstance} = require('./views/table');
-import game from './phaser'
+const {attemptToRenderTable} = require('./views/table');
+// import DeckrTable from './phaser'
 
 if (window.location.pathname === '/home/') {
     renderLobby();
@@ -11,8 +11,8 @@ else {
     attemptToRenderTable(strippedPath);
 }
 
-testEmit.onclick = async function() {
-    //send a message to socket server
-    const { socket, room } = await socketRoomInstance()
-    socket.emit('test',{room,message:'hi!'})
-}
+// testEmit.onclick = async function() {
+//     //send a message to socket server
+//     const { socket, room } = await socketRoomInstance()
+//     socket.emit('test',{room,message:'hi!'})
+// }
