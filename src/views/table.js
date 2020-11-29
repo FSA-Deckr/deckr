@@ -39,6 +39,10 @@ async function renderTable(tableNumber) {
         });
 
         root.innerHTML = `<div>You are in room ${tableNumber}</div>`
+
 }
+
+
+
 
 module.exports = {attemptToRenderTable, renderTable}
