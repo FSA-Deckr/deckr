@@ -4,12 +4,13 @@
   "description": "Virtual card table/video app",
   "main": "server/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "build": "webpack",
     "build:dev": "webpack -w",
     "build:phaser": "webpack -w --config webpack-phaser.config.js",
     "start": "node server/index.js",
-    "start:dev": "npm run build && nodemon --ignore client --ignore server/public"
+    "start:dev": "npm run build && nodemon --ignore src --ignore server/public",
+    "start:server": "nodemon --ignore src --ignore server/public"
   },
   "repository": {
     "type": "git",
@@ -18,8 +19,15 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.21.0",
+    "chalk": "^4.1.0",
+    "cookie-parser": "^1.4.5",
     "express": "^4.17.1",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "pg": "^8.5.1",
+    "sequelize": "^6.3.5",
+    "socket.io": "^3.0.3",
+    "socket.io-client": "^3.0.3"
   },
   "devDependencies": {
     "@babel/core": "^7.4.3",
@@ -28,8 +36,10 @@
     "babel-loader": "^8.0.5",
     "eslint": "^7.14.0",
     "eslint-config-fullstack": "^6.0.0",
+    "jest": "^26.6.3",
     "nodemon": "^2.0.4",
     "phaser": "^3.24.1",
+    "supertest": "^6.0.1",
     "webpack": "^4.44.1",
     "webpack-cli": "^3.3.12"
   },

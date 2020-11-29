@@ -1,3 +1,4 @@
+const {socketRoomInstance} = require('./views/table');
 import Phaser from 'phaser'
 import Chip from './Chip'
 import Card from './Card'
@@ -13,11 +14,12 @@ const cfg = {
   },
   scene: { preload, create }
 }
-
-const game = new Phaser.Game(cfg)
+export const game = new Phaser.Game(cfg)
 //chips and cards are Phaser physics groups
 //the deck is just an array of numbers representing the cards 0-51
-let chips, cards, deck
+let deck, cardsPhysicsGroup, chipsPhysicsGroup, socket, room
+const chips = {}
+const cards = {}
 
 function preload() {
   this.load.image('chip','chip.png')
@@ -32,16 +34,17 @@ function preload() {
   shuffleDeck(deck)
 }
 
-function create() {
+async function create() {
+  ({ socket, room } = await socketRoomInstance())
   //add background image
   this.add.image(400, 400, 'board');
 
   //make Phaser physics groups
-  chips = this.physics.add.group();
-  cards = this.physics.add.group()
+  chipsPhysicsGroup = this.physics.add.group();
+  cardsPhysicsGroup = this.physics.add.group()
 
   //detect collision between chips, with a callback that induces spin
-  this.physics.add.collider(chips, chips, function(chipA, chipB) {
+  this.physics.add.collider(chipsPhysicsGroup, chipsPhysicsGroup, function(chipA, chipB) {
     const ax = chipA.body.x
     const ay = chipA.body.y
     const bx = chipB.body.x
@@ -64,7 +67,8 @@ function create() {
 
   //create a chip in the chip physics group and at random location
   const addAChip = () => {
-    const chip = new Chip(this, Phaser.Math.Between(200, 600),Phaser.Math.Between(200, 600), chips)
+    const chip = new Chip(this, Phaser.Math.Between(200, 600),Phaser.Math.Between(200, 600), chipsPhysicsGroup)
+    console.log(chip);
     //put all chips below all cards
   }
 
@@ -77,13 +81,36 @@ function create() {
     //show card count on button
     newCard.innerText = `Deal a card (${_deck.length})`
     //create the Phaser card
-    const card = new Card(this, Phaser.Math.Between(200, 600),Phaser.Math.Between(590, 610), cards, cardNumber)
+    const card = new Card(this, Phaser.Math.Between(200, 600),Phaser.Math.Between(590, 610), cardsPhysicsGroup, cardNumber)
+    console.log(card);
+    //put in cards obj and emit card and deck
+    cards[card.cardNumber] = card;
+    socket.emit("sendCards", {cards, room});
   }
 
   //some buttons for testing
   newChip.onclick = addAChip
   newCard.onclick = () =>dealACard(deck)
-  collectCards.onclick = () => collectAllCards(cards, deck)
+  collectCards.onclick = () => collectAllCards(cardsPhysicsGroup, deck)
+
+  socket.on('receiveCards', (receivedCards) => {
+    //for each receivedCard in receivedCards, if card[receivedCard.cardNumber] do nothing, otherwise make that card w relevant card data, and add it to cards
+    console.log(receivedCards);
+    // const receivedCardNumbers = Object.keys(receivedCards)
+    for(let receivedCardNum in receivedCards) {
+      if(!cards[receivedCardNum]) {
+        const receivedCard = receivedCards[receivedCardNum];
+        console.log(receivedCard);
+        const card = new Card(this, receivedCard.x, receivedCard.y, cardsPhysicsGroup, receivedCardNum)
+        cards[card.cardNumber] = card;
+      }
+    }
+    // receivedCardNumbers.forEach(receivedCardNumber => {
+    //   if(!cards[receivedCardNumber]) {
+    //     const card = new Card(this, , cardsPhysicsGroup, cardNumber)
+    //   }
+    // })
+  })
 }
 
 //clear all cards and make a new deck
