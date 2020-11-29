@@ -33,9 +33,11 @@ app.use((err, req, res, next) => {
     res.status(500).send('Error:' + err.message);
   });
 
+
+
 const init = async () => {
 try {
-    await db.sync({force: true});
+    // await db.sync({force: true});
     const port = process.env.PORT || 8080;
     const server = app.listen(port, () => console.log(`listening on port ${port}`));
     setSocketServer(io(server))
@@ -44,6 +46,8 @@ catch (ex){
     console.log(ex);
 }
 };
+
+
 
 init();
 
