@@ -27,7 +27,7 @@ async function renderTable(tableNumber) {
             await axios.put('/api/player', {gameTableId: null, playerNumber: null})
         })
 
-        const socket = io(process.env.SOCKET_URL || 'http://localhost:8080');
+        const socket = io('/');
         const room = tableNumber
         socket.on('connect', function() {
             //send room number to connect to it
