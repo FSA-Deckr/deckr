@@ -93,7 +93,7 @@ export class DeckrTable extends Phaser.Game {
         const card = new Card(this, Phaser.Math.Between(200, 600),Phaser.Math.Between(590, 610), cardsPhysicsGroup, cardNumber);
         //put in cards obj and emit card and deck
         gameState.cards[card.cardNumber] = card;
-        socket.emit("sendCards", gameState);
+        socket.emit("sendGameState", gameState);
       }
 
       //some buttons for testing
@@ -101,17 +101,15 @@ export class DeckrTable extends Phaser.Game {
       newCard.onclick = () =>dealACard(gameState.deck)
       collectCards.onclick = () => collectAllCards(cardsPhysicsGroup, gameState.deck)
 
-      socket.on('receiveCards', (receivedGameState) => {
-        //for each receivedCard in receivedCards, if card[receivedCard.cardNumber] do nothing, otherwise make that card w relevant card data, and add it to cards
+      socket.on('receiveGameState', (receivedGameState) => {
+        //for each receivedCard in gamestate, make new card if it doesn't exist
         const { cards, chips, deck } = receivedGameState;
-
         for(let receivedCardNum in cards) {
           // adds cards to table
           if(!gameState.cards[receivedCardNum]) {
             const receivedCard = cards[receivedCardNum];
             gameState.deck = deck;
             newCard.innerText = `Deal a card (${deck.length})`
-            console.log(receivedCard);
             const card = new Card(this, receivedCard.x, receivedCard.y, cardsPhysicsGroup, receivedCardNum)
             gameState.cards[card.cardNumber] = card;
           }

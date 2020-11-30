@@ -9,17 +9,16 @@ const setSocketServer = (server) => {
         // once a client has connected, we expect to get a ping from them saying what room they want to join
         socket.on('room', function(room) {
             console.log(chalk.yellow('the room is', room))
-            socket.join(room);
-            socketServer.to(room).emit('message', `the is a message from the websocket to people in ${room}?`);
+            this.join(room);
+            this.to(room).emit('message', `the is a message from the websocket to people in ${room}?`);
         });
 
         socket.on('test', function(data) {
-            socketServer.to(data.room).emit('message', data.message + '?')
+            this.to(data.room).emit('message', data.message + '?')
         })
 
-        socket.on('sendCards', function(gameState) {
-            console.log("server gameState:", gameState);
-            socketServer.to(gameState.room).emit('receiveCards', gameState);
+        socket.on('sendGameState', function(gameState) {
+            this.to(gameState.room).emit('receiveGameState', gameState);
         })
     });
 

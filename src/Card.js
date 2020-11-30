@@ -11,12 +11,6 @@ export default class Card extends Phaser.GameObjects.Container {
     this.rotateButton = scene.add.image(hoverButtonRadius - cardDimensions.width/2, cardDimensions.height/2 - hoverButtonRadius,'rotate').setVisible(false)
     this.add([this.shadow,this.card,this.flipButton,this.rotateButton])
 
-    //look at gameState
-    // console.log('Scene gameState:', scene.game.gameState);
-    // console.log('socket: ', scene.game.socket);
-
-    const { socket, gameState } = scene.game;
-
     this.gameState = scene.game.gameState;
     this.socket = scene.game.socket;
 
@@ -82,9 +76,7 @@ export default class Card extends Phaser.GameObjects.Container {
     this.x = dragX;
     this.y = dragY;
 
-    this.gameState.cards[this.cardNumber].x = dragX;
-    this.gameState.cards[this.cardNumber].y = dragY;
-    this.socket.emit('sendCards', this.gameState);
+    this.socket.emit('sendGameState', this.gameState);
   }
 
   dragEnd (ptr) {
@@ -120,8 +112,7 @@ export default class Card extends Phaser.GameObjects.Container {
     this.spinning = true
     //some trig to spin the card relative to the pointer position
     this.rotation = Phaser.Math.Angle.Between(this.x, this.y, ptr.worldX, ptr.worldY) - 3*Math.PI/4
-    this.gameState.cards[this.cardNumber].rotation = this.rotation;
-    this.socket.emit('sendCards', this.gameState);
+    this.socket.emit('sendGameState', this.gameState);
   }
 
   startFlip() {
@@ -138,7 +129,7 @@ export default class Card extends Phaser.GameObjects.Container {
     }
     this.startFlipClickedDown = false
     this.setDepth(cardDepth)
-    this.socket.emit('sendCards', this.gameState);
+    this.socket.emit('sendGameState', this.gameState);
   }
 
   setRevealed(_revealed) {
