@@ -31,10 +31,10 @@ let client = AgoraRTC.createClient({
     codec: "vp8",
 });
 
-client.init("bb8fa8a838674e38abd095b569e17cfc");
+client.init("apikey");
 
 // Join a channel
-client.join("006bb8fa8a838674e38abd095b569e17cfcIAAWB6XPT9y1SuovAGMJC2PzHUeJ674GZ42M+fx1yvwS9KT2+9QAAAAAEAAWal0mdn3FXwEAAQB3fcVf", "deckr", null, (uid)=>{
+client.join("channel links", "deckr", null, (uid)=>{
     let localStream = AgoraRTC.createStream({
         audio: true,
         video: true,

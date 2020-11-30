@@ -1,6 +1,7 @@
 const axios = require('axios')
 const io = require('socket.io-client');
 const renderLobby = require('./lobby');
+const startVideo = require('../agora')
 
 async function attemptToRenderTable(tableNumber) {
     let gameTable = await axios.get(`/api/game/${tableNumber}`)
@@ -39,6 +40,7 @@ async function renderTable(tableNumber) {
         });
 
         root.innerHTML = `<div>You are in room ${tableNumber}</div>`
+        startVideo()
 
 }
 
