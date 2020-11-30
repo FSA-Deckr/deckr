@@ -17,9 +17,9 @@ const setSocketServer = (server) => {
             socketServer.to(data.room).emit('message', data.message + '?')
         })
 
-        socket.on('sendCards', function({cards, room}) {
-            console.log('Cards!', Object.keys(cards).length, "Room", room);
-            socketServer.to(room).emit('receiveCards', cards);
+        socket.on('sendCards', function(gameState) {
+            //console.log('Cards!', Object.keys(gameState.cards).length, "Room", gameState.room);
+            socketServer.to(gameState.room).emit('receiveCards', gameState);
         })
     });
 

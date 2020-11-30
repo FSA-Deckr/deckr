@@ -22,24 +22,29 @@ export class DeckrTable extends Phaser.Game {
     super(cfg)
 
     //the deck is just an array of numbers representing the cards 0-51
-    let deck, cardsPhysicsGroup, chipsPhysicsGroup
-    const chips = {}
-    const cards = {}
+    let cardsPhysicsGroup, chipsPhysicsGroup
+    this.socket = socket;
+    this.gameState = {
+      deck: [],
+      cards: {},
+      chips: {},
+      room: room
+    };
+    const { gameState } = this
 
     function preload() {
       this.load.image('chip','chip.png')
-      this.load.image('card','card.png')
-      //these are fixed widths for the current deck image, probabbly should change later
+      this.load.image('shadow','shadow.png')
       this.load.spritesheet('cardSprite','cardSpriteSheet.png', { frameWidth: cardDimensions.width, frameHeight: cardDimensions.height})
       this.load.image('flip','flip.png')
       this.load.image('rotate','rotate.png')
       this.load.image('board','board.jpg')
       //probably not the cleanest way to make a shuffled deck but whatever
-      deck = makeDeck(52)
-      shuffleDeck(deck)
+      gameState.deck = makeDeck(52)
+      shuffleDeck(gameState.deck)
     }
 
-    async function create() {
+    function create() {
       //add background image
       this.add.image(canvasWidth/2, canvasHeight/2, 'board');
 
@@ -88,26 +93,32 @@ export class DeckrTable extends Phaser.Game {
         const card = new Card(this, Phaser.Math.Between(200, 600),Phaser.Math.Between(590, 610), cardsPhysicsGroup, cardNumber)
         console.log(card);
         //put in cards obj and emit card and deck
-        cards[card.cardNumber] = card;
-        socket.emit("sendCards", {cards, room});
+        gameState.cards[card.cardNumber] = card;
+        socket.emit("sendCards", gameState);
       }
 
       //some buttons for testing
       newChip.onclick = addAChip
-      newCard.onclick = () =>dealACard(deck)
-      collectCards.onclick = () => collectAllCards(cardsPhysicsGroup, deck)
+      newCard.onclick = () =>dealACard(gameState.deck)
+      collectCards.onclick = () => collectAllCards(cardsPhysicsGroup, gameState.deck)
 
-      socket.on('receiveCards', (receivedCards) => {
+      socket.on('receiveCards', (receivedGameState) => {
         //for each receivedCard in receivedCards, if card[receivedCard.cardNumber] do nothing, otherwise make that card w relevant card data, and add it to cards
-        console.log(receivedCards);
+        // console.log(receivedGameState);
+        const { cards, chips, deck } = receivedGameState;
         // const receivedCardNumbers = Object.keys(receivedCards)
-        for(let receivedCardNum in receivedCards) {
-          if(!cards[receivedCardNum]) {
-            const receivedCard = receivedCards[receivedCardNum];
+        // adds cards to table
+        for(let receivedCardNum in cards) {
+          if(!gameState.cards[receivedCardNum]) {
+            const receivedCard = cards[receivedCardNum];
+            gameState.deck = deck;
+            newCard.innerText = `Deal a card (${deck.length})`
             console.log(receivedCard);
             const card = new Card(this, receivedCard.x, receivedCard.y, cardsPhysicsGroup, receivedCardNum)
-            cards[card.cardNumber] = card;
+            gameState.cards[card.cardNumber] = card;
           }
+
+          gameState.cards[receivedCardNum].setPosition(cards[receivedCardNum].x, cards[receivedCardNum].y)
         }
       })
     }
@@ -115,8 +126,8 @@ export class DeckrTable extends Phaser.Game {
     //clear all cards and make a new deck
     const collectAllCards = (_cards, _deck) => {
       _cards.clear(true, true)
-      deck = makeDeck(52)
-      shuffleDeck(deck)
+      _deck = makeDeck(52)
+      shuffleDeck(_deck)
     }
 
     //fill deck w random numbers

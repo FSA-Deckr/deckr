@@ -4,11 +4,21 @@ export default class Card extends Phaser.GameObjects.Container {
   constructor(scene, x, y, physicsGroup, cardNumber) {
     super(scene, x, y)
     //add images to container
+    this.shadow = scene.add.image(0,0,'shadow')
     this.card = scene.add.sprite(0,0,'cardSprite')
     this.card.setFrame(cardBackFrame)
     this.flipButton = scene.add.image(cardDimensions.width/2 - hoverButtonRadius, hoverButtonRadius - cardDimensions.height/2,'flip').setVisible(false)
     this.rotateButton = scene.add.image(hoverButtonRadius - cardDimensions.width/2, cardDimensions.height/2 - hoverButtonRadius,'rotate').setVisible(false)
-    this.add([this.card,this.flipButton,this.rotateButton])
+    this.add([this.shadow,this.card,this.flipButton,this.rotateButton])
+
+    //look at gameState
+    console.log('Scene gameState:', scene.game.gameState);
+    console.log('socket: ', scene.game.socket);
+
+    const { socket, gameState } = scene.game;
+
+    this.gameState = scene.game.gameState;
+    this.socket = scene.game.socket;
 
     //set container size and add to scene, make interactive
     scene.add.existing(this);
@@ -60,6 +70,10 @@ export default class Card extends Phaser.GameObjects.Container {
     } else this.body.setVelocity(0,0)
     this.x = dragX;
     this.y = dragY;
+
+    this.gameState.cards[this.cardNumber].x = dragX;
+    this.gameState.cards[this.cardNumber].y = dragY;
+    this.socket.emit('sendCards', this.gameState);
   }
 
   dragEnd (ptr) {
@@ -79,12 +93,14 @@ export default class Card extends Phaser.GameObjects.Container {
   hover (ptr,localX,localY) {
     this.flipButton.setVisible(true)
     this.rotateButton.setVisible(true)
+    this.card.setPosition(10,-10)
   }
 
   unhover (ptr) {
     if(!this.spinning) {
       this.flipButton.setVisible(false)
       this.rotateButton.setVisible(false)
+      this.card.setPosition(0,0)
     }
   }
 
