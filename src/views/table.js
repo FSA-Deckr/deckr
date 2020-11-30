@@ -38,7 +38,14 @@ async function renderTable(tableNumber) {
            console.log('Incoming message:', data);
         });
 
-        root.innerHTML = `<div>You are in room ${tableNumber}</div>`
+        root.innerHTML = `<div>You are in room ${tableNumber}</div>
+        <canvas id="canvas"></canvas>
+        <p>
+          <button id="newChip">Add a chip</button>
+          <button id="newCard">Deal a card (0)</button>
+          <button id="collectCards">Collect cards & shuffle</button>
+        </p>
+      </body>`
 
         const game = new DeckrTable(socket, room)
 }

@@ -90,8 +90,7 @@ export class DeckrTable extends Phaser.Game {
         //show card count on button
         newCard.innerText = `Deal a card (${_deck.length})`
         //create the Phaser card
-        const card = new Card(this, Phaser.Math.Between(200, 600),Phaser.Math.Between(590, 610), cardsPhysicsGroup, cardNumber)
-        console.log(card);
+        const card = new Card(this, Phaser.Math.Between(200, 600),Phaser.Math.Between(590, 610), cardsPhysicsGroup, cardNumber);
         //put in cards obj and emit card and deck
         gameState.cards[card.cardNumber] = card;
         socket.emit("sendCards", gameState);
@@ -104,11 +103,10 @@ export class DeckrTable extends Phaser.Game {
 
       socket.on('receiveCards', (receivedGameState) => {
         //for each receivedCard in receivedCards, if card[receivedCard.cardNumber] do nothing, otherwise make that card w relevant card data, and add it to cards
-        // console.log(receivedGameState);
         const { cards, chips, deck } = receivedGameState;
-        // const receivedCardNumbers = Object.keys(receivedCards)
-        // adds cards to table
+
         for(let receivedCardNum in cards) {
+          // adds cards to table
           if(!gameState.cards[receivedCardNum]) {
             const receivedCard = cards[receivedCardNum];
             gameState.deck = deck;
@@ -117,8 +115,10 @@ export class DeckrTable extends Phaser.Game {
             const card = new Card(this, receivedCard.x, receivedCard.y, cardsPhysicsGroup, receivedCardNum)
             gameState.cards[card.cardNumber] = card;
           }
-
+          //put all cards where they belong and with their rotations and reveal status
           gameState.cards[receivedCardNum].setPosition(cards[receivedCardNum].x, cards[receivedCardNum].y)
+          gameState.cards[receivedCardNum].setRotation(cards[receivedCardNum].rotation)
+          gameState.cards[receivedCardNum].setRevealed(cards[receivedCardNum].revealed)
         }
       })
     }

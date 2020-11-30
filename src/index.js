@@ -10,9 +10,3 @@ else {
     const strippedPath = path.substring(1,path.length-1);
     attemptToRenderTable(strippedPath);
 }
-
-// testEmit.onclick = async function() {
-//     //send a message to socket server
-//     const { socket, room } = await socketRoomInstance()
-//     socket.emit('test',{room,message:'hi!'})
-// }

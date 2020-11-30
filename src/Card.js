@@ -12,8 +12,8 @@ export default class Card extends Phaser.GameObjects.Container {
     this.add([this.shadow,this.card,this.flipButton,this.rotateButton])
 
     //look at gameState
-    console.log('Scene gameState:', scene.game.gameState);
-    console.log('socket: ', scene.game.socket);
+    // console.log('Scene gameState:', scene.game.gameState);
+    // console.log('socket: ', scene.game.socket);
 
     const { socket, gameState } = scene.game;
 
@@ -55,6 +55,17 @@ export default class Card extends Phaser.GameObjects.Container {
     this.startFlipClickedDown = false
     this.revealed = false
     this.spinning = false
+
+    //overwrite phaser's bullshit toJSON implementation
+    this.toJSON = () => {
+      return {
+        cardNumber: this.cardNumber,
+        x: this.x,
+        y: this.y,
+        rotation: this.rotation,
+        revealed: this.revealed
+      }
+    }
   }
 
   drag (ptr, dragX, dragY) {
@@ -109,6 +120,8 @@ export default class Card extends Phaser.GameObjects.Container {
     this.spinning = true
     //some trig to spin the card relative to the pointer position
     this.rotation = Phaser.Math.Angle.Between(this.x, this.y, ptr.worldX, ptr.worldY) - 3*Math.PI/4
+    this.gameState.cards[this.cardNumber].rotation = this.rotation;
+    this.socket.emit('sendCards', this.gameState);
   }
 
   startFlip() {
@@ -125,5 +138,11 @@ export default class Card extends Phaser.GameObjects.Container {
     }
     this.startFlipClickedDown = false
     this.setDepth(cardDepth)
+    this.socket.emit('sendCards', this.gameState);
+  }
+
+  setRevealed(_revealed) {
+    this.revealed = _revealed
+    !this.revealed ? this.card.setFrame(cardBackFrame) : this.card.setFrame(this.cardNumber)
   }
 }

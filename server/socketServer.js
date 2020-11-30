@@ -18,7 +18,7 @@ const setSocketServer = (server) => {
         })
 
         socket.on('sendCards', function(gameState) {
-            //console.log('Cards!', Object.keys(gameState.cards).length, "Room", gameState.room);
+            console.log("server gameState:", gameState);
             socketServer.to(gameState.room).emit('receiveCards', gameState);
         })
     });
