@@ -1,5 +1,5 @@
 import Phaser from 'phaser'
-import { boardDrag, cardDimensions, hoverButtonRadius, cardBackFrame, cardDepth, activeDepth } from './Constants'
+import { boardDrag, cardDimensions, hoverButtonRadius, cardBackFrame, cardDepth, activeDepth, hoverOffset } from './Constants'
 export default class Card extends Phaser.GameObjects.Container {
   constructor(scene, x, y, physicsGroup, cardNumber) {
     super(scene, x, y)
@@ -7,10 +7,11 @@ export default class Card extends Phaser.GameObjects.Container {
     this.shadow = scene.add.image(0,0,'shadow')
     this.card = scene.add.sprite(0,0,'cardSprite')
     this.card.setFrame(cardBackFrame)
-    this.flipButton = scene.add.image(cardDimensions.width/2 - hoverButtonRadius, hoverButtonRadius - cardDimensions.height/2,'flip').setVisible(false)
-    this.rotateButton = scene.add.image(hoverButtonRadius - cardDimensions.width/2, cardDimensions.height/2 - hoverButtonRadius,'rotate').setVisible(false)
+    this.flipButton = scene.add.image(cardDimensions.width/2 - hoverButtonRadius + hoverOffset, hoverButtonRadius - cardDimensions.height/2 - hoverOffset,'flip').setVisible(false)
+    this.rotateButton = scene.add.image(hoverButtonRadius - cardDimensions.width/2 + hoverOffset, cardDimensions.height/2 - hoverButtonRadius - hoverOffset,'rotate').setVisible(false)
     this.add([this.shadow,this.card,this.flipButton,this.rotateButton])
 
+    //socket and room info for emit events
     this.gameState = scene.game.gameState;
     this.socket = scene.game.socket;
 
@@ -96,7 +97,7 @@ export default class Card extends Phaser.GameObjects.Container {
   hover (ptr,localX,localY) {
     this.flipButton.setVisible(true)
     this.rotateButton.setVisible(true)
-    this.card.setPosition(10,-10)
+    this.card.setPosition(hoverOffset,-hoverOffset)
   }
 
   unhover (ptr) {

@@ -32,6 +32,8 @@ export class DeckrTable extends Phaser.Game {
     };
     const { gameState } = this
 
+    this.currentChipNumber = 0
+
     function preload() {
       this.load.image('chip','chip.png')
       this.load.image('shadow','shadow.png')
@@ -76,9 +78,10 @@ export class DeckrTable extends Phaser.Game {
 
       //create a chip in the chip physics group and at random location
       const addAChip = () => {
-        const chip = new Chip(this, Phaser.Math.Between(200, 600),Phaser.Math.Between(200, 600), chipsPhysicsGroup)
-        console.log(chip);
-        //put all chips below all cards
+        const chip = new Chip(this, Phaser.Math.Between(200, 600),Phaser.Math.Between(200, 600), chipsPhysicsGroup, this.game.currentChipNumber)
+        gameState.chips[chip.chipNumber] = chip
+        this.game.currentChipNumber++
+        socket.emit("sendGameState", gameState);
       }
 
       //create a randomly numbered card in the card physics group
@@ -102,13 +105,14 @@ export class DeckrTable extends Phaser.Game {
       collectCards.onclick = () => collectAllCards(cardsPhysicsGroup, gameState.deck)
 
       socket.on('receiveGameState', (receivedGameState) => {
-        //for each receivedCard in gamestate, make new card if it doesn't exist
         const { cards, chips, deck } = receivedGameState;
+        //update the deck
+        gameState.deck = deck;
+        //for each receivedCard in gamestate, make new card if it doesn't exist
         for(let receivedCardNum in cards) {
           // adds cards to table
           if(!gameState.cards[receivedCardNum]) {
             const receivedCard = cards[receivedCardNum];
-            gameState.deck = deck;
             newCard.innerText = `Deal a card (${deck.length})`
             const card = new Card(this, receivedCard.x, receivedCard.y, cardsPhysicsGroup, receivedCardNum)
             gameState.cards[card.cardNumber] = card;
@@ -117,6 +121,18 @@ export class DeckrTable extends Phaser.Game {
           gameState.cards[receivedCardNum].setPosition(cards[receivedCardNum].x, cards[receivedCardNum].y)
           gameState.cards[receivedCardNum].setRotation(cards[receivedCardNum].rotation)
           gameState.cards[receivedCardNum].setRevealed(cards[receivedCardNum].revealed)
+        }
+        for(let receivedChipNumber in chips) {
+          // adds chips to table
+          if(!gameState.chips[receivedChipNumber]) {
+            const receivedChip = chips[receivedChipNumber];
+            const chip = new Chip(this, receivedChip.x, receivedChip.y, chipsPhysicsGroup, receivedChipNumber)
+            gameState.chips[chip.chipNumber] = chip;
+            this.game.currentChipNumber = +chip.chipNumber+1
+          }
+          //put all chips where they belong and with their rotations
+          gameState.chips[receivedChipNumber].setPosition(chips[receivedChipNumber].x, chips[receivedChipNumber].y)
+          gameState.chips[receivedChipNumber].setPosition(chips[receivedChipNumber].x, chips[receivedChipNumber].y)
         }
       })
     }
