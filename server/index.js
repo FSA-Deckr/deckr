@@ -33,6 +33,8 @@ app.use((err, req, res, next) => {
     res.status(500).send('Error:' + err.message);
   });
 
+
+
 const init = async () => {
 try {
     await db.sync({force: true});
@@ -44,6 +46,8 @@ catch (ex){
     console.log(ex);
 }
 };
+
+
 
 init();
 
