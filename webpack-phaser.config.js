@@ -1,10 +1,10 @@
 module.exports = {
-	entry: ["./src/index.js"],
-	output: {
-		path: __dirname + '/server/public',
-		filename: "bundle.js",
-	},
+	entry: ["./src/phaser.js"],
 	mode: 'development',
+	output: {
+		path: __dirname,
+		filename: "./server/public/phaser-bundle.js",
+	},
 	resolve: {
 		extensions: [".js", ".jsx"],
 	},
@@ -23,5 +23,5 @@ module.exports = {
 				},
 			},
 		],
-	}
+	},
 }

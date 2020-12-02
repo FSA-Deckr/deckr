@@ -7,9 +7,15 @@ router.post('/', async (req, res, next) => {
         let accessCode;
         let created = false;
         let foundTable;
+<<<<<<< HEAD
         
         while (!created) {
             //radix 36 uses 0-9 and a-z 
+=======
+
+        while (!created) {
+            //radix 36 uses 0-9 and a-z
+>>>>>>> origin/card-sockets
             accessCode = Math.random().toString(36).substr(2, 6).toUpperCase()
 
             //check if table with this access code exists
