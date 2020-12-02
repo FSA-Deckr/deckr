@@ -20,6 +20,10 @@ const setSocketServer = (server) => {
         socket.on('sendGameState', function(gameState) {
             this.to(gameState.room).emit('receiveGameState', gameState);
         })
+
+        socket.on('sendCard', function(cardState) {
+            this.to(cardState.room).emit('receiveCard', {...cardState.card, isDragging: cardState.isDragging});
+        })
     });
 
 }

@@ -36,7 +36,8 @@ export default class Chip extends Phaser.Physics.Arcade.Image {
         chipNumber: this.chipNumber,
         x: this.x,
         y: this.y,
-        rotation: this.rotation
+        rotation: this.rotation,
+        velocity: this.body.velocity
       }
     }
   }

@@ -50,6 +50,7 @@ export default class Card extends Phaser.GameObjects.Container {
     this.startFlipClickedDown = false
     this.revealed = false
     this.spinning = false
+    this.isDragging = false
 
     //overwrite phaser's bullshit toJSON implementation
     this.toJSON = () => {
@@ -58,12 +59,15 @@ export default class Card extends Phaser.GameObjects.Container {
         x: this.x,
         y: this.y,
         rotation: this.rotation,
-        revealed: this.revealed
+        revealed: this.revealed,
+        velocity: this.body.velocity,
+        isDragging: this.isDragging
       }
     }
   }
 
   drag (ptr, dragX, dragY) {
+    if(this.isDragging) return
     this.setDepth(activeDepth)
     const { dragHistory } = this
     dragHistory.push([dragX, dragY]);
@@ -77,11 +81,13 @@ export default class Card extends Phaser.GameObjects.Container {
     this.x = dragX;
     this.y = dragY;
 
-    this.socket.emit('sendGameState', this.gameState);
+    this.socket.emit('sendCard', { card:this, room: this.gameState.room, isDragging: true });
+    this.isDragging = false
   }
 
   dragEnd (ptr) {
-    if(!this.spinning) {
+    if(this.isDragging) return
+    if(!this.spinning && this.dragHistory.length > 1) {
       const { dragHistory } = this
       const [lastX, lastY] = dragHistory[dragHistory.length - 1];
       const [penX, penY] = dragHistory[dragHistory.length - 2];
@@ -92,9 +98,12 @@ export default class Card extends Phaser.GameObjects.Container {
     }
     this.spinning = false
     this.setDepth(cardDepth)
+
+    this.socket.emit('sendCard', { card:this, room: this.gameState.room, isDragging: false });
   }
 
   hover (ptr,localX,localY) {
+    if(this.isDragging) return
     this.flipButton.setVisible(true)
     this.rotateButton.setVisible(true)
     this.card.setPosition(hoverOffset,-hoverOffset)
@@ -113,16 +122,18 @@ export default class Card extends Phaser.GameObjects.Container {
     this.spinning = true
     //some trig to spin the card relative to the pointer position
     this.rotation = Phaser.Math.Angle.Between(this.x, this.y, ptr.worldX, ptr.worldY) - 3*Math.PI/4
-    this.socket.emit('sendGameState', this.gameState);
+    this.socket.emit('sendCard', { card:this, room: this.gameState.room });
   }
 
   startFlip() {
+    if(this.isDragging) return
     this.setDepth(activeDepth)
     //mark that a click down (without drag) begins in the reveal zone
     this.startFlipClickedDown = true
   }
 
   flip() {
+    if(this.isDragging) return
     //flip
     if(this.startFlipClickedDown) {
       this.revealed ? this.card.setFrame(cardBackFrame) : this.card.setFrame(this.cardNumber)
@@ -130,7 +141,7 @@ export default class Card extends Phaser.GameObjects.Container {
     }
     this.startFlipClickedDown = false
     this.setDepth(cardDepth)
-    this.socket.emit('sendGameState', this.gameState);
+    this.socket.emit('sendCard', { card:this, room: this.gameState.room });
   }
 
   setRevealed(_revealed) {
