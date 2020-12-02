@@ -32,6 +32,7 @@ export default class Card extends Phaser.GameObjects.Container {
 
     //event listeners
     this.dragHistory = []
+    this.on('dragstart', this.dragStart)
     this.on('drag', (ptr,dragX,dragY)=>this.drag(ptr, dragX, dragY));
     this.on('dragend', this.dragEnd);
     this.on('pointerover', (ptr,localX,localY)=>this.hover(ptr,localX,localY))
@@ -50,7 +51,8 @@ export default class Card extends Phaser.GameObjects.Container {
     this.startFlipClickedDown = false
     this.revealed = false
     this.spinning = false
-    this.isDragging = false
+    this.otherPlayerDragging = false
+    this.playerPickedUp = false
 
     //overwrite phaser's bullshit toJSON implementation
     this.toJSON = () => {
@@ -61,13 +63,17 @@ export default class Card extends Phaser.GameObjects.Container {
         rotation: this.rotation,
         revealed: this.revealed,
         velocity: this.body.velocity,
-        isDragging: this.isDragging
+        otherPlayerDragging: this.otherPlayerDragging
       }
     }
   }
 
+  dragStart() {
+    if(!this.otherPlayerDragging) this.playerPickedUp = true
+  }
+
   drag (ptr, dragX, dragY) {
-    if(this.isDragging) return
+    if(!this.playerPickedUp) return
     this.setDepth(activeDepth)
     const { dragHistory } = this
     dragHistory.push([dragX, dragY]);
@@ -81,12 +87,12 @@ export default class Card extends Phaser.GameObjects.Container {
     this.x = dragX;
     this.y = dragY;
 
-    this.socket.emit('sendCard', { card:this, room: this.gameState.room, isDragging: true });
-    this.isDragging = false
+    this.socket.emit('sendCard', { card:this, room: this.gameState.room, otherPlayerDragging: true });
+    this.otherPlayerDragging = false
   }
 
-  dragEnd (ptr) {
-    if(this.isDragging) return
+  dragEnd () {
+    if(!this.playerPickedUp) return
     if(!this.spinning && this.dragHistory.length > 1) {
       const { dragHistory } = this
       const [lastX, lastY] = dragHistory[dragHistory.length - 1];
@@ -99,11 +105,12 @@ export default class Card extends Phaser.GameObjects.Container {
     this.spinning = false
     this.setDepth(cardDepth)
 
-    this.socket.emit('sendCard', { card:this, room: this.gameState.room, isDragging: false });
+    this.socket.emit('sendCard', { card:this, room: this.gameState.room, otherPlayerDragging: false });
+    this.playerPickedUp = false
   }
 
   hover (ptr,localX,localY) {
-    if(this.isDragging) return
+    if(this.otherPlayerDragging) return
     this.flipButton.setVisible(true)
     this.rotateButton.setVisible(true)
     this.card.setPosition(hoverOffset,-hoverOffset)
@@ -126,14 +133,14 @@ export default class Card extends Phaser.GameObjects.Container {
   }
 
   startFlip() {
-    if(this.isDragging) return
+    if(this.otherPlayerDragging) return
     this.setDepth(activeDepth)
     //mark that a click down (without drag) begins in the reveal zone
     this.startFlipClickedDown = true
   }
 
   flip() {
-    if(this.isDragging) return
+    if(this.otherPlayerDragging) return
     //flip
     if(this.startFlipClickedDown) {
       this.revealed ? this.card.setFrame(cardBackFrame) : this.card.setFrame(this.cardNumber)

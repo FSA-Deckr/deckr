@@ -144,7 +144,7 @@ export class DeckrTable extends Phaser.Game {
         gameState.cards[receivedCard.cardNumber].setRotation(receivedCard.rotation)
         gameState.cards[receivedCard.cardNumber].setRevealed(receivedCard.revealed)
         gameState.cards[receivedCard.cardNumber].body.setVelocity(receivedCard.velocity.x,receivedCard.velocity.y)
-        gameState.cards[receivedCard.cardNumber].isDragging = receivedCard.isDragging
+        gameState.cards[receivedCard.cardNumber].otherPlayerDragging = receivedCard.otherPlayerDragging
       })
     }
     //clear all cards and make a new deck
