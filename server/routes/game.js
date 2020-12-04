@@ -7,15 +7,9 @@ router.post('/', async (req, res, next) => {
         let accessCode;
         let created = false;
         let foundTable;
-<<<<<<< HEAD
-        
-        while (!created) {
-            //radix 36 uses 0-9 and a-z 
-=======
 
         while (!created) {
             //radix 36 uses 0-9 and a-z
->>>>>>> origin/card-sockets
             accessCode = Math.random().toString(36).substr(2, 6).toUpperCase()
 
             //check if table with this access code exists
@@ -62,7 +56,7 @@ router.get('/:gameId', async (req, res, next) => {
             const playerNums = gameUsers.length ? gameUsers.map( user => user.playerNumber) : [];
             //if the player refreshes after being on a table
             if (req.gameTableId === req.params.gameId) {
-                res.sendStatus(200)
+                res.status(200).json(gameTable.id)
             }
             else {
                 //if table full
@@ -81,7 +75,7 @@ router.get('/:gameId', async (req, res, next) => {
                     await player.update({gameTableId: gameTable.id, playerNumber: newPlayerNum})
                     req.gameTableNum = req.params.gameId;
                     req.playerNumber = newPlayerNum;
-                    res.sendStatus(200)
+                    res.status(200).json(gameTable.id)
                 }
             }
         }
