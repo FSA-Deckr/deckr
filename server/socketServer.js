@@ -13,7 +13,6 @@ const setSocketServer = (server) => {
             this.to(room).emit('message', `the is a message from the websocket to people in ${room}?`);
         });
         socket.on('sendGameState', function(gameState) {
-            console.log('game')
             this.to(gameState.room).emit('receiveGameState', gameState);
         })
         socket.on('sendCard', function(cardState) {
@@ -22,7 +21,6 @@ const setSocketServer = (server) => {
         })
 
         socket.on('sendChip', function(chipState) {
-            console.log('chip')
             this.to(chipState.room).emit('receiveChip', {...chipState.chip, otherPlayerDragging: chipState.otherPlayerDragging});
             if(chipState.isDragging) this.emit('receiveChip', {...chipState.chip, otherPlayerDragging: !chipState.otherPlayerDragging});
         })

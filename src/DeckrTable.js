@@ -1,7 +1,7 @@
 import Phaser from 'phaser'
 import Chip from './Chip'
 import Card from './Card'
-import { canvasWidth, canvasHeight, cardDimensions } from './Constants'
+import { canvasWidth, canvasHeight, cardDimensions, chipRadius } from './Constants'
 
 export class DeckrTable extends Phaser.Game {
   constructor(socket, room, _playerNumber){
@@ -36,6 +36,7 @@ export class DeckrTable extends Phaser.Game {
 
     function preload() {
       this.load.image('chip','chip.png')
+      this.load.spritesheet('chipSprite','chipSpriteSheet.png', { frameWidth: chipRadius * 2, frameHeight: chipRadius * 2})
       this.load.image('shadow','shadow.png')
       this.load.spritesheet('cardSprite','cardSpriteSheet.png', { frameWidth: cardDimensions.width, frameHeight: cardDimensions.height})
       this.load.image('flip','flip.png')
@@ -78,7 +79,7 @@ export class DeckrTable extends Phaser.Game {
 
       //create a chip in the chip physics group and at random location
       const addAChip = () => {
-        const chip = new Chip(this, Phaser.Math.Between(200, 600),Phaser.Math.Between(200, 600), chipsPhysicsGroup, this.game.currentChipNumber)
+        const chip = new Chip(this, Phaser.Math.Between(200, 600),Phaser.Math.Between(200, 600), chipsPhysicsGroup, this.game.currentChipNumber, chipValue.value)
         gameState.chips[chip.chipNumber] = chip
         this.game.currentChipNumber++
         socket.emit("sendGameState", gameState);
@@ -145,7 +146,7 @@ export class DeckrTable extends Phaser.Game {
           // adds chips to table
           if(!gameState.chips[receivedChipNumber]) {
             const receivedChip = chips[receivedChipNumber];
-            const chip = new Chip(this, receivedChip.x, receivedChip.y, chipsPhysicsGroup, receivedChipNumber)
+            const chip = new Chip(this, receivedChip.x, receivedChip.y, chipsPhysicsGroup, receivedChipNumber, +receivedChip.chipValue)
             gameState.chips[chip.chipNumber] = chip;
             this.game.currentChipNumber = +chip.chipNumber+1
           }

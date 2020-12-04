@@ -46,6 +46,14 @@ async function renderTable(tableNumber,playerNumber) {
         <canvas id= '${canvas}'></canvas>
         <p>
           <button id="newChip">Add a chip</button>
+          <select id="chipValue">
+            <option value=1>1</option>
+            <option value=5>5</option>
+            <option value=25>25</option>
+            <option value=50>50</option>
+            <option value=100>100</option>
+            <option value=500>500</option>
+          </select>
           <button id="newCard">Deal a card (0)</button>
           <button id="collectCards">Collect cards & shuffle</button>
         </p>

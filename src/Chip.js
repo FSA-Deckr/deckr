@@ -1,12 +1,16 @@
 import Phaser from 'phaser'
 import { angularDrag, boardDrag, chipRadius, chipDepth, activeDepth } from './Constants'
 
-export default class Chip extends Phaser.Physics.Arcade.Image {
-  constructor(scene, x, y, physicsGroup, chipNumber){
-    super(scene, x, y, 'chip')
+export default class Chip extends Phaser.Physics.Arcade.Sprite {
+  constructor(scene, x, y, physicsGroup, chipNumber, chipValue){
+    super(scene, x, y, 'chipSprite')
+    //map chip values to sprite frame
+    const chipValueMap = {1:0, 5:1, 25:2, 50:3, 100:4, 500:5}
+
     //phaser scene and physics
     scene.add.existing(this);
     physicsGroup.add(this)
+    this.setFrame(chipValueMap[chipValue])
     this.setDepth(chipDepth)
 
     //socket and room info for emit events
@@ -34,6 +38,7 @@ export default class Chip extends Phaser.Physics.Arcade.Image {
 
     //chip status variables
     this.chipNumber = chipNumber
+    this.chipValue = chipValue
     this.otherPlayerDragging = false
     this.playerPickedUp = false
 
@@ -41,6 +46,7 @@ export default class Chip extends Phaser.Physics.Arcade.Image {
     this.toJSON = () => {
       return {
         chipNumber: this.chipNumber,
+        chipValue: this.chipValue,
         x: this.x,
         y: this.y,
         rotation: this.rotation,
