@@ -56,7 +56,7 @@ router.get('/:gameId', async (req, res, next) => {
             const playerNums = gameUsers.length ? gameUsers.map( user => user.playerNumber) : [];
             //if the player refreshes after being on a table
             if (req.gameTableId === req.params.gameId) {
-                res.sendStatus(200)
+                res.status(200).json(gameTable.id)
             }
             else {
                 //if table full
@@ -75,7 +75,7 @@ router.get('/:gameId', async (req, res, next) => {
                     await player.update({gameTableId: gameTable.id, playerNumber: newPlayerNum})
                     req.gameTableNum = req.params.gameId;
                     req.playerNumber = newPlayerNum;
-                    res.sendStatus(200)
+                    res.status(200).json(gameTable.id)
                 }
             }
         }

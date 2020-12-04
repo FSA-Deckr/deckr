@@ -10,3 +10,5 @@ else {
     const strippedPath = path.substring(1,path.length-1);
     attemptToRenderTable(strippedPath);
 }
+
+

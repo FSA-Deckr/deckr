@@ -1,0 +1,25 @@
+*{
+    font-family: sans-serif;
+}
+h1,h4{
+    text-align: center;
+}
+#me{
+    position: relative;
+    float:top;
+    width: 25%;
+    margin: 0 auto;
+    display: block;
+}
+#me video{
+    position: relative !important;
+}
+#remote-container{
+    display: flex;
+    float:top;
+
+}
+#remote-container video{
+    width: 25%;
+    position: relative !important;
+}
