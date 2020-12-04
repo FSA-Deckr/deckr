@@ -10,7 +10,7 @@ const { setSocketServer }  = require('./socketServer');
 
 const app = express();
 
-app.use(morgan('volleyball'));
+// app.use(morgan('dev'));
 app.use(express.json());
 
 app.use(cookieParser())
@@ -32,8 +32,6 @@ app.use((req, res, next) => {
 app.use((err, req, res, next) => {
     res.status(500).send('Error:' + err.message);
   });
-
-
 
 const init = async () => {
 try {
