@@ -6,7 +6,8 @@ h1,h4{
 }
 #me{
     position: relative;
-    width: 50%;
+    float:top;
+    width: 25%;
     margin: 0 auto;
     display: block;
 }
@@ -15,8 +16,10 @@ h1,h4{
 }
 #remote-container{
     display: flex;
+    float:top;
+
 }
 #remote-container video{
-    height: auto;
+    width: 25%;
     position: relative !important;
 }
