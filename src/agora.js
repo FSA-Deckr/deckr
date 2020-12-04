@@ -1,9 +1,9 @@
 const AgoraRTC = require('agora-rtc-sdk')
-const keys = require('../apikey')
+// const keys = require('../apikey')
 
 
 const startVideo = function(channelNum){
-    
+
     let handleError = function(err){
         console.log("Error: ", err);
     };

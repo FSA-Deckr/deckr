@@ -39,7 +39,7 @@ async function renderTable(tableNumber,channelNum) {
            console.log('Incoming message:', data);
         });
         const canvas = 'canvas'
- 
+
         root.innerHTML = `<div>You are in room ${tableNumber}</div>
         <div id='me'></div>
         <div id="remote-container"></div>
@@ -54,8 +54,8 @@ async function renderTable(tableNumber,channelNum) {
 
 
         const game = new DeckrTable(socket, room)
-        startVideo(channelNum)
-    
+        // startVideo(channelNum)
+
 }
 
 module.exports = {attemptToRenderTable, renderTable}
