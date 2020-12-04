@@ -7,7 +7,7 @@ const {DeckrTable} = require('../DeckrTable')
 
 async function attemptToRenderTable(tableNumber) {
     let gameTable = await axios.get(`/api/game/${tableNumber}`)
-    let channelNum = gameTable.data
+    let playerNumber = gameTable.data.playerNumber
     if (gameTable.status === 206) {
         window.location.pathname = '/home'
         console.log('Sorry, this game is full')
@@ -17,11 +17,11 @@ async function attemptToRenderTable(tableNumber) {
         console.log('Sorry, this game was not found')
     }
     else {
-        await renderTable(tableNumber,channelNum);
+        await renderTable(tableNumber, playerNumber);
     }
 }
 
-async function renderTable(tableNumber,channelNum) {
+async function renderTable(tableNumber,playerNumber) {
     const root = document.getElementById('root');
 
         //this just updates db with info when a player Xs out
@@ -49,13 +49,12 @@ async function renderTable(tableNumber,channelNum) {
           <button id="newCard">Deal a card (0)</button>
           <button id="collectCards">Collect cards & shuffle</button>
         </p>
+        <p>You are player #${playerNumber}</p>
 
       </body>`
 
-
-        const game = new DeckrTable(socket, room)
+        const game = new DeckrTable(socket, room, playerNumber)
         // startVideo(channelNum)
-
 }
 
 module.exports = {attemptToRenderTable, renderTable}

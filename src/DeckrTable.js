@@ -4,8 +4,7 @@ import Card from './Card'
 import { canvasWidth, canvasHeight, cardDimensions } from './Constants'
 
 export class DeckrTable extends Phaser.Game {
-  constructor(socket, room){
-
+  constructor(socket, room, _playerNumber){
     //phaser game object config
     const cfg = {
       type: Phaser.CANVAS,
@@ -24,13 +23,14 @@ export class DeckrTable extends Phaser.Game {
     //the deck is just an array of numbers representing the cards 0-51
     let cardsPhysicsGroup, chipsPhysicsGroup
     this.socket = socket;
+    this.playerNumber = _playerNumber
     this.gameState = {
       deck: [],
       cards: {},
       chips: {},
       room: room
     };
-    const { gameState } = this
+    const { gameState, playerNumber } = this
 
     this.currentChipNumber = 0
 
@@ -104,6 +104,24 @@ export class DeckrTable extends Phaser.Game {
       newCard.onclick = () =>dealACard(gameState.deck)
       collectCards.onclick = () => collectAllCards(cardsPhysicsGroup, gameState.deck)
 
+      socket.on('receiveCard', (receivedCard) => {
+        //put all cards where they belong and with their rotations and reveal status
+        gameState.cards[receivedCard.cardNumber].setPosition(receivedCard.x, receivedCard.y)
+        gameState.cards[receivedCard.cardNumber].setRotation(receivedCard.rotation)
+        gameState.cards[receivedCard.cardNumber].setRevealed(receivedCard.revealed)
+        gameState.cards[receivedCard.cardNumber].body.setVelocity(receivedCard.velocity.x,receivedCard.velocity.y)
+        gameState.cards[receivedCard.cardNumber].otherPlayerDragging = receivedCard.otherPlayerDragging
+      })
+
+      socket.on('receiveChip', (receivedChip) => {
+        //put all cards where they belong and with their rotations and reveal status
+        gameState.chips[receivedChip.chipNumber].setPosition(receivedChip.x, receivedChip.y)
+        gameState.chips[receivedChip.chipNumber].setRotation(receivedChip.rotation)
+        gameState.chips[receivedChip.chipNumber].body.setVelocity(receivedChip.velocity.x,receivedChip.velocity.y)
+        gameState.chips[receivedChip.chipNumber].body.setAngularVelocity(receivedChip.angularVelocity)
+        gameState.chips[receivedChip.chipNumber].otherPlayerDragging = receivedChip.otherPlayerDragging
+      })
+
       socket.on('receiveGameState', (receivedGameState) => {
         const { cards, chips, deck } = receivedGameState;
         //update the deck
@@ -134,19 +152,12 @@ export class DeckrTable extends Phaser.Game {
           //put all chips where they belong and with their rotations
           gameState.chips[receivedChipNumber].setPosition(chips[receivedChipNumber].x, chips[receivedChipNumber].y)
           gameState.chips[receivedChipNumber].body.setVelocity(chips[receivedChipNumber].velocity.x, chips[receivedChipNumber].velocity.y)
+          gameState.chips[receivedChipNumber].body.setAngularVelocity(chips[receivedChipNumber].angularVelocity)
           gameState.chips[receivedChipNumber].setRotation(chips[receivedChipNumber].rotation)
         }
       })
-
-      socket.on('receiveCard', (receivedCard) => {
-        //put all cards where they belong and with their rotations and reveal status
-        gameState.cards[receivedCard.cardNumber].setPosition(receivedCard.x, receivedCard.y)
-        gameState.cards[receivedCard.cardNumber].setRotation(receivedCard.rotation)
-        gameState.cards[receivedCard.cardNumber].setRevealed(receivedCard.revealed)
-        gameState.cards[receivedCard.cardNumber].body.setVelocity(receivedCard.velocity.x,receivedCard.velocity.y)
-        gameState.cards[receivedCard.cardNumber].otherPlayerDragging = receivedCard.otherPlayerDragging
-      })
     }
+
     //clear all cards and make a new deck
     const collectAllCards = (_cards, _deck) => {
       _cards.clear(true, true)
