@@ -28,6 +28,12 @@ export class DeckrTable extends Phaser.Game {
       deck: [],
       cards: {},
       chips: {},
+      hands: {
+        player1: [],
+        player2: [],
+        player3: [],
+        player4: [],
+      },
       room: room
     };
     const { gameState } = this
@@ -145,6 +151,13 @@ export class DeckrTable extends Phaser.Game {
         gameState.cards[receivedCard.cardNumber].setRevealed(receivedCard.revealed)
         gameState.cards[receivedCard.cardNumber].body.setVelocity(receivedCard.velocity.x,receivedCard.velocity.y)
         gameState.cards[receivedCard.cardNumber].otherPlayerDragging = receivedCard.otherPlayerDragging
+      })
+
+      socket.on('removeCard', (removeCardState) => {
+        gameState.hands[removeCardState.player].push(removeCardState.cardNumber);
+        gameState.cards[removeCardState.cardNumber].destroy();
+        delete gameState.cards[removeCardState.cardNumber];
+        p1Card.innerText = gameState.hands.player1.length;
       })
     }
     //clear all cards and make a new deck

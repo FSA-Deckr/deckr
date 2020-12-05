@@ -49,6 +49,9 @@ async function renderTable(tableNumber,channelNum) {
           <button id="newCard">Deal a card (0)</button>
           <button id="collectCards">Collect cards & shuffle</button>
         </p>
+        <p>
+            Player1 Card: <span id="p1Card"></span>
+        </p>
 
       </body>`
 

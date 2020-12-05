@@ -25,6 +25,10 @@ const setSocketServer = (server) => {
             this.to(cardState.room).emit('receiveCard', {...cardState.card, otherPlayerDragging: cardState.otherPlayerDragging});
             if(cardState.isDragging) this.emit('receiveCard', {...cardState.card, otherPlayerDragging: !cardState.otherPlayerDragging});
         })
+
+        socket.on('destroyCard', function(cardState) {
+            this.to(cardState.room).emit('removeCard', {cardNumber: cardState.cardNumber, player: cardState.player});
+        })
     });
 
 }

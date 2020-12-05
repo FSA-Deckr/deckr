@@ -1,5 +1,5 @@
 import Phaser from 'phaser'
-import { boardDrag, cardDimensions, hoverButtonRadius, cardBackFrame, cardDepth, activeDepth, hoverOffset } from './Constants'
+import { boardDrag, cardDimensions, hoverButtonRadius, cardBackFrame, cardDepth, activeDepth, hoverOffset, canvasHeight } from './Constants'
 export default class Card extends Phaser.GameObjects.Container {
   constructor(scene, x, y, physicsGroup, cardNumber) {
     super(scene, x, y)
@@ -53,6 +53,7 @@ export default class Card extends Phaser.GameObjects.Container {
     this.spinning = false
     this.otherPlayerDragging = false
     this.playerPickedUp = false
+    this.addToHand = false;
 
     //overwrite phaser's bullshit toJSON implementation
     this.toJSON = () => {
@@ -87,6 +88,16 @@ export default class Card extends Phaser.GameObjects.Container {
     this.x = dragX;
     this.y = dragY;
 
+    //this is when we want to add to hand
+    if (this.y > canvasHeight - 100) {
+      //set a add to hand value to true, to check on dragEnd
+      this.addToHand = true;
+      //animate/indicate that we are in this state, pointer change, etc.
+    } else {
+      this.addToHand = false;
+    }
+    console.log("Add to hand?", this.addToHand);
+
     this.socket.emit('sendCard', { card:this, room: this.gameState.room, otherPlayerDragging: true });
     this.otherPlayerDragging = false
   }
@@ -107,6 +118,15 @@ export default class Card extends Phaser.GameObjects.Container {
 
     this.socket.emit('sendCard', { card:this, room: this.gameState.room, otherPlayerDragging: false });
     this.playerPickedUp = false
+
+    if (this.addToHand) {
+      this.gameState.hands[`player1`].push(this.cardNumber);
+      console.log(this.gameState.hands);
+      this.socket.emit('destroyCard', {cardNumber: this.cardNumber, room: this.gameState.room, player: 'player1'});
+      p1Card.innerText = this.gameState.hands.player1.length;
+      this.destroy();
+      delete this.gameState.cards[this.cardNumber];
+    }
   }
 
   hover (ptr,localX,localY) {
