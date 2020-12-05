@@ -13,6 +13,7 @@ export default class Card extends Phaser.GameObjects.Container {
 
     //socket and room info for emit events
     this.gameState = scene.game.gameState;
+    this.playerNumber = scene.game.playerNumber;
     this.socket = scene.game.socket;
 
     //set container size and add to scene, make interactive
@@ -120,10 +121,14 @@ export default class Card extends Phaser.GameObjects.Container {
     this.playerPickedUp = false
 
     if (this.addToHand) {
-      this.gameState.hands[`player1`].push(this.cardNumber);
+      this.gameState.hands[`player${this.playerNumber}`].push(this.cardNumber);
       console.log(this.gameState.hands);
-      this.socket.emit('destroyCard', {cardNumber: this.cardNumber, room: this.gameState.room, player: 'player1'});
+      this.socket.emit('destroyCard', {cardNumber: this.cardNumber, room: this.gameState.room, player: `player${this.playerNumber}`});
+      // p1Card.innerText = this.gameState.hands[`player${this.playerNumber}`].length;
       p1Card.innerText = this.gameState.hands.player1.length;
+      p2Card.innerText = this.gameState.hands.player2.length;
+      p3Card.innerText = this.gameState.hands.player3.length;
+      p4Card.innerText = this.gameState.hands.player4.length;
       this.destroy();
       delete this.gameState.cards[this.cardNumber];
     }

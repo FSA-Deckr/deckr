@@ -59,10 +59,17 @@ async function renderTable(tableNumber,playerNumber) {
         </p>
         <p>
             Player1 Card: <span id="p1Card"></span>
+        </p>
+        <p>
             Player2 Card: <span id="p2Card"></span>
+        </p>
+        <p>
             Player3 Card: <span id="p3Card"></span>
+        </p>
+        <p>
             Player4 Card: <span id="p4Card"></span>
         </p>
+        <p>You are player #${playerNumber}</p>
 
       </body>`
 

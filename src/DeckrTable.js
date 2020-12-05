@@ -130,9 +130,10 @@ export class DeckrTable extends Phaser.Game {
       })
 
       socket.on('receiveGameState', (receivedGameState) => {
-        const { cards, chips, deck } = receivedGameState;
-        //update the deck
+        const { cards, chips, deck, hands } = receivedGameState;
+        //update the deck and hands
         gameState.deck = deck;
+        gameState.hands = hands;
         //for each receivedCard in gamestate, make new card if it doesn't exist
         for(let receivedCardNum in cards) {
           // adds cards to table
@@ -178,6 +179,9 @@ export class DeckrTable extends Phaser.Game {
         gameState.cards[removeCardState.cardNumber].destroy();
         delete gameState.cards[removeCardState.cardNumber];
         p1Card.innerText = gameState.hands.player1.length;
+        p2Card.innerText = gameState.hands.player2.length;
+        p3Card.innerText = gameState.hands.player3.length;
+        p4Card.innerText = gameState.hands.player4.length;
       })
     }
 
