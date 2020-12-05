@@ -24,6 +24,10 @@ const setSocketServer = (server) => {
             this.to(chipState.room).emit('receiveChip', {...chipState.chip, otherPlayerDragging: chipState.otherPlayerDragging});
             if(chipState.isDragging) this.emit('receiveChip', {...chipState.chip, otherPlayerDragging: !chipState.otherPlayerDragging});
         })
+
+        socket.on('sendPointer', function(ptr) {
+            this.to(ptr.room).emit('receivePointer', ptr)
+        })
     });
 }
 
