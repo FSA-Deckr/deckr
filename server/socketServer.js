@@ -12,9 +12,12 @@ const setSocketServer = (server) => {
             this.join(room);
             this.to(room).emit('message', `the is a message from the websocket to people in ${room}?`);
         });
+
         socket.on('sendGameState', function(gameState) {
             this.to(gameState.room).emit('receiveGameState', gameState);
+            console.log('game state emitted')
         })
+
         socket.on('sendCard', function(cardState) {
             this.to(cardState.room).emit('receiveCard', {...cardState.card, otherPlayerDragging: cardState.otherPlayerDragging});
             if(cardState.isDragging) this.emit('receiveCard', {...cardState.card, otherPlayerDragging: !cardState.otherPlayerDragging});
@@ -27,6 +30,10 @@ const setSocketServer = (server) => {
 
         socket.on('sendPointer', function(ptr) {
             this.to(ptr.room).emit('receivePointer', ptr)
+        })
+
+        socket.on('requestGameState', function({room}){
+            this.to(room).emit('newPlayer')
         })
     });
 }

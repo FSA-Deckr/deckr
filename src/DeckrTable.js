@@ -49,6 +49,9 @@ export class DeckrTable extends Phaser.Game {
     }
 
     function create() {
+      //send initial message to ask for gameState
+      socket.emit('requestGameState', gameState)
+
       //add background image
       const cam = this.cameras.main
       switch(playerNumber) {
@@ -194,6 +197,10 @@ export class DeckrTable extends Phaser.Game {
           newPointer.setDepth(activeDepth + 1)
           pointers[pointerNumber] = newPointer
         }
+      })
+
+      socket.on('newPlayer', ()=>{
+        if(playerNumber===1) socket.emit("sendGameState", gameState);
       })
     }
 
