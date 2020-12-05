@@ -1,13 +1,21 @@
 import Phaser from 'phaser'
 import { angularDrag, boardDrag, chipRadius, chipDepth, activeDepth } from './Constants'
 
-export default class Chip extends Phaser.Physics.Arcade.Image {
-  constructor(scene, x, y, physicsGroup, chipNumber){
-    super(scene, x, y, 'chip')
+export default class Chip extends Phaser.Physics.Arcade.Sprite {
+  constructor(scene, x, y, physicsGroup, chipNumber, chipValue){
+    super(scene, x, y, 'chipSprite')
+    //map chip values to sprite frame
+    const chipValueMap = {1:0, 5:1, 25:2, 50:3, 100:4, 500:5}
+
     //phaser scene and physics
     scene.add.existing(this);
     physicsGroup.add(this)
+    this.setFrame(chipValueMap[chipValue])
     this.setDepth(chipDepth)
+
+    //socket and room info for emit events
+    this.gameState = scene.game.gameState;
+    this.socket = scene.game.socket;
 
     //phaser physics settings
     this.setAngularDrag(angularDrag)
@@ -24,25 +32,37 @@ export default class Chip extends Phaser.Physics.Arcade.Image {
     this.socket = scene.game.socket;
 
     //chip event listeners
+    this.on('dragstart', this.dragStart)
     this.on('drag', (ptr,dragX,dragY)=>this.drag(ptr, dragX, dragY));
     this.on('dragend', this.dragEnd);
 
     //chip status variables
     this.chipNumber = chipNumber
+    this.chipValue = chipValue
+    this.otherPlayerDragging = false
+    this.playerPickedUp = false
 
     //overwrite phaser's bullshit toJSON implementation
     this.toJSON = () => {
       return {
         chipNumber: this.chipNumber,
+        chipValue: this.chipValue,
         x: this.x,
         y: this.y,
         rotation: this.rotation,
-        velocity: this.body.velocity
+        velocity: this.body.velocity,
+        angularVelocity: this.body.angularVelocity,
+        otherPlayerDragging: this.otherPlayerDragging
       }
     }
   }
 
+  dragStart() {
+    if(!this.otherPlayerDragging) this.playerPickedUp = true
+  }
+
   drag (ptr, dragX, dragY) {
+    if(!this.playerPickedUp) return
     //put chips on top while dragging
     this.setDepth(activeDepth)
     const { dragHistory } = this
@@ -58,10 +78,12 @@ export default class Chip extends Phaser.Physics.Arcade.Image {
     this.x = dragX;
     this.y = dragY;
 
-    this.socket.emit('sendGameState', this.gameState);
+    this.socket.emit('sendChip', { chip:this, room: this.gameState.room, otherPlayerDragging: true });
+    this.otherPlayerDragging = false
   }
 
   dragEnd (ptr) {
+    if(!this.playerPickedUp) return
     //put chip back on bottom layer when done dragging
     this.setDepth(chipDepth)
     const { dragHistory } = this
@@ -71,5 +93,8 @@ export default class Chip extends Phaser.Physics.Arcade.Image {
     const dy = (lastY - penY) * 50;
     this.setVelocity(dx, dy);
     this.dragHistory = [];
+
+    this.socket.emit('sendChip', { chip:this, room: this.gameState.room, otherPlayerDragging: false });
+    this.playerPickedUp = false
   }
 }
