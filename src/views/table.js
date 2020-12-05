@@ -52,8 +52,10 @@ async function renderTable(tableNumber,channelNum) {
 
       </body>`
 
+        const rotatingCanvas = document.getElementById('canvas')
+ 
+        const game = new DeckrTable(socket, room, rotatingCanvas)
 
-        const game = new DeckrTable(socket, room)
         // startVideo(channelNum)
 
 }

@@ -4,12 +4,15 @@ import Card from './Card'
 import { canvasWidth, canvasHeight, cardDimensions } from './Constants'
 
 export class DeckrTable extends Phaser.Game {
-  constructor(socket, room){
+  constructor(socket, room, canvas){
+
+    // const ctx = canvas.getContext('2d')
+    // ctx.rotate(Math.PI / 2);
 
     //phaser game object config
     const cfg = {
       type: Phaser.CANVAS,
-      canvas: canvas,
+      canvas: canvas.getContext('2d').rotate(Math.PI / 2),
       width: canvasWidth,
       height: canvasHeight,
       physics: {
@@ -48,6 +51,9 @@ export class DeckrTable extends Phaser.Game {
 
     function create() {
       //add background image
+      // const ctx = cfg.canvas.getContext('2d')
+      const cam = this.cameras.main
+      cam.rotation = Math.PI/2
       this.add.image(canvasWidth/2, canvasHeight/2, 'board');
 
       //make Phaser physics groups
