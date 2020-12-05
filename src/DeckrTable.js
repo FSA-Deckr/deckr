@@ -163,7 +163,6 @@ export class DeckrTable extends Phaser.Game {
           gameState.chips[receivedChipNumber].setRotation(chips[receivedChipNumber].rotation)
         }
       })
-<<<<<<< HEAD
 
       socket.on('receiveCard', (receivedCard) => {
         //put all cards where they belong and with their rotations and reveal status
@@ -180,8 +179,6 @@ export class DeckrTable extends Phaser.Game {
         delete gameState.cards[removeCardState.cardNumber];
         p1Card.innerText = gameState.hands.player1.length;
       })
-=======
->>>>>>> c700ddb56cdd24aa0f069fef10e9ff975b586bf5
     }
 
     //clear all cards and make a new deck

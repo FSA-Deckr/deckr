@@ -57,13 +57,12 @@ async function renderTable(tableNumber,playerNumber) {
           <button id="newCard">Deal a card (0)</button>
           <button id="collectCards">Collect cards & shuffle</button>
         </p>
-<<<<<<< HEAD
         <p>
             Player1 Card: <span id="p1Card"></span>
+            Player2 Card: <span id="p2Card"></span>
+            Player3 Card: <span id="p3Card"></span>
+            Player4 Card: <span id="p4Card"></span>
         </p>
-=======
-        <p>You are player #${playerNumber}</p>
->>>>>>> c700ddb56cdd24aa0f069fef10e9ff975b586bf5
 
       </body>`
 
