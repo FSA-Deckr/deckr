@@ -1,9 +1,81 @@
 *{
     font-family: sans-serif;
 }
-h1,h4{
-    text-align: center;
+
+body{
+    background-image: url("./board.jpg");
+    align-items: center;
 }
+#root{
+    width: 33.3%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+h1{
+    text-shadow: 3px 3px 5px #070707;
+    font-size: 75px;
+    color: whitesmoke;
+    text-align: center;
+    margin-top: 20%;
+    margin-bottom: 15%;
+}
+
+button{
+    box-shadow: 3px 3px 5px #070707;
+    background-color: rgb(49, 9, 9);
+    display:block;
+    color: whitesmoke;
+    border-radius: 8px;
+    text-align: center;
+    border: none;
+    padding: 20px;
+    text-decoration: none;
+    position: relative;
+    line-height: 0.1;
+    margin-left: auto;
+    margin-right: auto;
+}
+#newRoom{
+    font-size: 25px;
+}
+#logInButton{
+    font-size: 20px;
+    margin-top: 20%;
+}
+form{
+    margin: 25%;
+}
+label{
+    height: 40px;
+    text-shadow: 3px 3px 5px #070707;
+    text-align: center;
+    text-shadow: 2px 2px #070707;
+    display:block;
+    position:relative;
+    color: whitesmoke;
+    font-size: 30px;
+
+}
+input{
+    padding:5px;
+    font-size: 18px;
+    color:whitesmoke;
+    text-align: center;
+    box-shadow: 3px 3px 5px #070707;
+    display:block;
+    position:relative;
+    background: transparent;
+    border-radius: 8px;
+    border-color: whitesmoke;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 20%;
+}
+input:focus {
+    outline-width: 0;
+}
+
 #me{
     position: relative;
     float:top;
