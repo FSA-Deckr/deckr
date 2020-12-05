@@ -49,6 +49,20 @@ export class DeckrTable extends Phaser.Game {
 
     function create() {
       //add background image
+      const cam = this.cameras.main
+      switch(playerNumber) {
+        case 2: 
+          cam.rotation = Math.PI/2;
+          break;
+        case (3): 
+          cam.rotation = Math.PI;
+          break;
+        case 4:
+          cam.rotation = 3 * Math.PI/2;
+          break;
+        default: 
+          break;
+      }
       this.add.image(canvasWidth/2, canvasHeight/2, 'board');
 
       //make Phaser physics groups
