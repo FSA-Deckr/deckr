@@ -1,8 +1,23 @@
 const AgoraRTC = require('agora-rtc-sdk')
 const keys = require('../apikey')
+const {RtcTokenBuilder, RtcRole} = require('agora-access-token');
 
 
 const startVideo = function(channelNum){
+    const appId = keys[channelNum].appId
+    const appCertificate = keys[channelNum].appCertificate
+    const channelName = 'deckr';
+    const uid = 0;
+    const role = RtcRole.PUBLISHER;
+
+    const expirationTimeInSeconds = 3600
+
+    const currentTimestamp = Math.floor(Date.now() / 1000)
+
+    const privilegeExpiredTs = currentTimestamp + expirationTimeInSeconds
+
+    // Build token with uid
+    const token = RtcTokenBuilder.buildTokenWithUid(appId, appCertificate, channelName, uid, role, privilegeExpiredTs);
     
     let handleError = function(err){
         console.log("Error: ", err);
@@ -35,10 +50,10 @@ const startVideo = function(channelNum){
         codec: "vp8",
     });
 
-    client.init(keys[channelNum].appId);
+    client.init(appId);
 
     // Join a channel
-    client.join(keys[channelNum].token, "deckr", null, (uid)=>{
+    client.join(token, channelName, null, (uid)=>{
         let localStream = AgoraRTC.createStream({
             audio: true,
             video: true,
