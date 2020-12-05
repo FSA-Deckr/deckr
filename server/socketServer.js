@@ -12,15 +12,9 @@ const setSocketServer = (server) => {
             this.join(room);
             this.to(room).emit('message', `the is a message from the websocket to people in ${room}?`);
         });
-
-        socket.on('test', function(data) {
-            this.to(data.room).emit('message', data.message + '?')
-        })
-
         socket.on('sendGameState', function(gameState) {
             this.to(gameState.room).emit('receiveGameState', gameState);
         })
-
         socket.on('sendCard', function(cardState) {
             this.to(cardState.room).emit('receiveCard', {...cardState.card, otherPlayerDragging: cardState.otherPlayerDragging});
             if(cardState.isDragging) this.emit('receiveCard', {...cardState.card, otherPlayerDragging: !cardState.otherPlayerDragging});
@@ -29,8 +23,12 @@ const setSocketServer = (server) => {
         socket.on('destroyCard', function(cardState) {
             this.to(cardState.room).emit('removeCard', {cardNumber: cardState.cardNumber, player: cardState.player});
         })
-    });
 
+        socket.on('sendChip', function(chipState) {
+            this.to(chipState.room).emit('receiveChip', {...chipState.chip, otherPlayerDragging: chipState.otherPlayerDragging});
+            if(chipState.isDragging) this.emit('receiveChip', {...chipState.chip, otherPlayerDragging: !chipState.otherPlayerDragging});
+        })
+    });
 }
 
 const getSocketServer = () => socketServer;
