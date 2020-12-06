@@ -80,8 +80,7 @@ export default class Card extends Phaser.GameObjects.Container {
     this.setDepth(activeDepth)
     if (this.inHand) {
       // console.log('dragX', dragX, 'dragY', dragY);
-      this.x = dragX;
-      console.log('X!', this.x);
+      this.x = dragX < 0 ? 0 : dragX > 800 ? 800 : dragX;
       this.y = inHandYPosition;
       if (!this.addToHand) {
         this.inHand = false;
@@ -91,7 +90,7 @@ export default class Card extends Phaser.GameObjects.Container {
     } else {
       const { dragHistory } = this
       dragHistory.push([dragX, dragY]);
-      if(dragHistory.length > 2) {
+      if(dragHistory.length > 2 && !this.addToHand) {
         const [lastX, lastY] = dragHistory[dragHistory.length - 1];
         const [penX, penY] = dragHistory[dragHistory.length - 2];
         const dx = (lastX - penX) * 50;
@@ -117,7 +116,7 @@ export default class Card extends Phaser.GameObjects.Container {
 
   dragEnd () {
     if(!this.playerPickedUp) return
-    if(!this.spinning && this.dragHistory.length > 1) {
+    if(!this.spinning && this.dragHistory.length > 1 && !this.addToHand && !this.inHand) {
       const { dragHistory } = this
       const [lastX, lastY] = dragHistory[dragHistory.length - 1];
       const [penX, penY] = dragHistory[dragHistory.length - 2];
@@ -132,9 +131,10 @@ export default class Card extends Phaser.GameObjects.Container {
     this.socket.emit('sendCard', { card:this, room: this.gameState.room, otherPlayerDragging: false });
     this.playerPickedUp = false
 
-    if (this.addToHand) {
+    if (this.addToHand && !this.inHand) {
       this.gameState.hands[`player${this.playerNumber}`][this.cardNumber] = this;
       this.inHand = true;
+      this.setRotation(0);
       this.setRevealed(true);
       this.body.setCollideWorldBounds(false);
       this.y = inHandYPosition;
