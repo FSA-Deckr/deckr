@@ -1,7 +1,7 @@
 import Phaser from 'phaser'
 import Chip from './Chip'
 import Card from './Card'
-import { canvasWidth, canvasHeight, cardDimensions, chipRadius } from './Constants'
+import { canvasWidth, canvasHeight, cardDimensions, chipRadius, activeDepth } from './Constants'
 
 export class DeckrTable extends Phaser.Game {
   constructor(socket, room, _playerNumber){
@@ -24,6 +24,7 @@ export class DeckrTable extends Phaser.Game {
     let cardsPhysicsGroup, chipsPhysicsGroup
     this.socket = socket;
     this.playerNumber = _playerNumber
+    this.pointers = {}
     this.gameState = {
       deck: [],
       cards: {},
@@ -36,7 +37,7 @@ export class DeckrTable extends Phaser.Game {
       },
       room: room
     };
-    const { gameState, playerNumber } = this
+    const { gameState, playerNumber, pointers } = this
 
     this.currentChipNumber = 0
 
@@ -54,7 +55,24 @@ export class DeckrTable extends Phaser.Game {
     }
 
     function create() {
+      //send initial message to ask for gameState
+      socket.emit('requestGameState', gameState)
+
       //add background image
+      const cam = this.cameras.main
+      switch(playerNumber) {
+        case 2:
+          cam.rotation = Math.PI/2;
+          break;
+        case (3):
+          cam.rotation = Math.PI;
+          break;
+        case 4:
+          cam.rotation = 3 * Math.PI/2;
+          break;
+        default:
+          break;
+      }
       this.add.image(canvasWidth/2, canvasHeight/2, 'board');
 
       //make Phaser physics groups
@@ -184,6 +202,32 @@ export class DeckrTable extends Phaser.Game {
         delete gameState.hands[removeCardState.player][removeCardState.cardNumber];
       })
 
+      this.input.on('pointermove', (ptr)=>{
+        // console.log(ptr)
+        socket.emit('sendPointer', {x: ptr.worldX, y: ptr.worldY, pointerNumber: playerNumber, room: gameState.room})
+      })
+
+      socket.on('receivePointer', ({ x, y, pointerNumber })=>{
+        if(pointers[pointerNumber]) {
+          pointers[pointerNumber].x = x
+          pointers[pointerNumber].y = y
+        } else {
+          const ptrColors = {
+            1:0xff1100,
+            2:0x0400ff,
+            3:0xff9d00,
+            4:0x9500ff
+          }
+          const newPointer = this.add.circle(x,y,10,ptrColors[pointerNumber])
+          newPointer.setAlpha(0.5)
+          newPointer.setDepth(activeDepth + 1)
+          pointers[pointerNumber] = newPointer
+        }
+      })
+
+      socket.on('newPlayer', ()=>{
+        if(playerNumber===1) socket.emit("sendGameState", gameState);
+      })
     }
 
     //clear all cards and make a new deck

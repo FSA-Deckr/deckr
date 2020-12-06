@@ -1,5 +1,5 @@
 import Phaser from 'phaser'
-import { boardDrag, cardDimensions, hoverButtonRadius, cardBackFrame, cardDepth, activeDepth, hoverOffset, canvasHeight, inHandYPosition } from './Constants'
+import { boardDrag, cardDimensions, hoverButtonRadius, cardBackFrame, cardDepth, activeDepth, hoverOffset, canvasHeight, inHandAdjustment, canvasWidth } from './Constants'
 export default class Card extends Phaser.GameObjects.Container {
   constructor(scene, x, y, physicsGroup, cardNumber) {
     super(scene, x, y)
@@ -80,8 +80,26 @@ export default class Card extends Phaser.GameObjects.Container {
     this.setDepth(activeDepth)
     if (this.inHand) {
       // console.log('dragX', dragX, 'dragY', dragY);
-      this.x = dragX < 0 ? 0 : dragX > 800 ? 800 : dragX;
-      this.y = inHandYPosition;
+
+      switch(this.playerNumber) {
+        case 2:
+          this.y = dragY < 0 ? 0 : dragY > 800 ? 800 : dragY;
+          this.x = canvasWidth + inHandAdjustment;
+          break;
+        case (3):
+          this.x = dragX < 0 ? 0 : dragX > 800 ? 800 : dragX;
+          this.y = 0 - inHandAdjustment;
+          break;
+        case 4:
+          this.y = dragY < 0 ? 0 : dragY > 800 ? 800 : dragY;
+          this.x = 0 - inHandAdjustment;
+          break;
+        default:
+          this.x = dragX < 0 ? 0 : dragX > 800 ? 800 : dragX;
+          this.y = canvasHeight + inHandAdjustment;
+          break;
+      }
+
       if (!this.addToHand) {
         this.inHand = false;
         this.body.setCollideWorldBounds(true);
@@ -101,14 +119,29 @@ export default class Card extends Phaser.GameObjects.Container {
       this.y = dragY;
     }
 
-    //this is when we want to add to hand
-    if (dragY > canvasHeight - 100) {
-      //set a add to hand value to true, to check on dragEnd
-      this.addToHand = true;
-      //animate/indicate that we are in this state, pointer change, etc.
-    } else {
-      this.addToHand = false;
+    switch(this.playerNumber) {
+      case 2:
+        this.addToHand = dragX > canvasWidth - 100;
+        break;
+      case (3):
+        this.addToHand = dragY < 100;
+        break;
+      case 4:
+        this.addToHand = dragX < 100;
+        break;
+      default:
+        this.addToHand = dragY > canvasHeight - 100;
+        break;
     }
+
+    // //this is when we want to add to hand
+    // if (dragY > canvasHeight - 100) {
+    //   //set a add to hand value to true, to check on dragEnd
+    //   this.addToHand = true;
+    //   //animate/indicate that we are in this state, pointer change, etc.
+    // } else {
+    //   this.addToHand = false;
+    // }
 
     this.socket.emit('sendCard', { card:this, room: this.gameState.room, otherPlayerDragging: true });
     this.otherPlayerDragging = false
@@ -134,10 +167,23 @@ export default class Card extends Phaser.GameObjects.Container {
     if (this.addToHand && !this.inHand) {
       this.gameState.hands[`player${this.playerNumber}`][this.cardNumber] = this;
       this.inHand = true;
-      this.setRotation(0);
+      this.setRotation((this.playerNumber - 1) * (Math.PI/2));
       this.setRevealed(true);
       this.body.setCollideWorldBounds(false);
-      this.y = inHandYPosition;
+      switch(this.playerNumber) {
+        case 2:
+          this.x = canvasWidth + inHandAdjustment;
+          break;
+        case (3):
+          this.y = 0 - inHandAdjustment;
+          break;
+        case 4:
+          this.x = 0 - inHandAdjustment;
+          break;
+        default:
+          this.y = canvasHeight + inHandAdjustment;
+          break;
+      }
       this.socket.emit('addCardToHand', {cardNumber: this.cardNumber, room: this.gameState.room, player: `player${this.playerNumber}`});
     }
   }
