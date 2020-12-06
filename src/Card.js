@@ -1,5 +1,5 @@
 import Phaser from 'phaser'
-import { boardDrag, cardDimensions, hoverButtonRadius, cardBackFrame, cardDepth, activeDepth, hoverOffset, canvasHeight } from './Constants'
+import { boardDrag, cardDimensions, hoverButtonRadius, cardBackFrame, cardDepth, activeDepth, hoverOffset, canvasHeight, inHandYPosition } from './Constants'
 export default class Card extends Phaser.GameObjects.Container {
   constructor(scene, x, y, physicsGroup, cardNumber) {
     super(scene, x, y)
@@ -55,6 +55,7 @@ export default class Card extends Phaser.GameObjects.Container {
     this.otherPlayerDragging = false
     this.playerPickedUp = false
     this.addToHand = false;
+    this.inHand = false;
 
     //overwrite phaser's bullshit toJSON implementation
     this.toJSON = () => {
@@ -77,27 +78,38 @@ export default class Card extends Phaser.GameObjects.Container {
   drag (ptr, dragX, dragY) {
     if(!this.playerPickedUp) return
     this.setDepth(activeDepth)
-    const { dragHistory } = this
-    dragHistory.push([dragX, dragY]);
-    if(dragHistory.length > 2) {
-      const [lastX, lastY] = dragHistory[dragHistory.length - 1];
-      const [penX, penY] = dragHistory[dragHistory.length - 2];
-      const dx = (lastX - penX) * 50;
-      const dy = (lastY - penY) * 50;
-      this.body.setVelocity(dx, dy);
-    } else this.body.setVelocity(0,0)
-    this.x = dragX;
-    this.y = dragY;
+    if (this.inHand) {
+      // console.log('dragX', dragX, 'dragY', dragY);
+      this.x = dragX;
+      console.log('X!', this.x);
+      this.y = inHandYPosition;
+      if (!this.addToHand) {
+        this.inHand = false;
+        this.body.setCollideWorldBounds(true);
+        this.socket.emit('removeCardFromHand', {cardNumber: this.cardNumber, room: this.gameState.room, player: `player${this.playerNumber}`});
+      }
+    } else {
+      const { dragHistory } = this
+      dragHistory.push([dragX, dragY]);
+      if(dragHistory.length > 2) {
+        const [lastX, lastY] = dragHistory[dragHistory.length - 1];
+        const [penX, penY] = dragHistory[dragHistory.length - 2];
+        const dx = (lastX - penX) * 50;
+        const dy = (lastY - penY) * 50;
+        this.body.setVelocity(dx, dy);
+      } else this.body.setVelocity(0,0)
+      this.x = dragX;
+      this.y = dragY;
+    }
 
     //this is when we want to add to hand
-    if (this.y > canvasHeight - 100) {
+    if (dragY > canvasHeight - 100) {
       //set a add to hand value to true, to check on dragEnd
       this.addToHand = true;
       //animate/indicate that we are in this state, pointer change, etc.
     } else {
       this.addToHand = false;
     }
-    console.log("Add to hand?", this.addToHand);
 
     this.socket.emit('sendCard', { card:this, room: this.gameState.room, otherPlayerDragging: true });
     this.otherPlayerDragging = false
@@ -121,16 +133,12 @@ export default class Card extends Phaser.GameObjects.Container {
     this.playerPickedUp = false
 
     if (this.addToHand) {
-      this.gameState.hands[`player${this.playerNumber}`].push(this.cardNumber);
-      console.log(this.gameState.hands);
-      this.socket.emit('destroyCard', {cardNumber: this.cardNumber, room: this.gameState.room, player: `player${this.playerNumber}`});
-      // p1Card.innerText = this.gameState.hands[`player${this.playerNumber}`].length;
-      p1Card.innerText = this.gameState.hands.player1.length;
-      p2Card.innerText = this.gameState.hands.player2.length;
-      p3Card.innerText = this.gameState.hands.player3.length;
-      p4Card.innerText = this.gameState.hands.player4.length;
-      this.destroy();
-      delete this.gameState.cards[this.cardNumber];
+      this.gameState.hands[`player${this.playerNumber}`][this.cardNumber] = this;
+      this.inHand = true;
+      this.setRevealed(true);
+      this.body.setCollideWorldBounds(false);
+      this.y = inHandYPosition;
+      this.socket.emit('addCardToHand', {cardNumber: this.cardNumber, room: this.gameState.room, player: `player${this.playerNumber}`});
     }
   }
 

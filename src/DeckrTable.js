@@ -29,10 +29,10 @@ export class DeckrTable extends Phaser.Game {
       cards: {},
       chips: {},
       hands: {
-        player1: [],
-        player2: [],
-        player3: [],
-        player4: [],
+        player1: {},
+        player2: {},
+        player3: {},
+        player4: {},
       },
       room: room
     };
@@ -174,15 +174,16 @@ export class DeckrTable extends Phaser.Game {
         gameState.cards[receivedCard.cardNumber].otherPlayerDragging = receivedCard.otherPlayerDragging
       })
 
-      socket.on('removeCard', (removeCardState) => {
-        gameState.hands[removeCardState.player].push(removeCardState.cardNumber);
-        gameState.cards[removeCardState.cardNumber].destroy();
-        delete gameState.cards[removeCardState.cardNumber];
-        p1Card.innerText = gameState.hands.player1.length;
-        p2Card.innerText = gameState.hands.player2.length;
-        p3Card.innerText = gameState.hands.player3.length;
-        p4Card.innerText = gameState.hands.player4.length;
+      socket.on('addCardToHand', (removeCardState) => {
+        gameState.cards[removeCardState.cardNumber].setVisible(false);
+        gameState.hands[removeCardState.player][removeCardState.cardNumber] = gameState.cards[removeCardState.cardNumber];
       })
+
+      socket.on('removeCardFromHand', (removeCardState) => {
+        gameState.cards[removeCardState.cardNumber].setVisible(true);
+        delete gameState.hands[removeCardState.player][removeCardState.cardNumber];
+      })
+
     }
 
     //clear all cards and make a new deck
