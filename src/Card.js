@@ -43,6 +43,14 @@ export default class Card extends Phaser.GameObjects.Container {
       this.on('pointerover', (ptr,localX,localY)=>this.hover(ptr,localX,localY))
       this.on('pointerout', (ptr)=>this.unhover(ptr))
 
+      this.stackCounterPrevDragX = -32.5;
+      this.stackCounterPrevDragY = -77.5;
+      this.stackCounter.on('dragstart', ()=> this.dragStart())
+      this.stackCounter.on('drag', (ptr,dragX,dragY)=>{
+        return this.drag(ptr, dragX, dragY, true)
+      });
+      this.stackCounter.on('dragend', () => this.dragEnd());
+
       const buttonArray = [this.rotateButton, this.flipButton, this.shuffleButton, this.stackCounter]
       buttonArray.forEach( button => {
         button.on('pointerover', (ptr,localX,localY)=>this.hover(ptr,localX,localY));
@@ -90,11 +98,26 @@ export default class Card extends Phaser.GameObjects.Container {
     return this.getCardsInStack().length + 1
   }
 
+  getClosestCard() {
+    const roomCards = Object.keys(this.gameState.cards).filter(key => Number(key) !== this.cardNumber).map( key => this.gameState.cards[key])
+    return this.scene.physics.closest(this, roomCards)
+  }
+
   dragStart() {
+    
     if(!this.otherPlayerDragging) this.playerPickedUp = true
   }
 
-  drag (ptr, dragX, dragY) {
+  drag (ptr, dragX, dragY, dragStack = false) {
+    if (dragStack) {
+      let currDragX = this.stackCounterPrevDragX;
+      let currDragY = this.stackCounterPrevDragY;
+      this.stackCounterPrevDragX = dragX;
+      this.stackCounterPrevDragY = dragY;
+      dragX += (this.x - currDragX);
+      dragY += (this.y - currDragY);
+    }
+    
     if(!this.playerPickedUp) return
     this.setDepth(activeDepth)
     const { dragHistory } = this
@@ -113,19 +136,40 @@ export default class Card extends Phaser.GameObjects.Container {
     this.otherPlayerDragging = false
   }
 
-  dragEnd () {
+  dragEnd() {
     if(!this.playerPickedUp) return
-    if(!this.spinning && this.dragHistory.length > 1) {
-      const { dragHistory } = this
-      const [lastX, lastY] = dragHistory[dragHistory.length - 1];
-      const [penX, penY] = dragHistory[dragHistory.length - 2];
-      const dx = (lastX - penX) * 50;
-      const dy = (lastY - penY) * 50;
-      this.body.setVelocity(dx, dy);
+
+    const closestCard = this.getClosestCard();
+    const distanceToClosestCard = closestCard && Math.sqrt(Math.pow((this.x - closestCard.x),2) + Math.pow((this.y - closestCard.y),2))
+
+    if (distanceToClosestCard && distanceToClosestCard < 20) {
+      this.body.setVelocity(0,0);
+      this.x = closestCard.x;
+      this.y = closestCard.y;
+      this.rotation = closestCard.rotation;
+      this.stackNumber = closestCard.stackNumber;
+      this.stackOrder = this.giveNextStackNumber();
+      this.setDepth(cardDepth + this.stackOrder);
       this.dragHistory = [];
     }
+    else {
+      if(!this.spinning && this.dragHistory.length > 1) {
+        const { dragHistory } = this
+        const [lastX, lastY] = dragHistory[dragHistory.length - 1];
+        const [penX, penY] = dragHistory[dragHistory.length - 2];
+        const dx = (lastX - penX) * 50;
+        const dy = (lastY - penY) * 50;
+        this.body.setVelocity(dx, dy);
+        this.dragHistory = [];
+      }
+      this.stackNumber = this.cardNumber;
+      this.stackOrder = 1;
+      this.setDepth(cardDepth)
+    }
+
+    this.stackCounterPrevDragX = -32.5;
+    this.stackCounterPrevDragY = -77.5;
     this.spinning = false
-    this.setDepth(cardDepth)
 
     this.socket.emit('sendCard', { card:this, room: this.gameState.room, otherPlayerDragging: false });
     this.playerPickedUp = false
