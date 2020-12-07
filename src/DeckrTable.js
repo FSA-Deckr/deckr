@@ -43,6 +43,8 @@ export class DeckrTable extends Phaser.Game {
       this.load.image('flip','flip.png')
       this.load.image('rotate','rotate.png')
       this.load.image('board','board.jpg')
+      this.load.image('deckCount', 'blankButton.png')
+      this.load.image('shuffle', 'shuffleButton.png')
       //probably not the cleanest way to make a shuffled deck but whatever
       gameState.deck = makeDeck(52)
       shuffleDeck(gameState.deck)
