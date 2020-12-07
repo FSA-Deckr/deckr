@@ -15,7 +15,6 @@ const setSocketServer = (server) => {
 
         socket.on('sendGameState', function(gameState) {
             this.to(gameState.room).emit('receiveGameState', gameState);
-            console.log('game state emitted')
         })
 
         socket.on('sendCard', function(cardState) {
@@ -32,8 +31,16 @@ const setSocketServer = (server) => {
             this.to(ptr.room).emit('receivePointer', ptr)
         })
 
-        socket.on('requestGameState', function({room}){
-            this.to(room).emit('newPlayer')
+        socket.on('requestGameState', function({room, playerNumber}){
+            this.to(room).emit('newPlayer', playerNumber)
+        })
+
+        socket.on('sendCollectChips', function({room, playerBanks}){
+            this.to(room).emit('receiveCollectChips', playerBanks)
+        })
+
+        socket.on('sendCollectCards', function({deck, room}){
+            this.to(room).emit('receiveCollectCards', deck)
         })
     });
 }
