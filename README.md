@@ -26,7 +26,11 @@ npm run start:dev
 
 ## Deployment
 
-Deployment/heroku notes go here.
+heroku  https://git.heroku.com/fsa-deckr.git (fetch)
+heroku  https://git.heroku.com/fsa-deckr.git (push)
+
+heroku git:remote -a fsa-deckr
+git push heroku HEAD:master
 
 ## Built with
 

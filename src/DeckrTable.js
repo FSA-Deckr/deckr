@@ -99,6 +99,8 @@ export class DeckrTable extends Phaser.Game {
         const spinSpeed = Math.sqrt(((avx+bvx)**2) + ((avy+bvy)**2))
         chipA.setAngularVelocity(1 * (spinCoeff) * spinSpeed * -1)
         chipB.setAngularVelocity(1 * (spinCoeff) * spinSpeed)
+        // socket.emit('sendChip', { chip: chipA, room: gameState.room, otherPlayerDragging: false })
+        // socket.emit('sendChip', { chip: chipB, room: gameState.room, otherPlayerDragging: false })
       })
 
       //create a chip in the chip physics group and at random location
