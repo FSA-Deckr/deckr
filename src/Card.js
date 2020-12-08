@@ -43,10 +43,8 @@ export default class Card extends Phaser.GameObjects.Container {
       this.on('pointerover', (ptr,localX,localY)=>this.hover(ptr,localX,localY))
       this.on('pointerout', (ptr)=>this.unhover(ptr))
 
-      this.stackCounterPrevDragX = -32.5;
-      this.stackCounterPrevDragY = -77.5;
       this.stackCounter.on('dragstart', ()=> this.dragStart())
-      this.stackCounter.on('drag', (ptr,dragX,dragY)=> this.drag(ptr, ptr.worldX + 32.5, ptr.worldY + 77.5));
+      this.stackCounter.on('drag', (ptr,dragX,dragY)=> this.drag(ptr, ptr.worldX + 32.5, ptr.worldY + 77.5, true));
       this.stackCounter.on('dragend', () => this.dragEnd());
 
       const buttonArray = [this.rotateButton, this.flipButton, this.shuffleButton, this.stackCounter]
@@ -83,21 +81,25 @@ export default class Card extends Phaser.GameObjects.Container {
         rotation: this.rotation,
         revealed: this.revealed,
         velocity: this.body.velocity,
-        otherPlayerDragging: this.otherPlayerDragging
+        otherPlayerDragging: this.otherPlayerDragging,
+        stackNumber: this.stackNumber,
+        stackOrder: this.stackOrder
       }
     }
   }
 
-  getCardsInStack() {
-    return Object.keys(this.gameState.cards).map( key => this.gameState.cards[key]).filter( card => card.stackNumber === this.stackNumber)
+  getCardsInStack(stackNumber = this.stackNumber) {
+    return Object.keys(this.gameState.cards)
+    .map( key => this.gameState.cards[key])
+    .filter( card => card.stackNumber === stackNumber)
   }
   
-  giveNextStackNumber() {
-    return this.getCardsInStack().length + 1
+  giveNextStackNumber(stackNumber = this.stackNumber) {
+    return this.getCardsInStack(stackNumber).length + 1
   }
 
-  getClosestCard() {
-    const roomCards = Object.keys(this.gameState.cards).filter(key => Number(key) !== this.cardNumber).map( key => this.gameState.cards[key])
+  getClosestCardNotInStack() {
+    const roomCards = Object.keys(this.gameState.cards).filter(key => Number(key) !== this.cardNumber && this.gameState.cards[key].stackNumber !== this.stackNumber).map( key => this.gameState.cards[key])
     return this.scene.physics.closest(this, roomCards)
   }
 
@@ -106,41 +108,51 @@ export default class Card extends Phaser.GameObjects.Container {
     if(!this.otherPlayerDragging) this.playerPickedUp = true
   }
 
-  drag (ptr, dragX, dragY) {
+  drag (ptr, dragX, dragY, dragStack = false) {
+    if (!dragStack) {
+      this.stackNumber = this.cardNumber;
+      this.stackOrder = 1;
+    }
     
     if(!this.playerPickedUp) return
     this.setDepth(activeDepth)
     const { dragHistory } = this
     dragHistory.push([dragX, dragY]);
+    let newXv = 0;
+    let newYv = 0;
     if(dragHistory.length > 2) {
       const [lastX, lastY] = dragHistory[dragHistory.length - 1];
       const [penX, penY] = dragHistory[dragHistory.length - 2];
       const dx = (lastX - penX) * 50;
       const dy = (lastY - penY) * 50;
-      this.body.setVelocity(dx, dy);
-    } else this.body.setVelocity(0,0)
-    this.x = dragX;
-    this.y = dragY;
+      newXv = dx;
+      newYv = dy;
+    }
+    this.getCardsInStack().forEach( card => {
+      card.body.setVelocity(newXv, newYv)
+      card.x = dragX;
+      card.y = dragY;
+      this.socket.emit('sendCard', { card, room: this.gameState.room, otherPlayerDragging: true });
+    });
 
-    this.socket.emit('sendCard', { card:this, room: this.gameState.room, otherPlayerDragging: true });
     this.otherPlayerDragging = false
   }
 
   dragEnd() {
     if(!this.playerPickedUp) return
 
-    const closestCard = this.getClosestCard();
+    const closestCard = this.getClosestCardNotInStack();
     const distanceToClosestCard = closestCard && Math.sqrt(Math.pow((this.x - closestCard.x),2) + Math.pow((this.y - closestCard.y),2))
 
     if (distanceToClosestCard && distanceToClosestCard < 20) {
-      this.body.setVelocity(0,0);
-      this.x = closestCard.x;
-      this.y = closestCard.y;
-      this.rotation = closestCard.rotation;
-      this.stackNumber = closestCard.stackNumber;
-      this.stackOrder = this.giveNextStackNumber();
-      this.setDepth(cardDepth + this.stackOrder);
-      this.dragHistory = [];
+      this.getCardsInStack().forEach( card => {
+        card.body.setVelocity(0,0);
+        card.x = closestCard.x;
+        card.y = closestCard.y;
+        card.rotation = closestCard.rotation;
+        card.stackOrder = this.giveNextStackNumber(closestCard.stackNumber);
+        card.stackNumber = closestCard.stackNumber;
+      })
     }
     else {
       if(!this.spinning && this.dragHistory.length > 1) {
@@ -149,20 +161,19 @@ export default class Card extends Phaser.GameObjects.Container {
         const [penX, penY] = dragHistory[dragHistory.length - 2];
         const dx = (lastX - penX) * 50;
         const dy = (lastY - penY) * 50;
-        this.body.setVelocity(dx, dy);
-        this.dragHistory = [];
+        this.getCardsInStack().forEach( card => {
+          card.body.setVelocity(dx, dy);
+        })
       }
-      this.stackNumber = this.cardNumber;
-      this.stackOrder = 1;
-      this.setDepth(cardDepth)
     }
 
-    this.stackCounterPrevDragX = -32.5;
-    this.stackCounterPrevDragY = -77.5;
-    this.spinning = false
-
-    this.socket.emit('sendCard', { card:this, room: this.gameState.room, otherPlayerDragging: false });
-    this.playerPickedUp = false
+    this.getCardsInStack().forEach( card => {
+      card.dragHistory = [];
+      card.setDepth(cardDepth + card.stackOrder)
+      card.spinning = false;
+      this.socket.emit('sendCard' , { card, room: this.gameState.room, otherPlayerDragging: false })
+      this.playerPickedUp = false;
+    })
   }
 
   hover (ptr,localX,localY) {

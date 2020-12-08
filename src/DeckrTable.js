@@ -132,6 +132,8 @@ export class DeckrTable extends Phaser.Game {
         gameState.cards[receivedCard.cardNumber].setRevealed(receivedCard.revealed)
         gameState.cards[receivedCard.cardNumber].body.setVelocity(receivedCard.velocity.x,receivedCard.velocity.y)
         gameState.cards[receivedCard.cardNumber].otherPlayerDragging = receivedCard.otherPlayerDragging
+        gameState.cards[receivedCard.cardNumber].stackNumber = receivedCard.stackNumber
+        gameState.cards[receivedCard.cardNumber].stackOrder = receivedCard.stackOrder
       })
 
       socket.on('receiveChip', (receivedChip) => {
@@ -161,6 +163,8 @@ export class DeckrTable extends Phaser.Game {
           gameState.cards[receivedCardNum].setRotation(cards[receivedCardNum].rotation)
           gameState.cards[receivedCardNum].setRevealed(cards[receivedCardNum].revealed)
           gameState.cards[receivedCardNum].body.setVelocity(cards[receivedCardNum].velocity.x,cards[receivedCardNum].velocity.y)
+          gameState.cards[receivedCardNum].stackNumber = cards[receivedCardNum].stackNumber
+          gameState.cards[receivedCardNum].stackOrder = cards[receivedCardNum].stackOrder
         }
         for(let receivedChipNumber in chips) {
           // adds chips to table
