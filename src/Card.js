@@ -46,9 +46,7 @@ export default class Card extends Phaser.GameObjects.Container {
       this.stackCounterPrevDragX = -32.5;
       this.stackCounterPrevDragY = -77.5;
       this.stackCounter.on('dragstart', ()=> this.dragStart())
-      this.stackCounter.on('drag', (ptr,dragX,dragY)=>{
-        return this.drag(ptr, dragX, dragY, true)
-      });
+      this.stackCounter.on('drag', (ptr,dragX,dragY)=> this.drag(ptr, ptr.worldX + 32.5, ptr.worldY + 77.5));
       this.stackCounter.on('dragend', () => this.dragEnd());
 
       const buttonArray = [this.rotateButton, this.flipButton, this.shuffleButton, this.stackCounter]
@@ -108,15 +106,7 @@ export default class Card extends Phaser.GameObjects.Container {
     if(!this.otherPlayerDragging) this.playerPickedUp = true
   }
 
-  drag (ptr, dragX, dragY, dragStack = false) {
-    if (dragStack) {
-      let currDragX = this.stackCounterPrevDragX;
-      let currDragY = this.stackCounterPrevDragY;
-      this.stackCounterPrevDragX = dragX;
-      this.stackCounterPrevDragY = dragY;
-      dragX += (this.x - currDragX);
-      dragY += (this.y - currDragY);
-    }
+  drag (ptr, dragX, dragY) {
     
     if(!this.playerPickedUp) return
     this.setDepth(activeDepth)
