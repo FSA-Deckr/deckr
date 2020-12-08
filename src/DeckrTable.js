@@ -38,8 +38,7 @@ export class DeckrTable extends Phaser.Game {
     this.currentChipNumber = 0
 
     //player chip total
-    this.playerChipTotal = +initialChips
-    this.gameState.playerBanks[this.playerNumber] = this.playerChipTotal
+    this.gameState.playerBanks[this.playerNumber] = initialChips
 
     function preload() {
       this.load.image('chip','chip.png')
@@ -103,7 +102,7 @@ export class DeckrTable extends Phaser.Game {
 
       //create a chip in the chip physics group and at random location
       const addAChip = (denom) => {
-        if(this.game.playerChipTotal >= denom) {
+        if(gameState.playerBanks[this.game.playerNumber] >= denom) {
           let xPosition, yPosition, orientation
           switch(this.game.playerNumber) {
             case 2:
@@ -131,23 +130,9 @@ export class DeckrTable extends Phaser.Game {
           gameState.chips[chip.chipNumber] = chip
           this.game.currentChipNumber++
           //process current value for player
-          this.game.playerChipTotal -= denom
-          playerChips.innerText = this.game.playerChipTotal
-          chipNames.forEach(chipName => {
-            if(this.game.playerChipTotal < +chipName.substring(4)) document.getElementById(chipName).className = 'greyOut chipImg'
-          })
-          //update player bank in gamestate
-          gameState.playerBanks[this.game.playerNumber] = this.game.playerChipTotal
-        ///////////////////////////////////////////////////////////////////
-        //  for now, update playerBanks Div //////////////////////////////
-        //////////////////////////////////////////////////////////////////
-        playerBankDiv.innerHTML = `
-        <p>Player 1 Bank: $ ${gameState.playerBanks[1]}</p>
-        <p>Player 2 Bank: $ ${gameState.playerBanks[2]}</p>
-        <p>Player 3 Bank: $ ${gameState.playerBanks[3]}</p>
-        <p>Player 4 Bank: $ ${gameState.playerBanks[4]}</p>
-        `
+          gameState.playerBanks[this.game.playerNumber] -= denom
           socket.emit("sendGameState", gameState);
+          this.updateBanks();
         }
       }
 
@@ -193,33 +178,18 @@ export class DeckrTable extends Phaser.Game {
       //collect all chips on table for player
       const collectAllChips = () => {
         let totalValue = 0
-        //loop through chips in gamestate, add up value and add to playerChipTotal
+        //loop through chips in gamestate, add up value and add to player's bank
         for(const chipNum in gameState.chips) {
           totalValue += gameState.chips[chipNum].chipValue
           //must destroy the phaser obj and delete the key in gamestate
           gameState.chips[chipNum].destroy()
           delete gameState.chips[chipNum]
         }
-        this.game.playerChipTotal += totalValue
-        //update the HTML
-        playerChips.innerText = this.game.playerChipTotal
-        chipNames.forEach(chipName => {
-          if(this.game.playerChipTotal < +chipName.substring(4)) document.getElementById(chipName).className = 'greyOut chipImg'
-          else document.getElementById(chipName).className = 'chipImg'
-        })
-        //update the gamestate
-        gameState.playerBanks[this.game.playerNumber] = this.game.playerChipTotal
-        ///////////////////////////////////////////////////////////////////
-        //  for now, update playerBanks Div //////////////////////////////
-        //////////////////////////////////////////////////////////////////
-        playerBankDiv.innerHTML = `
-        <p>Player 1 Bank: $ ${gameState.playerBanks[1]}</p>
-        <p>Player 2 Bank: $ ${gameState.playerBanks[2]}</p>
-        <p>Player 3 Bank: $ ${gameState.playerBanks[3]}</p>
-        <p>Player 4 Bank: $ ${gameState.playerBanks[4]}</p>
-        `
+        gameState.playerBanks[this.game.playerNumber] += totalValue
         //emit event to collect chips and update player banks
         socket.emit("sendCollectChips", { room:gameState.room, playerBanks: gameState.playerBanks});
+        //update the HTML for player banks
+        this.updateBanks();
       }
 
       //collect all cards on table, shuffle
@@ -232,6 +202,25 @@ export class DeckrTable extends Phaser.Game {
         gameState.deck = makeDeck(52)
         shuffleDeck(gameState.deck)
         socket.emit("sendCollectCards", { deck: gameState.deck, room: gameState.room});
+      }
+
+      //update the HTML for player banks
+      this.updateBanks = () => {
+        const thisPlayerChips = gameState.playerBanks[this.game.playerNumber]
+        playerChips.innerText = thisPlayerChips
+        chipNames.forEach(chipName => {
+          if(thisPlayerChips < +chipName.substring(4)) document.getElementById(chipName).className = 'greyOut chipImg'
+          else document.getElementById(chipName).className = 'chipImg'
+        })
+        /////////////////////////////////////
+        // for now, update playerBanks Div //
+        /////////////////////////////////////
+        playerBankDiv.innerHTML = `
+        <p>Player 1 Bank: $ ${gameState.playerBanks[1]}</p>
+        <p>Player 2 Bank: $ ${gameState.playerBanks[2]}</p>
+        <p>Player 3 Bank: $ ${gameState.playerBanks[3]}</p>
+        <p>Player 4 Bank: $ ${gameState.playerBanks[4]}</p>
+        `
       }
 
       //clicking HTML elements for chips adds a chip w that value to the board
@@ -298,17 +287,11 @@ export class DeckrTable extends Phaser.Game {
           gameState.chips[receivedChipNumber].body.setAngularVelocity(chips[receivedChipNumber].angularVelocity)
           gameState.chips[receivedChipNumber].setRotation(chips[receivedChipNumber].rotation)
         }
-        //update player banks
+        //update player banks gamestate
         gameState.playerBanks = playerBanks
-        ///////////////////////////////////////////////////////////////////
-        //  for now, update playerBanks Div //////////////////////////////
-        //////////////////////////////////////////////////////////////////
-        playerBankDiv.innerHTML = `
-        <p>Player 1 Bank: $ ${gameState.playerBanks[1]}</p>
-        <p>Player 2 Bank: $ ${gameState.playerBanks[2]}</p>
-        <p>Player 3 Bank: $ ${gameState.playerBanks[3]}</p>
-        <p>Player 4 Bank: $ ${gameState.playerBanks[4]}</p>
-        `
+
+        //update HTML for player banks
+        this.updateBanks();
       })
 
       //emit pointer position whenever moved in world
@@ -338,15 +321,8 @@ export class DeckrTable extends Phaser.Game {
       //send game state if you are player 1 and a new player joins
       socket.on('newPlayer', (newPlayerNumber)=>{
         gameState.playerBanks[newPlayerNumber] = initialChips
-        ///////////////////////////////////////////////////////////////////
-        //  for now, update playerBanks Div //////////////////////////////
-        //////////////////////////////////////////////////////////////////
-        playerBankDiv.innerHTML = `
-        <p>Player 1 Bank: $ ${gameState.playerBanks[1]}</p>
-        <p>Player 2 Bank: $ ${gameState.playerBanks[2]}</p>
-        <p>Player 3 Bank: $ ${gameState.playerBanks[3]}</p>
-        <p>Player 4 Bank: $ ${gameState.playerBanks[4]}</p>
-        `
+        //update HTML for player banks
+        this.updateBanks();
         if(playerNumber===1) socket.emit("sendGameState", gameState);
       })
 
@@ -360,15 +336,8 @@ export class DeckrTable extends Phaser.Game {
         //update the gamestate
         gameState.playerBanks = playerBanks
 
-        ///////////////////////////////////////////////////////////////////
-        //  for now, update playerBanks Div //////////////////////////////
-        //////////////////////////////////////////////////////////////////
-        playerBankDiv.innerHTML = `
-        <p>Player 1 Bank: $ ${gameState.playerBanks[1]}</p>
-        <p>Player 2 Bank: $ ${gameState.playerBanks[2]}</p>
-        <p>Player 3 Bank: $ ${gameState.playerBanks[3]}</p>
-        <p>Player 4 Bank: $ ${gameState.playerBanks[4]}</p>
-        `
+        //update HTML for player banks
+        this.updateBanks();
       })
 
       //if someone's banked a single chip, update their bank
@@ -380,15 +349,8 @@ export class DeckrTable extends Phaser.Game {
         gameState.chips[chipNumber].destroy()
         delete gameState.chips[chipNumber]
 
-        ///////////////////////////////////////////////////////////////////
-        //  for now, update playerBanks Div //////////////////////////////
-        //////////////////////////////////////////////////////////////////
-        playerBankDiv.innerHTML = `
-        <p>Player 1 Bank: $ ${gameState.playerBanks[1]}</p>
-        <p>Player 2 Bank: $ ${gameState.playerBanks[2]}</p>
-        <p>Player 3 Bank: $ ${gameState.playerBanks[3]}</p>
-        <p>Player 4 Bank: $ ${gameState.playerBanks[4]}</p>
-        `
+        //update HTML for player banks
+        this.updateBanks();
       })
 
       //if someone's collected the cards, delete them all from screen and update the deck
@@ -399,7 +361,7 @@ export class DeckrTable extends Phaser.Game {
           delete gameState.cards[cardNum]
         }
         gameState.deck = receivedDeck
-        //update the HTML
+        //update the card button count HTML
         dealButton.innerText = `Deal A Card (${gameState.deck.length})`
       })
     }

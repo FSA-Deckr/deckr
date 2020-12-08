@@ -85,6 +85,7 @@ export default class Chip extends Phaser.Physics.Arcade.Sprite {
   }
 
   dragEnd (ptr) {
+    const { updateBanks } = this.scene
     if(!this.playerPickedUp) return
     //put chip back on bottom layer when done dragging
     this.setDepth(chipDepth)
@@ -113,13 +114,7 @@ export default class Chip extends Phaser.Physics.Arcade.Sprite {
 
     if(addToBank) {
       //add value to player bank
-      this.scene.game.playerChipTotal += this.chipValue
-      this.gameState.playerBanks[this.playerNumber] = this.scene.game.playerChipTotal
-      playerChips.innerText = this.gameState.playerBanks[this.playerNumber]
-      chipNames.forEach(chipName => {
-        if(this.scene.game.playerChipTotal < +chipName.substring(4)) document.getElementById(chipName).className = 'greyOut chipImg'
-        else document.getElementById(chipName).className = 'chipImg'
-      })
+      this.gameState.playerBanks[this.playerNumber] += this.chipValue
 
       //emit player chip bank
       this.socket.emit('bankChip', {chipNumber: this.chipNumber, room: this.gameState.room, playerNumber: this.scene.game.playerNumber})
@@ -128,15 +123,9 @@ export default class Chip extends Phaser.Physics.Arcade.Sprite {
       this.destroy()
       delete this.gameState.chips[this.chipNumber]
 
-      ///////////////////////////////////////////////////////////////////
-      //  for now, update playerBanks Div //////////////////////////////
-      //////////////////////////////////////////////////////////////////
-      playerBankDiv.innerHTML = `
-      <p>Player 1 Bank: $ ${this.gameState.playerBanks[1]}</p>
-      <p>Player 2 Bank: $ ${this.gameState.playerBanks[2]}</p>
-      <p>Player 3 Bank: $ ${this.gameState.playerBanks[3]}</p>
-      <p>Player 4 Bank: $ ${this.gameState.playerBanks[4]}</p>
-      `
+      //update HTML for player banks
+      updateBanks();
+
     } else {
       this.socket.emit('sendChip', { chip:this, room: this.gameState.room, otherPlayerDragging: false });
     }
