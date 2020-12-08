@@ -133,11 +133,18 @@ export class DeckrTable extends Phaser.Game {
 
       socket.on('receiveCard', (receivedCard) => {
         //put all cards where they belong and with their rotations and reveal status
-        gameState.cards[receivedCard.cardNumber].setPosition(receivedCard.x, receivedCard.y)
-        gameState.cards[receivedCard.cardNumber].setRotation(receivedCard.rotation)
-        gameState.cards[receivedCard.cardNumber].setRevealed(receivedCard.revealed)
-        gameState.cards[receivedCard.cardNumber].body.setVelocity(receivedCard.velocity.x,receivedCard.velocity.y)
-        gameState.cards[receivedCard.cardNumber].otherPlayerDragging = receivedCard.otherPlayerDragging
+        if (!receivedCard.inHand) {
+          gameState.cards[receivedCard.cardNumber].setPosition(receivedCard.x, receivedCard.y)
+          gameState.cards[receivedCard.cardNumber].setRotation(receivedCard.rotation)
+          gameState.cards[receivedCard.cardNumber].setRevealed(receivedCard.revealed)
+          gameState.cards[receivedCard.cardNumber].body.setVelocity(receivedCard.velocity.x,receivedCard.velocity.y)
+          gameState.cards[receivedCard.cardNumber].otherPlayerDragging = receivedCard.otherPlayerDragging
+        } else {
+          gameState.hands[`player${receivedCard.player}`][receivedCard.cardNumber].x = receivedCard.x;
+          gameState.hands[`player${receivedCard.player}`][receivedCard.cardNumber].y = receivedCard.y;
+          gameState.hands[`player${receivedCard.player}`][receivedCard.cardNumber].revealed = receivedCard.revealed;
+          gameState.hands[`player${receivedCard.player}`][receivedCard.cardNumber].rotation = receivedCard.rotation;
+        }
       })
 
       socket.on('receiveChip', (receivedChip) => {
@@ -151,9 +158,9 @@ export class DeckrTable extends Phaser.Game {
 
       socket.on('receiveGameState', (receivedGameState) => {
         const { cards, chips, deck, hands } = receivedGameState;
-        //update the deck and hands
+        //update the deck
         gameState.deck = deck;
-        gameState.hands = hands;
+
         //for each receivedCard in gamestate, make new card if it doesn't exist
         for(let receivedCardNum in cards) {
           // adds cards to table
@@ -168,6 +175,30 @@ export class DeckrTable extends Phaser.Game {
           gameState.cards[receivedCardNum].setRotation(cards[receivedCardNum].rotation)
           gameState.cards[receivedCardNum].setRevealed(cards[receivedCardNum].revealed)
           gameState.cards[receivedCardNum].body.setVelocity(cards[receivedCardNum].velocity.x,cards[receivedCardNum].velocity.y)
+        }
+        //for hands recieved in gameState from sockets
+        for (let playerHand in hands) {
+          // for each card in a hand
+          for (let handCard in hands[playerHand]) {
+            //if it doesn't already exist in the hand OR on the table for some reason, make the card
+            if (!gameState.hands[playerHand][handCard] && !gameState.cards[handCard]) {
+              let cardInHand = hands[playerHand][handCard];
+              const card = new Card(this, cardInHand.x, cardInHand.y, cardsPhysicsGroup, handCard);
+              card.body.setCollideWorldBounds(false);
+              gameState.hands[playerHand][card.cardNumber] = card;
+            }
+            //set position and rotation of the card
+            gameState.hands[playerHand][handCard].body.setCollideWorldBounds(false);
+            gameState.hands[playerHand][handCard].setPosition(hands[playerHand][handCard].x, hands[playerHand][handCard].y);
+            gameState.hands[playerHand][handCard].setRotation(hands[playerHand][handCard].rotation);
+            gameState.hands[playerHand][handCard].setRevealed(hands[playerHand][handCard].revealed);
+            //set visibility of card, dependent on player number
+            if (playerHand === `player${playerNumber}`) {
+              gameState.hands[playerHand][handCard].setVisible(true);
+            } else {
+              gameState.hands[playerHand][handCard].setVisible(false);
+            }
+          }
         }
         for(let receivedChipNumber in chips) {
           // adds chips to table
@@ -185,21 +216,14 @@ export class DeckrTable extends Phaser.Game {
         }
       })
 
-      socket.on('receiveCard', (receivedCard) => {
-        //put all cards where they belong and with their rotations and reveal status
-        gameState.cards[receivedCard.cardNumber].setPosition(receivedCard.x, receivedCard.y)
-        gameState.cards[receivedCard.cardNumber].setRotation(receivedCard.rotation)
-        gameState.cards[receivedCard.cardNumber].setRevealed(receivedCard.revealed)
-        gameState.cards[receivedCard.cardNumber].body.setVelocity(receivedCard.velocity.x,receivedCard.velocity.y)
-        gameState.cards[receivedCard.cardNumber].otherPlayerDragging = receivedCard.otherPlayerDragging
-      })
-
       socket.on('addCardToHand', (removeCardState) => {
         gameState.cards[removeCardState.cardNumber].setVisible(false);
         gameState.hands[removeCardState.player][removeCardState.cardNumber] = gameState.cards[removeCardState.cardNumber];
+        delete gameState.cards[removeCardState.cardNumber];
       })
 
       socket.on('removeCardFromHand', (removeCardState) => {
+        gameState.cards[removeCardState.cardNumber] = gameState.hands[removeCardState.player][removeCardState.cardNumber];
         gameState.cards[removeCardState.cardNumber].setVisible(true);
         delete gameState.hands[removeCardState.player][removeCardState.cardNumber];
       })

@@ -66,7 +66,9 @@ export default class Card extends Phaser.GameObjects.Container {
         rotation: this.rotation,
         revealed: this.revealed,
         velocity: this.body.velocity,
-        otherPlayerDragging: this.otherPlayerDragging
+        otherPlayerDragging: this.otherPlayerDragging,
+        inHand: this.inHand,
+        player: this.playerNumber
       }
     }
   }
@@ -103,6 +105,9 @@ export default class Card extends Phaser.GameObjects.Container {
       if (!this.addToHand) {
         this.inHand = false;
         this.body.setCollideWorldBounds(true);
+        this.gameState.cards[this.cardNumber] = this;
+        delete this.gameState.hands[`player${this.playerNumber}`][this.cardNumber];
+
         this.socket.emit('removeCardFromHand', {cardNumber: this.cardNumber, room: this.gameState.room, player: `player${this.playerNumber}`});
       }
     } else {
@@ -134,15 +139,6 @@ export default class Card extends Phaser.GameObjects.Container {
         break;
     }
 
-    // //this is when we want to add to hand
-    // if (dragY > canvasHeight - 100) {
-    //   //set a add to hand value to true, to check on dragEnd
-    //   this.addToHand = true;
-    //   //animate/indicate that we are in this state, pointer change, etc.
-    // } else {
-    //   this.addToHand = false;
-    // }
-
     this.socket.emit('sendCard', { card:this, room: this.gameState.room, otherPlayerDragging: true });
     this.otherPlayerDragging = false
   }
@@ -166,8 +162,9 @@ export default class Card extends Phaser.GameObjects.Container {
 
     if (this.addToHand && !this.inHand) {
       this.gameState.hands[`player${this.playerNumber}`][this.cardNumber] = this;
+      delete this.gameState.cards[this.cardNumber];
       this.inHand = true;
-      this.setRotation((this.playerNumber - 1) * (Math.PI/2));
+      this.setRotation((4 * (Math.PI/2)) - ((this.playerNumber - 1) * (Math.PI/2)));
       this.setRevealed(true);
       this.body.setCollideWorldBounds(false);
       switch(this.playerNumber) {
