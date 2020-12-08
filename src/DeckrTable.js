@@ -153,7 +153,6 @@ export class DeckrTable extends Phaser.Game {
 
       //create a randomly numbered card in the card physics group
       const dealACard = (_deck) => {
-        console.log(_deck)
         //only do it if there are cards in the deck
         if (!_deck.length) return
         //get top card and remove from deck
@@ -400,7 +399,6 @@ export class DeckrTable extends Phaser.Game {
           delete gameState.cards[cardNum]
         }
         gameState.deck = receivedDeck
-        console.log(gameState.deck)
         //update the HTML
         dealButton.innerText = `Deal A Card (${gameState.deck.length})`
       })
