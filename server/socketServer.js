@@ -42,6 +42,10 @@ const setSocketServer = (server) => {
         socket.on('sendCollectCards', function({deck, room}){
             this.to(room).emit('receiveCollectCards', deck)
         })
+
+        socket.on('bankChip', function({room, chipNumber, playerNumber}){
+            this.to(room).emit('receiveBankChip', {chipNumber, playerNumber})
+        })
     });
 }
 

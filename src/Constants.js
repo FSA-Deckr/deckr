@@ -26,3 +26,4 @@ export const newItemRange = 200
 export const newItemRandom = 10
 export const chipOffset = 80
 export const cardOffset = 220
+export const chipBankRange = 40

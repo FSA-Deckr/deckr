@@ -372,6 +372,26 @@ export class DeckrTable extends Phaser.Game {
         `
       })
 
+      //if someone's banked a single chip, update their bank
+      socket.on('receiveBankChip', ({playerNumber, chipNumber})=>{
+        //update the gamestate
+        gameState.playerBanks[playerNumber] += gameState.chips[chipNumber].chipValue
+
+        //must destroy the phaser obj and delete the key in gamestate
+        gameState.chips[chipNumber].destroy()
+        delete gameState.chips[chipNumber]
+
+        ///////////////////////////////////////////////////////////////////
+        //  for now, update playerBanks Div //////////////////////////////
+        //////////////////////////////////////////////////////////////////
+        playerBankDiv.innerHTML = `
+        <p>Player 1 Bank: $ ${gameState.playerBanks[1]}</p>
+        <p>Player 2 Bank: $ ${gameState.playerBanks[2]}</p>
+        <p>Player 3 Bank: $ ${gameState.playerBanks[3]}</p>
+        <p>Player 4 Bank: $ ${gameState.playerBanks[4]}</p>
+        `
+      })
+
       //if someone's collected the cards, delete them all from screen and update the deck
       socket.on('receiveCollectCards', (receivedDeck)=>{
         for(const cardNum in gameState.cards) {

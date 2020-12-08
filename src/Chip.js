@@ -1,5 +1,5 @@
 import Phaser from 'phaser'
-import { angularDrag, boardDrag, chipRadius, chipDepth, activeDepth } from './Constants'
+import { angularDrag, boardDrag, chipRadius, chipDepth, activeDepth, chipBankRange, canvasHeight, canvasWidth, chipNames } from './Constants'
 
 export default class Chip extends Phaser.Physics.Arcade.Sprite {
   constructor(scene, x, y, physicsGroup, chipNumber, chipValue, orientation = 0){
@@ -17,6 +17,7 @@ export default class Chip extends Phaser.Physics.Arcade.Sprite {
     //socket and room info for emit events
     this.gameState = scene.game.gameState;
     this.socket = scene.game.socket;
+    this.playerNumber = scene.game.playerNumber
 
     //phaser physics settings
     this.setAngularDrag(angularDrag)
@@ -94,8 +95,52 @@ export default class Chip extends Phaser.Physics.Arcade.Sprite {
     const dy = (lastY - penY) * 50;
     this.setVelocity(dx, dy);
     this.dragHistory = [];
+    let addToBank
+    switch(this.playerNumber) {
+      case 2:
+        addToBank = this.x > canvasWidth - chipBankRange;
+        break;
+      case (3):
+        addToBank = this.y < chipBankRange
+        break;
+      case 4:
+        addToBank = this.x < chipBankRange
+        break;
+      default:
+        addToBank = this.y > canvasHeight - chipBankRange;
+        break;
+    }
 
-    this.socket.emit('sendChip', { chip:this, room: this.gameState.room, otherPlayerDragging: false });
+    if(addToBank) {
+      //add value to player bank
+      this.scene.game.playerChipTotal += this.chipValue
+      this.gameState.playerBanks[this.playerNumber] = this.scene.game.playerChipTotal
+      playerChips.innerText = this.gameState.playerBanks[this.playerNumber]
+      chipNames.forEach(chipName => {
+        if(this.scene.game.playerChipTotal < +chipName.substring(4)) document.getElementById(chipName).className = 'greyOut chipImg'
+        else document.getElementById(chipName).className = 'chipImg'
+      })
+
+      //emit player chip bank
+      this.socket.emit('bankChip', {chipNumber: this.chipNumber, room: this.gameState.room, playerNumber: this.scene.game.playerNumber})
+
+      //remove chip from board and GameState
+      this.destroy()
+      delete this.gameState.chips[this.chipNumber]
+
+      ///////////////////////////////////////////////////////////////////
+      //  for now, update playerBanks Div //////////////////////////////
+      //////////////////////////////////////////////////////////////////
+      playerBankDiv.innerHTML = `
+      <p>Player 1 Bank: $ ${this.gameState.playerBanks[1]}</p>
+      <p>Player 2 Bank: $ ${this.gameState.playerBanks[2]}</p>
+      <p>Player 3 Bank: $ ${this.gameState.playerBanks[3]}</p>
+      <p>Player 4 Bank: $ ${this.gameState.playerBanks[4]}</p>
+      `
+    } else {
+      this.socket.emit('sendChip', { chip:this, room: this.gameState.room, otherPlayerDragging: false });
+    }
+
     this.playerPickedUp = false
   }
 }
