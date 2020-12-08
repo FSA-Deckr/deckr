@@ -92,6 +92,7 @@ export default class Card extends Phaser.GameObjects.Container {
     return Object.keys(this.gameState.cards)
     .map( key => this.gameState.cards[key])
     .filter( card => card.stackNumber === stackNumber)
+    .sort( (a,b) => a.stackOrder - b.stackOrder)
   }
   
   giveNextStackNumber(stackNumber = this.stackNumber) {
@@ -222,7 +223,7 @@ export default class Card extends Phaser.GameObjects.Container {
       this.revealed = !this.revealed
     }
     this.startFlipClickedDown = false
-    this.setDepth(cardDepth)
+    this.setDepth(activeDepth)
     this.socket.emit('sendCard', { card:this, room: this.gameState.room });
   }
 
