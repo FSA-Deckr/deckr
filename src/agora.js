@@ -5,9 +5,9 @@ const {RtcTokenBuilder, RtcRole} = require('agora-access-token');
 
 const startVideo = function(channelNum){
 
-    const appId = process.env.APPID
+    const appId = 'bb8fa8a838674e38abd095b569e17cfc'
     // || keys[channelNum].appId
-    const appCertificate = process.env.APPCERTIFICATE
+    const appCertificate = 'af33a381800a43ae8ac8e2fc97c79d99'
     // || keys[channelNum].appCertificate
     const channelName = 'deckr';
     const uid = 0;
