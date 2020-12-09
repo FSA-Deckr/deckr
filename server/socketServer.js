@@ -23,11 +23,11 @@ const setSocketServer = (server) => {
         })
 
         socket.on('addCardToHand', function(cardState) {
-            this.to(cardState.room).emit('addCardToHand', {cardNumber: cardState.cardNumber, player: cardState.player});
+            this.to(cardState.room).emit('addCardToHand', {card: cardState.card, player: cardState.player});
         })
 
         socket.on('removeCardFromHand', function(cardState) {
-            this.to(cardState.room).emit('removeCardFromHand', {cardNumber: cardState.cardNumber, player: cardState.player});
+            this.to(cardState.room).emit('removeCardFromHand', {card: cardState.card, player: cardState.player});
         })
 
         socket.on('sendChip', function(chipState) {

@@ -15,7 +15,7 @@ export const inHandRange = 100
 //display z-index/depth variables
 export const chipDepth = 1
 export const cardDepth = 2
-export const activeDepth = 3
+export const activeDepth = 100
 
 //game board
 export const canvasWidth = 800

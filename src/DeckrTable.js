@@ -54,6 +54,8 @@ export class DeckrTable extends Phaser.Game {
       this.load.image('flip','flip.png')
       this.load.image('rotate','rotate.png')
       this.load.image('board','board.jpg')
+      this.load.image('deckCount', 'blankButton.png')
+      this.load.image('shuffle', 'shuffleButton.png')
       //probably not the cleanest way to make a shuffled deck but whatever
       gameState.deck = makeDeck(52)
       shuffleDeck(gameState.deck)
@@ -252,11 +254,9 @@ export class DeckrTable extends Phaser.Game {
           gameState.cards[receivedCard.cardNumber].setRevealed(receivedCard.revealed)
           gameState.cards[receivedCard.cardNumber].body.setVelocity(receivedCard.velocity.x,receivedCard.velocity.y)
           gameState.cards[receivedCard.cardNumber].otherPlayerDragging = receivedCard.otherPlayerDragging
-        } else {
-          gameState.hands[`player${receivedCard.player}`][receivedCard.cardNumber].x = receivedCard.x;
-          gameState.hands[`player${receivedCard.player}`][receivedCard.cardNumber].y = receivedCard.y;
-          gameState.hands[`player${receivedCard.player}`][receivedCard.cardNumber].revealed = receivedCard.revealed;
-          gameState.hands[`player${receivedCard.player}`][receivedCard.cardNumber].rotation = receivedCard.rotation;
+          gameState.cards[receivedCard.cardNumber].stackNumber = receivedCard.stackNumber
+          gameState.cards[receivedCard.cardNumber].stackOrder = receivedCard.stackOrder
+          gameState.cards[receivedCard.cardNumber].setDepth(receivedCard.depth)
         }
       })
 
@@ -288,31 +288,33 @@ export class DeckrTable extends Phaser.Game {
           gameState.cards[receivedCardNum].setRotation(cards[receivedCardNum].rotation)
           gameState.cards[receivedCardNum].setRevealed(cards[receivedCardNum].revealed)
           gameState.cards[receivedCardNum].body.setVelocity(cards[receivedCardNum].velocity.x,cards[receivedCardNum].velocity.y)
+          gameState.cards[receivedCardNum].stackNumber = cards[receivedCardNum].stackNumber
+          gameState.cards[receivedCardNum].stackOrder = cards[receivedCardNum].stackOrder
+          gameState.cards[receivedCardNum].setDepth(cards[receivedCardNum].depth)
         }
-        //for hands recieved in gameState from sockets
-        for (let playerHand in hands) {
-          // for each card in a hand
-          for (let handCard in hands[playerHand]) {
-            //if it doesn't already exist in the hand OR on the table for some reason, make the card
-            if (!gameState.hands[playerHand][handCard] && !gameState.cards[handCard]) {
-              let cardInHand = hands[playerHand][handCard];
-              const card = new Card(this, cardInHand.x, cardInHand.y, cardsPhysicsGroup, handCard);
-              card.body.setCollideWorldBounds(false);
-              gameState.hands[playerHand][card.cardNumber] = card;
-            }
-            //set position and rotation of the card
-            gameState.hands[playerHand][handCard].body.setCollideWorldBounds(false);
-            gameState.hands[playerHand][handCard].setPosition(hands[playerHand][handCard].x, hands[playerHand][handCard].y);
-            gameState.hands[playerHand][handCard].setRotation(hands[playerHand][handCard].rotation);
-            gameState.hands[playerHand][handCard].setRevealed(hands[playerHand][handCard].revealed);
-            //set visibility of card, dependent on player number
-            if (playerHand === `player${playerNumber}`) {
-              gameState.hands[playerHand][handCard].setVisible(true);
-            } else {
-              gameState.hands[playerHand][handCard].setVisible(false);
-            }
+
+        //render cards in your hand, if they don't exist for some reason (refresh?)
+        //cycle through YOUR hand cards coming from the received game state
+        const handToModify = hands[`player${playerNumber}`];
+        for (let handCardKey in handToModify) {
+          //if the card doesn't already exist in your local gameState
+          if (!gameState.hands[`player${playerNumber}`][handCardKey]){
+            //create/render it
+            const newHandCard = new Card(this, handToModify[handCardKey].x, handToModify[handCardKey].y, cardsPhysicsGroup, handCardKey);
+            newHandCard.setRevealed(handToModify[handCardKey].revealed);
+            newHandCard.inHand = true;
+            newHandCard.setRotation((4 * (Math.PI/2)) - ((playerNumber - 1) * (Math.PI/2)));
+            newHandCard.body.setCollideWorldBounds(false);
+            newHandCard.x = handToModify[handCardKey].x;
+            newHandCard.y = handToModify[handCardKey].y;
+            //add it to your local gameState
+            handToModify[handCardKey] = newHandCard;
           }
         }
+        //update the rest of the hands in local gameState
+        gameState.hands = hands;
+        gameState.hands[`player${playerNumber}`] = handToModify;
+
         for(let receivedChipNumber in chips) {
           // adds chips to table
           if(!gameState.chips[receivedChipNumber]) {
@@ -334,17 +336,16 @@ export class DeckrTable extends Phaser.Game {
         this.updateBanks();
       })
 
-      socket.on('addCardToHand', (removeCardState) => {
-        gameState.cards[removeCardState.cardNumber].setVisible(false);
-        gameState.hands[removeCardState.player][removeCardState.cardNumber] = gameState.cards[removeCardState.cardNumber];
-        delete gameState.cards[removeCardState.cardNumber];
+      socket.on('addCardToHand', (cardState) => {
+        gameState.hands[cardState.player][cardState.card.cardNumber] = cardState.card;
+        gameState.cards[cardState.card.cardNumber].destroy();
+        delete gameState.cards[cardState.card.cardNumber];
       })
 
-      socket.on('removeCardFromHand', (removeCardState) => {
-        gameState.cards[removeCardState.cardNumber] = gameState.hands[removeCardState.player][removeCardState.cardNumber];
-        gameState.cards[removeCardState.cardNumber].setVisible(true);
-        gameState.cards[removeCardState.cardNumber].body.setCollideWorldBounds(true);
-        delete gameState.hands[removeCardState.player][removeCardState.cardNumber];
+      socket.on('removeCardFromHand', (cardState) => {
+        const removedCard = new Card(this, cardState.card.x, cardState.card.y, cardsPhysicsGroup, cardState.card.cardNumber);
+        gameState.cards[removedCard.cardNumber] = removedCard;
+        delete gameState.hands[cardState.player][cardState.card.cardNumber];
       })
 
       //emit pointer position whenever moved in world
