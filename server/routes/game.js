@@ -1,6 +1,13 @@
 const router = require('express').Router();
 const {GameTable, PlayerSession} = require('../db');
 
+const agoraKeys = {
+        1:{
+            appId : process.env.APPID,
+            appCertificate: process.env.APPCERTIFICATE
+          }
+    }
+
 //this post request creates a new game room
 router.post('/', async (req, res, next) => {
     try {
@@ -56,7 +63,7 @@ router.get('/:gameId', async (req, res, next) => {
             const playerNums = gameUsers.length ? gameUsers.map( user => user.playerNumber) : [];
             //if the player refreshes after being on a table
             if (req.gameTableId === req.params.gameId) {
-                res.status(200).json({gameTable: gameTable.id, playerNumber})
+                res.status(200).json({gameTable: agoraKeys[gameTable.id], playerNumber})
             }
             else {
                 //if table full

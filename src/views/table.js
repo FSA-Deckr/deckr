@@ -9,7 +9,8 @@ const { initialChips } = require('../Constants');
 async function attemptToRenderTable(tableNumber) {
     let gameTable = await axios.get(`/api/game/${tableNumber}`)
     let playerNumber = gameTable.data.playerNumber
-    let channelNumber = gameTable.data.gameTable
+    console.log( gameTable.data.gameTable)
+    console.log(gameTable.data)
     if (gameTable.status === 206) {
         window.location.pathname = '/home'
         console.log('Sorry, this game is full')
