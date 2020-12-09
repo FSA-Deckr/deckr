@@ -17,9 +17,112 @@ h1,h4{
 #remote-container{
     display: flex;
     float:top;
-
 }
 #remote-container video{
     width: 25%;
     position: relative !important;
+}
+#game {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+#bank{
+    width:800px;
+    height:100px;
+    background-color: #0e4223;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border-radius: 0px 0px 15px 15px;
+}
+#dealButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: white 1px solid;
+    color: white;
+    font-size: 1rem;
+    height: 50px;
+    width: 75px;
+    text-align: center;
+    border-radius: 5px;
+}
+#dealButton:hover {
+    color:black;
+    background-color: white;
+    cursor: pointer;
+}
+.chipImg {
+    display: inline-block;
+    height: 50px;
+    width: 50px;
+    cursor: pointer;
+}
+#chip1 {
+    background: url('chipSpriteSheet.png');
+}
+#chip5 {
+    background: url('chipSpriteSheet.png') left 100px top 0px;
+}
+#chip25 {
+    background: url('chipSpriteSheet.png') left 50px top 0px;
+}
+#chip50 {
+    background: url('chipSpriteSheet.png') left 0px top 50px;
+}
+#chip100 {
+    background: url('chipSpriteSheet.png') left 100px top 50px;
+}
+#chip500 {
+    background: url('chipSpriteSheet.png') left 50px top 50px;
+}
+.greyOut {
+    opacity: 0.4;
+}
+#chipCount {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: yellow 1px solid;
+    color: yellow;
+    font-size: 1rem;
+    height: 50px;
+    width: 75px;
+    border-radius: 5px;
+}
+#chipCollect {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: white 1px solid;
+    color: white;
+    font-size: 1rem;
+    height: 50px;
+    width: 75px;
+    text-align: center;
+    border-radius: 5px;
+}
+#chipCollect:hover {
+    color:black;
+    background-color: white;
+    cursor: pointer;
+}
+#cardCollect {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: white 1px solid;
+    color: white;
+    font-size: 1rem;
+    height: 50px;
+    width: 75px;
+    text-align: center;
+    border-radius: 5px;
+}
+#cardCollect:hover {
+    color:black;
+    background-color: white;
+    cursor: pointer;
 }

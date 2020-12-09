@@ -18,3 +18,12 @@ export const activeDepth = 3
 //game board
 export const canvasWidth = 800
 export const canvasHeight = 800
+
+//player chip and card placement and initial values
+export const initialChips = 1000
+export const chipNames = ['chip1','chip5','chip25','chip50','chip100','chip500']
+export const newItemRange = 200
+export const newItemRandom = 10
+export const chipOffset = 80
+export const cardOffset = 220
+export const chipBankRange = 40
