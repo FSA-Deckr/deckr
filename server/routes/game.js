@@ -79,10 +79,10 @@ router.get('/:gameId', async (req, res, next) => {
                             break;
                         }
                     }
-                    await player.update({gameTableId: gameTable.id, playerNumber: newPlayerNum})
+                    await player.update({gameTableId: agoraKeys[gameTable.id], playerNumber: newPlayerNum})
                     req.gameTableNum = req.params.gameId;
                     req.playerNumber = newPlayerNum;
-                    res.status(200).json({gameTable: gameTable.id, playerNumber: req.playerNumber})
+                    res.status(200).json({gameTable: agoraKeys[gameTable.id], playerNumber: req.playerNumber})
                 }
             }
         }

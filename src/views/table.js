@@ -20,7 +20,7 @@ async function attemptToRenderTable(tableNumber) {
         console.log('Sorry, this game was not found')
     }
     else {
-        await renderTable(tableNumber, playerNumber,channelNumber);
+        await renderTable(tableNumber, playerNumber);
     }
 }
 
