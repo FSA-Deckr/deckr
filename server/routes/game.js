@@ -1,7 +1,6 @@
 const router = require('express').Router();
 const {GameTable, PlayerSession} = require('../db');
-const keys = require('../../apikey')
-
+// const keys = require('../../apikey')
 const agoraKeys = keys || {
         1:{
             appId : process.env.APPID,
