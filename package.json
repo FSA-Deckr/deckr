@@ -7,7 +7,6 @@
     "test": "jest",
     "build": "webpack",
     "build:dev": "webpack -w",
-    "build:phaser": "webpack -w --config webpack-phaser.config.js",
     "start": "node server/index.js",
     "start:dev": "npm run build && nodemon --ignore src --ignore server/public",
     "start:server": "nodemon --ignore src --ignore server/public"
