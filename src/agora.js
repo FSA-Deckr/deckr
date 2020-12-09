@@ -6,10 +6,10 @@ const {RtcTokenBuilder, RtcRole} = require('agora-access-token');
 //comment out if running on heroku
 
 
-const startVideo = function(channelNumber){
+const startVideo = function(agoraKeys){
 
-    const appId = keys[channelNumber].appId
-    const appCertificate = keys[channelNum].appCertificate
+    const appId = agoraKeys.appId
+    const appCertificate = agoraKeys.appCertificate
     const channelName = 'deckr';
     const uid = 0;
     const role = RtcRole.PUBLISHER;
