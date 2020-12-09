@@ -22,7 +22,7 @@ async function attemptToRenderTable(tableNumber) {
 }
 
 async function renderTable(tableNumber,channelNum) {
-    const root = document.getElementById('root');
+    const table = document.getElementById('table');
 
         //this just updates db with info when a player Xs out
         window.addEventListener("beforeunload", async function(e) {
@@ -40,7 +40,7 @@ async function renderTable(tableNumber,channelNum) {
         });
         const canvas = 'canvas'
  
-        root.innerHTML = `<div>You are in room ${tableNumber}</div>
+        table.innerHTML = `<div>You are in room ${tableNumber}</div>
         <div id='me'></div>
         <div id="remote-container"></div>
         <canvas id= '${canvas}'></canvas>
