@@ -83,7 +83,8 @@ export default class Card extends Phaser.GameObjects.Container {
         velocity: this.body.velocity,
         otherPlayerDragging: this.otherPlayerDragging,
         stackNumber: this.stackNumber,
-        stackOrder: this.stackOrder
+        stackOrder: this.stackOrder,
+        depth: this.depth
       }
     }
   }
