@@ -23,7 +23,7 @@ function renderLobby() {
     const joinRoomButton = document.getElementById('logInForm')
     joinRoomButton.addEventListener("submit", async function(e) {
         e.preventDefault()
-        let roomNumber = document.getElementById('roomNumber')
+        let roomNugmber = document.getElementById('roomNumber')
         if (roomNumber.value) window.location.pathname = `/${roomNumber.value}/`
         roomNumber.value = ''
     })

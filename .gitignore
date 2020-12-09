@@ -3,5 +3,6 @@ server/public/bundle.js
 server/public/bundle.js.map
 server/public/phaser-bundle.js
 server/public/phaser-bundle.js.map
-.DS_Store
+server/public/.DS_Store
 apikey.js
+.DS_Store
