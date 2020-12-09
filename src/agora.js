@@ -1,6 +1,5 @@
 const AgoraRTC = require('agora-rtc-sdk')
 
-const keys = require('../apikey')
 const {RtcTokenBuilder, RtcRole} = require('agora-access-token');
 
 
