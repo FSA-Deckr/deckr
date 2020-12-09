@@ -6,3 +6,4 @@ server/public/phaser-bundle.js.map
 server/public/.DS_Store
 apikey.js
 .DS_Store
+server/.DS_Store
