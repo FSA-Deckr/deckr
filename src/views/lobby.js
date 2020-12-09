@@ -5,12 +5,14 @@ function renderLobby() {
 
     root.innerHTML = 
     `
+    <h1>deckr</h1>
+    <button id="newRoom">Create a table</button>
     <form id = "logInForm">
-        <label>Access Code:</label>
-        <input name ="accessCode" className = "accessCode" id="roomNumber"/>
-        <button type ="submit" id = "logInButton" >Go to room</button>
+        <label>Join a table</label>
+        <input name ="accessCode" className = "accessCode" id="roomNumber" placeholder="Table Code"/>
+        <button type ="submit" id = "logInButton" >JOIN</button>
     </form>
-    <button id="newRoom">New room</button>`
+    `
 
     const createRoomButton = document.getElementById('newRoom')
     createRoomButton.addEventListener("click", async function(e) {
@@ -21,7 +23,7 @@ function renderLobby() {
     const joinRoomButton = document.getElementById('logInForm')
     joinRoomButton.addEventListener("submit", async function(e) {
         e.preventDefault()
-        let roomNumber = document.getElementById('roomNumber')
+        let roomNugmber = document.getElementById('roomNumber')
         if (roomNumber.value) window.location.pathname = `/${roomNumber.value}/`
         roomNumber.value = ''
     })
