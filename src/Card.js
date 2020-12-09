@@ -1,5 +1,5 @@
 import Phaser from 'phaser'
-import { boardDrag, cardDimensions, hoverButtonRadius, cardBackFrame, cardDepth, activeDepth, hoverOffset, canvasHeight, inHandAdjustment, canvasWidth } from './Constants'
+import { boardDrag, cardDimensions, hoverButtonRadius, cardBackFrame, cardDepth, activeDepth, hoverOffset, canvasHeight, inHandAdjustment, canvasWidth, inHandRange } from './Constants'
 export default class Card extends Phaser.GameObjects.Container {
   constructor(scene, x, y, physicsGroup, cardNumber) {
     super(scene, x, y)
@@ -126,16 +126,16 @@ export default class Card extends Phaser.GameObjects.Container {
 
     switch(this.playerNumber) {
       case 2:
-        this.addToHand = dragX > canvasWidth - 100;
+        this.addToHand = dragX > canvasWidth - inHandRange;
         break;
       case (3):
-        this.addToHand = dragY < 100;
+        this.addToHand = dragY < inHandRange;
         break;
       case 4:
-        this.addToHand = dragX < 100;
+        this.addToHand = dragX < inHandRange;
         break;
       default:
-        this.addToHand = dragY > canvasHeight - 100;
+        this.addToHand = dragY > canvasHeight - inHandRange;
         break;
     }
 
