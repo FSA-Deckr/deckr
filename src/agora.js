@@ -4,6 +4,10 @@ const {RtcTokenBuilder, RtcRole} = require('agora-access-token');
 
 
 const startVideo = function(channelNum){
+
+    console.log('in startvideo', process.env.APPID, process.env.APPCERTIFICATE)
+    console.log('whole thing', process.env)
+
     const appId = process.env.APPID
     // || keys[channelNum].appId
     const appCertificate = process.env.APPCERTIFICATE
