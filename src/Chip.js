@@ -1,8 +1,8 @@
 import Phaser from 'phaser'
-import { angularDrag, boardDrag, chipRadius, chipDepth, activeDepth } from './Constants'
+import { angularDrag, boardDrag, chipRadius, chipDepth, activeDepth, chipBankRange, canvasHeight, canvasWidth, chipNames } from './Constants'
 
 export default class Chip extends Phaser.Physics.Arcade.Sprite {
-  constructor(scene, x, y, physicsGroup, chipNumber, chipValue){
+  constructor(scene, x, y, physicsGroup, chipNumber, chipValue, orientation = 0){
     super(scene, x, y, 'chipSprite')
     //map chip values to sprite frame
     const chipValueMap = {1:0, 5:1, 25:2, 50:3, 100:4, 500:5}
@@ -12,10 +12,12 @@ export default class Chip extends Phaser.Physics.Arcade.Sprite {
     physicsGroup.add(this)
     this.setFrame(chipValueMap[chipValue])
     this.setDepth(chipDepth)
+    this.rotation = orientation
 
     //socket and room info for emit events
     this.gameState = scene.game.gameState;
     this.socket = scene.game.socket;
+    this.playerNumber = scene.game.playerNumber
 
     //phaser physics settings
     this.setAngularDrag(angularDrag)
@@ -83,6 +85,7 @@ export default class Chip extends Phaser.Physics.Arcade.Sprite {
   }
 
   dragEnd (ptr) {
+    const { updateBanks } = this.scene
     if(!this.playerPickedUp) return
     //put chip back on bottom layer when done dragging
     this.setDepth(chipDepth)
@@ -93,8 +96,40 @@ export default class Chip extends Phaser.Physics.Arcade.Sprite {
     const dy = (lastY - penY) * 50;
     this.setVelocity(dx, dy);
     this.dragHistory = [];
+    let addToBank
+    switch(this.playerNumber) {
+      case 2:
+        addToBank = this.x > canvasWidth - chipBankRange;
+        break;
+      case (3):
+        addToBank = this.y < chipBankRange
+        break;
+      case 4:
+        addToBank = this.x < chipBankRange
+        break;
+      default:
+        addToBank = this.y > canvasHeight - chipBankRange;
+        break;
+    }
 
-    this.socket.emit('sendChip', { chip:this, room: this.gameState.room, otherPlayerDragging: false });
+    if(addToBank) {
+      //add value to player bank
+      this.gameState.playerBanks[this.playerNumber] += this.chipValue
+
+      //emit player chip bank
+      this.socket.emit('bankChip', {chipNumber: this.chipNumber, room: this.gameState.room, playerNumber: this.scene.game.playerNumber})
+
+      //remove chip from board and GameState
+      this.destroy()
+      delete this.gameState.chips[this.chipNumber]
+
+      //update HTML for player banks
+      updateBanks();
+
+    } else {
+      this.socket.emit('sendChip', { chip:this, room: this.gameState.room, otherPlayerDragging: false });
+    }
+
     this.playerPickedUp = false
   }
 }

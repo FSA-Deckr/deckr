@@ -1,7 +1,7 @@
 import Phaser from 'phaser'
 import { boardDrag, cardDimensions, hoverButtonRadius, cardBackFrame, cardDepth, activeDepth, hoverOffset, canvasHeight, inHandAdjustment, canvasWidth, inHandRange } from './Constants'
 export default class Card extends Phaser.GameObjects.Container {
-  constructor(scene, x, y, physicsGroup, cardNumber) {
+  constructor(scene, x, y, physicsGroup, cardNumber, orientation = Math.PI/2) {
     super(scene, x, y)
     //add images to container
     this.shadow = scene.add.image(0,0,'shadow')
@@ -30,6 +30,7 @@ export default class Card extends Phaser.GameObjects.Container {
     this.body.useDamping = true;
     this.body.setBounce(1,1)
     this.body.setCollideWorldBounds(true)
+    this.rotation = orientation
 
     //event listeners
     this.dragHistory = []
