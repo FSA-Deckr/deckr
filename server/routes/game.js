@@ -1,11 +1,20 @@
 const router = require('express').Router();
 const {GameTable, PlayerSession} = require('../db');
+const keys = require('../../apikey')
 
-const agoraKeys = {
+const agoraKeys = keys || {
         1:{
             appId : process.env.APPID,
             appCertificate: process.env.APPCERTIFICATE
-          }
+        },
+        2:{
+            appId : process.env.APPID_2,
+            appCertificate: process.env.APPCERTIFICATE_2
+        },
+        3:{
+            appId : process.env.APPID_3,
+            appCertificate: process.env.APPCERTIFICATE_3
+        }
     }
 
 //this post request creates a new game room

@@ -2,8 +2,6 @@ const AgoraRTC = require('agora-rtc-sdk')
 
 const {RtcTokenBuilder, RtcRole} = require('agora-access-token');
 
-// const keys = require('../apikey')
-//comment out if running on heroku
 
 
 const startVideo = function(agoraKeys){
