@@ -2,11 +2,13 @@ const AgoraRTC = require('agora-rtc-sdk')
 
 const {RtcTokenBuilder, RtcRole} = require('agora-access-token');
 
-const keys = require('../apikey')
+// const keys = require('../apikey')
+//comment out if running on heroku
 
-const startVideo = function(channelNum){
 
-    const appId = keys[channelNum].appId
+const startVideo = function(channelNumber){
+
+    const appId = keys[channelNumber].appId
     const appCertificate = keys[channelNum].appCertificate
     const channelName = 'deckr';
     const uid = 0;
