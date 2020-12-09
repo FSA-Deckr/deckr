@@ -1,16 +1,17 @@
 const AgoraRTC = require('agora-rtc-sdk')
-
+const axios = require('axios')
 const {RtcTokenBuilder, RtcRole} = require('agora-access-token');
 
 
-const startVideo = function(channelNum){
+const startVideo = async function(channelNum){
 
-    console.log('in startvideo', process.env.APPID, process.env.APPCERTIFICATE)
-    console.log('whole thing', process.env)
+    let agoraAPIresp = await axios.get('/api/agora')
 
-    const appId = process.env.APPID
+    console.log(agoraAPIresp.data)
+
+    const appId = agoraAPIresp.data[0]
     // || keys[channelNum].appId
-    const appCertificate = process.env.APPCERTIFICATE
+    const appCertificate = agoraAPIresp.data[1]
     // || keys[channelNum].appCertificate
     const channelName = 'deckr';
     const uid = 0;
