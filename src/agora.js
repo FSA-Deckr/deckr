@@ -2,6 +2,8 @@ const AgoraRTC = require('agora-rtc-sdk')
 
 const {RtcTokenBuilder, RtcRole} = require('agora-access-token');
 
+const keys = require('../apikey')
+
 const startVideo = function(channelNum){
 
     const appId = keys[channelNum].appId

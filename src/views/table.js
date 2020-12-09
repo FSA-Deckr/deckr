@@ -9,6 +9,7 @@ const { initialChips } = require('../Constants');
 async function attemptToRenderTable(tableNumber) {
     let gameTable = await axios.get(`/api/game/${tableNumber}`)
     let playerNumber = gameTable.data.playerNumber
+    let channelNumber = gameTable.data.gameTable
     if (gameTable.status === 206) {
         window.location.pathname = '/home'
         console.log('Sorry, this game is full')
@@ -18,11 +19,11 @@ async function attemptToRenderTable(tableNumber) {
         console.log('Sorry, this game was not found')
     }
     else {
-        await renderTable(tableNumber, playerNumber);
+        await renderTable(tableNumber, playerNumber,channelNumber);
     }
 }
 
-async function renderTable(tableNumber,playerNumber) {
+async function renderTable(tableNumber,playerNumber,channelNumber) {
     const root = document.getElementById('root');
     const buttonControls = document.getElementById('buttonControls');
 
@@ -66,7 +67,7 @@ async function renderTable(tableNumber,playerNumber) {
     `
 
     const game = new DeckrTable(socket, room, playerNumber)
-    // startVideo(channelNum)
+    // startVideo(channelNumber)
 }
 
 module.exports = {attemptToRenderTable, renderTable}
