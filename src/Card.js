@@ -292,7 +292,6 @@ export default class Card extends Phaser.GameObjects.Container {
   startFlip() {
     if(this.otherPlayerDragging) return
     this.getCardsInStack().forEach( card => {
-      console.log('getting in the preflip for cards', card.cardNumber, card.startFlipClickedDown)
       card.setDepth(activeDepth + card.stackOrder)
     //mark that a click down (without drag) begins in the reveal zone
       card.startFlipClickedDown = true
@@ -301,12 +300,10 @@ export default class Card extends Phaser.GameObjects.Container {
 
   flip() {
     if(this.otherPlayerDragging) return
-    //flip
     let stackSizePlusOne = this.giveNextStackNumber();
     let newStackNumber = this.cardNumber;
 
     this.getCardsInStack().forEach( card => {
-      console.log('getting in the actual flip for cards', newStackNumber,card.cardNumber, card.stackNumber)
       if(card.startFlipClickedDown) {
         card.revealed ? card.card.setFrame(cardBackFrame) : card.card.setFrame(card.cardNumber)
         card.revealed = !card.revealed
