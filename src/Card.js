@@ -291,21 +291,33 @@ export default class Card extends Phaser.GameObjects.Container {
 
   startFlip() {
     if(this.otherPlayerDragging) return
-    this.setDepth(activeDepth)
+    this.getCardsInStack().forEach( card => {
+      console.log('getting in the preflip for cards', card.cardNumber, card.startFlipClickedDown)
+      card.setDepth(activeDepth + card.stackOrder)
     //mark that a click down (without drag) begins in the reveal zone
-    this.startFlipClickedDown = true
+      card.startFlipClickedDown = true
+    })
   }
 
   flip() {
     if(this.otherPlayerDragging) return
     //flip
-    if(this.startFlipClickedDown) {
-      this.revealed ? this.card.setFrame(cardBackFrame) : this.card.setFrame(this.cardNumber)
-      this.revealed = !this.revealed
-    }
-    this.startFlipClickedDown = false
-    this.setDepth(activeDepth)
-    this.socket.emit('sendCard', { card:this, room: this.gameState.room });
+    let stackSizePlusOne = this.giveNextStackNumber();
+    let newStackNumber = this.cardNumber;
+
+    this.getCardsInStack().forEach( card => {
+      console.log('getting in the actual flip for cards', newStackNumber,card.cardNumber, card.stackNumber)
+      if(card.startFlipClickedDown) {
+        card.revealed ? card.card.setFrame(cardBackFrame) : card.card.setFrame(card.cardNumber)
+        card.revealed = !card.revealed
+      }
+      card.startFlipClickedDown = false
+      card.stackOrder = stackSizePlusOne - card.stackOrder;
+      card.stackNumber = newStackNumber;
+      card.setDepth(cardDepth + card.stackOrder)
+      this.socket.emit('sendCard', { card, room: this.gameState.room });
+    })
+    
   }
 
   setRevealed(_revealed) {
