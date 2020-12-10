@@ -39,7 +39,7 @@ export default class Card extends Phaser.GameObjects.Container {
 
     //event listeners
       this.dragHistory = []
-      this.on('dragstart', this.dragStart)
+      this.on('dragstart', () => this.dragStart(true))
       this.on('drag', (ptr,dragX,dragY)=>this.drag(ptr, dragX, dragY));
       this.on('dragend', this.dragEnd);
       this.on('pointerover', (ptr,localX,localY)=>this.hover(ptr,localX,localY))
@@ -111,9 +111,9 @@ export default class Card extends Phaser.GameObjects.Container {
     return this.scene.physics.closest(this, roomCards)
   }
 
-  dragStart() {
-
+  dragStart(unhoverOldStack = false) {
     if(!this.otherPlayerDragging) this.playerPickedUp = true
+    if (unhoverOldStack) this.unhover(null, this.cardNumber);
   }
 
   drag (ptr, dragX, dragY, dragStack = false) {
@@ -267,14 +267,16 @@ export default class Card extends Phaser.GameObjects.Container {
     })
   }
 
-  unhover (ptr) {
+  unhover (ptr, cardNumberToExclude = undefined) {
     if(!this.spinning) {
       this.getCardsInStack().forEach( card => {
-        card.flipButton.setVisible(false)
-        card.rotateButton.setVisible(false)
-        card.shuffleButton.setVisible(false)
-        card.stackCounter.setPosition(hoverButtonRadius - cardDimensions.width/2, hoverButtonRadius - cardDimensions.height/2)
-        card.card.setPosition(0,0)
+        if (card.cardNumber !== cardNumberToExclude) {
+          card.flipButton.setVisible(false)
+          card.rotateButton.setVisible(false)
+          card.shuffleButton.setVisible(false)
+          card.stackCounter.setPosition(hoverButtonRadius - cardDimensions.width/2, hoverButtonRadius - cardDimensions.height/2)
+          card.card.setPosition(0,0)
+        }
       })
     }
   }
