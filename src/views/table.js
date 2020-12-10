@@ -60,6 +60,7 @@ async function renderTable(tableNumber,playerNumber) {
             <div id='cardCollect'>Collect Cards</div>
         </div>
     </div>
+
     `
     playerIndicator.innerHTML = `
     <p>You are player #${playerNumber}</p>

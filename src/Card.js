@@ -1,5 +1,5 @@
 import Phaser from 'phaser'
-import { boardDrag, cardDimensions, hoverButtonRadius, cardBackFrame, cardDepth, activeDepth, hoverOffset } from './Constants'
+import { boardDrag, cardDimensions, hoverButtonRadius, cardBackFrame, cardDepth, activeDepth, hoverOffset, canvasHeight, inHandAdjustment, canvasWidth, inHandRange } from './Constants'
 export default class Card extends Phaser.GameObjects.Container {
   constructor(scene, x, y, physicsGroup, cardNumber, orientation = Math.PI/2) {
     super(scene, x, y)
@@ -16,6 +16,7 @@ export default class Card extends Phaser.GameObjects.Container {
 
     //socket and room info for emit events
     this.gameState = scene.game.gameState;
+    this.playerNumber = scene.game.playerNumber;
     this.socket = scene.game.socket;
 
     //set container size and add to scene, make interactive
@@ -53,7 +54,7 @@ export default class Card extends Phaser.GameObjects.Container {
         button.on('pointerover', (ptr,localX,localY)=>this.hover(ptr,localX,localY));
         button.on('pointerout', (ptr)=>this.unhover(ptr));
       })
-      
+
       this.rotateButton.on('drag', (ptr,dragX,dragY)=>this.spin(ptr, dragX, dragY));
       this.rotateButton.on('dragend', (ptr)=>this.dragEnd(ptr));
       this.flipButton.on('pointerdown',()=>this.startFlip())
@@ -65,8 +66,10 @@ export default class Card extends Phaser.GameObjects.Container {
     this.revealed = false;
     this.spinning = false;
     this.otherPlayerDragging = false;
+    this.addToHand = false;
+    this.inHand = false;
     this.playerPickedUp = false;
-    //this.stackNumber should always be the number of the card at the bottom of a given stack. 
+    //this.stackNumber should always be the number of the card at the bottom of a given stack.
     //I.e., card 5 is stacked on card 18, and card 19 is stacked on card 5, all 3 cards will have stackNumber of 18.
     this.stackNumber = cardNumber
     //stackOrder is the number of cards from the bottom.
@@ -83,6 +86,8 @@ export default class Card extends Phaser.GameObjects.Container {
         revealed: this.revealed,
         velocity: this.body.velocity,
         otherPlayerDragging: this.otherPlayerDragging,
+        inHand: this.inHand,
+        player: this.playerNumber,
         stackNumber: this.stackNumber,
         stackOrder: this.stackOrder,
         depth: this.depth
@@ -96,7 +101,7 @@ export default class Card extends Phaser.GameObjects.Container {
     .filter( card => card.stackNumber === stackNumber)
     .sort( (a,b) => a.stackOrder - b.stackOrder)
   }
-  
+
   giveNextStackNumber(stackNumber = this.stackNumber) {
     return this.getCardsInStack(stackNumber).length + 1
   }
@@ -107,7 +112,7 @@ export default class Card extends Phaser.GameObjects.Container {
   }
 
   dragStart() {
-    
+
     if(!this.otherPlayerDragging) this.playerPickedUp = true
   }
 
@@ -116,27 +121,75 @@ export default class Card extends Phaser.GameObjects.Container {
       this.stackNumber = this.cardNumber;
       this.stackOrder = 1;
     }
-    
+
     if(!this.playerPickedUp) return
     this.setDepth(activeDepth)
-    const { dragHistory } = this
-    dragHistory.push([dragX, dragY]);
-    let newXv = 0;
-    let newYv = 0;
-    if(dragHistory.length > 2) {
-      const [lastX, lastY] = dragHistory[dragHistory.length - 1];
-      const [penX, penY] = dragHistory[dragHistory.length - 2];
-      const dx = (lastX - penX) * 50;
-      const dy = (lastY - penY) * 50;
-      newXv = dx;
-      newYv = dy;
+
+    //if a card is in your hand
+    if (this.inHand) {
+      //lock it to the bottom
+      switch(this.playerNumber) {
+        case 2:
+          this.y = dragY < 0 ? 0 : dragY > 800 ? 800 : dragY;
+          this.x = canvasWidth + inHandAdjustment;
+          break;
+        case (3):
+          this.x = dragX < 0 ? 0 : dragX > 800 ? 800 : dragX;
+          this.y = 0 - inHandAdjustment;
+          break;
+        case 4:
+          this.y = dragY < 0 ? 0 : dragY > 800 ? 800 : dragY;
+          this.x = 0 - inHandAdjustment;
+          break;
+        default:
+          this.x = dragX < 0 ? 0 : dragX > 800 ? 800 : dragX;
+          this.y = canvasHeight + inHandAdjustment;
+          break;
+      }
+      //unless it is being removed from the hand
+      if (!this.addToHand) {
+        this.inHand = false;
+        this.body.setCollideWorldBounds(true);
+        this.gameState.cards[this.cardNumber] = this;
+        delete this.gameState.hands[`player${this.playerNumber}`][this.cardNumber];
+
+        this.socket.emit('removeCardFromHand', {card: this, room: this.gameState.room, player: `player${this.playerNumber}`});
+      }
+    } else {
+      const { dragHistory } = this
+      dragHistory.push([dragX, dragY]);
+      let newXv = 0;
+      let newYv = 0;
+      if(dragHistory.length > 2) {
+        const [lastX, lastY] = dragHistory[dragHistory.length - 1];
+        const [penX, penY] = dragHistory[dragHistory.length - 2];
+        const dx = (lastX - penX) * 50;
+        const dy = (lastY - penY) * 50;
+        newXv = dx;
+        newYv = dy;
+      }
+      this.getCardsInStack().forEach( card => {
+        card.body.setVelocity(newXv, newYv)
+        card.x = dragX;
+        card.y = dragY;
+        this.socket.emit('sendCard', { card, room: this.gameState.room, otherPlayerDragging: true });
+      });
     }
-    this.getCardsInStack().forEach( card => {
-      card.body.setVelocity(newXv, newYv)
-      card.x = dragX;
-      card.y = dragY;
-      this.socket.emit('sendCard', { card, room: this.gameState.room, otherPlayerDragging: true });
-    });
+
+    switch(this.playerNumber) {
+      case 2:
+        this.addToHand = dragX > canvasWidth - inHandRange;
+        break;
+      case (3):
+        this.addToHand = dragY < inHandRange;
+        break;
+      case 4:
+        this.addToHand = dragX < inHandRange;
+        break;
+      default:
+        this.addToHand = dragY > canvasHeight - inHandRange;
+        break;
+    }
 
     this.otherPlayerDragging = false
   }
@@ -158,7 +211,7 @@ export default class Card extends Phaser.GameObjects.Container {
       })
     }
     else {
-      if(!this.spinning && this.dragHistory.length > 1) {
+      if(!this.spinning && this.dragHistory.length > 1 && !this.addToHand && !this.inHand) {
         const { dragHistory } = this
         const [lastX, lastY] = dragHistory[dragHistory.length - 1];
         const [penX, penY] = dragHistory[dragHistory.length - 2];
@@ -168,6 +221,30 @@ export default class Card extends Phaser.GameObjects.Container {
           card.body.setVelocity(dx, dy);
         })
       }
+    }
+    //if addToHand flag is active, and the card is not a mutliple stack
+    if (this.addToHand && !this.inHand && this.getCardsInStack().length === 1) {
+      this.gameState.hands[`player${this.playerNumber}`][this.cardNumber] = this;
+      delete this.gameState.cards[this.cardNumber];
+      this.inHand = true;
+      this.setRotation((4 * (Math.PI/2)) - ((this.playerNumber - 1) * (Math.PI/2)));
+      this.setRevealed(true);
+      this.body.setCollideWorldBounds(false);
+      switch(this.playerNumber) {
+        case 2:
+          this.x = canvasWidth + inHandAdjustment;
+          break;
+        case (3):
+          this.y = 0 - inHandAdjustment;
+          break;
+        case 4:
+          this.x = 0 - inHandAdjustment;
+          break;
+        default:
+          this.y = canvasHeight + inHandAdjustment;
+          break;
+      }
+      this.socket.emit('addCardToHand', {card: this, room: this.gameState.room, player: `player${this.playerNumber}`});
     }
 
     this.getCardsInStack().forEach( card => {
