@@ -26,7 +26,7 @@ async function attemptToRenderTable(tableNumber) {
 async function renderTable(tableNumber,playerNumber,agoraKeys) {
     const table = document.getElementById('table');
     const buttonControls = document.getElementById('buttonControls');
-
+    const root = document.getElementById('root')
     //this just updates db with info when a player Xs out
     window.addEventListener("beforeunload", async function(e) {
         await axios.put('/api/player', {gameTableId: null, playerNumber: null})
@@ -42,9 +42,8 @@ async function renderTable(tableNumber,playerNumber,agoraKeys) {
         console.log('Incoming message:', data);
     });
     const canvas = 'canvas'
-
-    table.innerHTML = `<div>You are in room ${tableNumber}</div>
-    <div id='me'></div>
+    root.innerHTML = `<div>You are in room ${tableNumber}</div>`
+    table.innerHTML = `
     <div id="remote-container"></div>
     <div id='game'>
         <canvas id= '${canvas}'></canvas>
@@ -61,13 +60,14 @@ async function renderTable(tableNumber,playerNumber,agoraKeys) {
             <div id='cardCollect'>Collect Cards</div>
         </div>
     </div>
+    <div id='me'></div>
     `
     playerIndicator.innerHTML = `
     <p>You are player #${playerNumber}</p>
     `
 
     const game = new DeckrTable(socket, room, playerNumber)
-    startVideo(agoraKeys)
+    startVideo(agoraKeys,playerNumber)
 }
 
 module.exports = {attemptToRenderTable, renderTable}

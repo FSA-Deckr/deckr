@@ -4,7 +4,7 @@ const {RtcTokenBuilder, RtcRole} = require('agora-access-token');
 
 
 
-const startVideo = function(agoraKeys){
+const startVideo = function(agoraKeys,playerNumber){
 
     const appId = agoraKeys.appId
     const appCertificate = agoraKeys.appCertificate
@@ -34,6 +34,10 @@ const startVideo = function(agoraKeys){
         let streamDiv = document.createElement("div");
     // Assigns the elementId to the div.
         streamDiv.id = elementId;
+        
+    // Assigns the className to the div.
+
+        streamDiv.className = `player${playerNumber}`
     // Takes care of the lateral inversion
         streamDiv.style.transform = "rotateY(180deg)";
     // Adds the div to the container.
