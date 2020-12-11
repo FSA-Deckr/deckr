@@ -21,7 +21,7 @@ export class DeckrTable extends Phaser.Game {
     super(cfg)
 
     //the deck is just an array of numbers representing the cards 0-51
-    let cardsPhysicsGroup, chipsPhysicsGroup
+    let chipsPhysicsGroup
     this.socket = socket;
     this.playerNumber = _playerNumber
     this.pointers = {}
@@ -85,7 +85,7 @@ export class DeckrTable extends Phaser.Game {
 
       //make Phaser physics groups
       chipsPhysicsGroup = this.physics.add.group();
-      cardsPhysicsGroup = this.physics.add.group()
+      this.cardsPhysicsGroup = this.physics.add.group()
 
       //detect collision between chips, with a callback that induces spin
       this.physics.add.collider(chipsPhysicsGroup, chipsPhysicsGroup, function(chipA, chipB) {
@@ -180,7 +180,7 @@ export class DeckrTable extends Phaser.Game {
             break;
         }
         //create the Phaser card
-        const card = new Card(this, xPosition, yPosition, cardsPhysicsGroup, cardNumber, orientation);
+        const card = new Card(this, xPosition, yPosition, this.cardsPhysicsGroup, cardNumber, orientation);
         //put in cards obj and emit card and deck
         gameState.cards[card.cardNumber] = card;
         socket.emit("sendGameState", gameState);
@@ -210,6 +210,11 @@ export class DeckrTable extends Phaser.Game {
           gameState.cards[cardNum].destroy()
           delete gameState.cards[cardNum]
         }
+        for(const player in gameState.hands) {
+          gameState.hands[player] = {}
+        }
+        //sometimes cards in hand aren't phaser object but rather socket representations of them, so this makes sure all cards in the phaser world are killed
+        this.cardsPhysicsGroup.clear(true,true)
         gameState.deck = makeDeck(52)
         shuffleDeck(gameState.deck)
         socket.emit("sendCollectCards", { deck: gameState.deck, room: gameState.room});
@@ -282,7 +287,7 @@ export class DeckrTable extends Phaser.Game {
           if(!gameState.cards[receivedCardNum]) {
             const receivedCard = cards[receivedCardNum];
             dealButton.innerText = `Deal A Card (${deck.length})`
-            const card = new Card(this, receivedCard.x, receivedCard.y, cardsPhysicsGroup, receivedCardNum)
+            const card = new Card(this, receivedCard.x, receivedCard.y, this.cardsPhysicsGroup, receivedCardNum)
             gameState.cards[card.cardNumber] = card;
           }
           //put all cards where they belong and with their rotations and reveal status
@@ -303,7 +308,7 @@ export class DeckrTable extends Phaser.Game {
           //if the card doesn't already exist in your local gameState
           if (!gameState.hands[`player${playerNumber}`][handCardKey]){
             //create/render it
-            const newHandCard = new Card(this, handToModify[handCardKey].x, handToModify[handCardKey].y, cardsPhysicsGroup, handCardKey);
+            const newHandCard = new Card(this, handToModify[handCardKey].x, handToModify[handCardKey].y, this.cardsPhysicsGroup, handCardKey);
             newHandCard.setRevealed(handToModify[handCardKey].revealed);
             newHandCard.inHand = true;
             newHandCard.setRotation((4 * (Math.PI/2)) - ((playerNumber - 1) * (Math.PI/2)));
@@ -346,7 +351,7 @@ export class DeckrTable extends Phaser.Game {
       })
 
       socket.on('removeCardFromHand', (cardState) => {
-        const removedCard = new Card(this, cardState.card.x, cardState.card.y, cardsPhysicsGroup, cardState.card.cardNumber);
+        const removedCard = new Card(this, cardState.card.x, cardState.card.y, this.cardsPhysicsGroup, cardState.card.cardNumber);
         gameState.cards[removedCard.cardNumber] = removedCard;
         delete gameState.hands[cardState.player][cardState.card.cardNumber];
       })
@@ -417,6 +422,10 @@ export class DeckrTable extends Phaser.Game {
           gameState.cards[cardNum].destroy()
           delete gameState.cards[cardNum]
         }
+        for(const player in gameState.hands) {
+          gameState.hands[player] = {}
+        }
+        this.cardsPhysicsGroup.clear(true,true)
         gameState.deck = receivedDeck
         //update the card button count HTML
         dealButton.innerText = `Deal A Card (${gameState.deck.length})`
