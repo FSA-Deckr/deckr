@@ -1,6 +1,6 @@
 const AgoraRTC = require('agora-rtc-sdk')
 
-// const {RtcTokenBuilder, RtcRole} = require('agora-access-token');
+const {RtcTokenBuilder, RtcRole} = require('agora-access-token');
 
 
 
@@ -34,7 +34,7 @@ const startVideo = function(agoraKeys,playerNumber){
         let streamDiv = document.createElement("div");
     // Assigns the elementId to the div.
         streamDiv.id = elementId;
-        
+
     // Assigns the className to the div.
 
         streamDiv.className = `player${playerNumber}`
