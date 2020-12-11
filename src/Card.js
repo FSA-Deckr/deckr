@@ -255,7 +255,6 @@ export default class Card extends Phaser.GameObjects.Container {
     }
 
     this.getCardsInStack().forEach( (card,ix) => {
-      console.log('here')
       card.dragHistory = [];
       card.setDepth(cardDepth + card.stackOrder)
       card.spinning = false;
