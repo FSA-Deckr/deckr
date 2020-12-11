@@ -22,6 +22,14 @@ const setSocketServer = (server) => {
             if(cardState.isDragging) this.emit('receiveCard', {...cardState.card, otherPlayerDragging: !cardState.otherPlayerDragging});
         })
 
+        socket.on('addCardToHand', function(cardState) {
+            this.to(cardState.room).emit('addCardToHand', {card: cardState.card, player: cardState.player});
+        })
+
+        socket.on('removeCardFromHand', function(cardState) {
+            this.to(cardState.room).emit('removeCardFromHand', {card: cardState.card, player: cardState.player});
+        })
+
         socket.on('sendChip', function(chipState) {
             this.to(chipState.room).emit('receiveChip', {...chipState.chip, otherPlayerDragging: chipState.otherPlayerDragging});
             if(chipState.isDragging) this.emit('receiveChip', {...chipState.chip, otherPlayerDragging: !chipState.otherPlayerDragging});

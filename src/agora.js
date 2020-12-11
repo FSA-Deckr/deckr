@@ -1,6 +1,6 @@
 const AgoraRTC = require('agora-rtc-sdk')
 
-const {RtcTokenBuilder, RtcRole} = require('agora-access-token');
+// const {RtcTokenBuilder, RtcRole} = require('agora-access-token');
 
 
 
@@ -20,7 +20,7 @@ const startVideo = function(agoraKeys,playerNumber){
 
     // Build token with uid
     const token = RtcTokenBuilder.buildTokenWithUid(appId, appCertificate, channelName, uid, role, privilegeExpiredTs);
-    
+
     let handleError = function(err){
         console.log("Error: ", err);
     };

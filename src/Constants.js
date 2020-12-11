@@ -9,6 +9,8 @@ export const cardDimensions = {width:125, height:175}
 export const hoverButtonRadius = 20
 export const cardBackFrame = 52
 export const hoverOffset = 10
+export const inHandAdjustment = 30
+export const inHandRange = 100
 
 //display z-index/depth variables
 export const chipDepth = 1

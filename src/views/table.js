@@ -61,6 +61,7 @@ async function renderTable(tableNumber,playerNumber,agoraKeys) {
         </div>
     </div>
     <div id='me'></div>
+
     `
     playerIndicator.innerHTML = `
     <p>You are player #${playerNumber}</p>
