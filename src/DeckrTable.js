@@ -257,6 +257,7 @@ export class DeckrTable extends Phaser.Game {
           gameState.cards[receivedCard.cardNumber].otherPlayerDragging = receivedCard.otherPlayerDragging
           gameState.cards[receivedCard.cardNumber].stackNumber = receivedCard.stackNumber
           gameState.cards[receivedCard.cardNumber].stackOrder = receivedCard.stackOrder
+          gameState.cards[receivedCard.cardNumber].showCounter(receivedCard.stackOrder - 1)
           gameState.cards[receivedCard.cardNumber].setDepth(receivedCard.depth)
         }
       })
@@ -291,6 +292,7 @@ export class DeckrTable extends Phaser.Game {
           gameState.cards[receivedCardNum].body.setVelocity(cards[receivedCardNum].velocity.x,cards[receivedCardNum].velocity.y)
           gameState.cards[receivedCardNum].stackNumber = cards[receivedCardNum].stackNumber
           gameState.cards[receivedCardNum].stackOrder = cards[receivedCardNum].stackOrder
+          gameState.cards[receivedCardNum].showCounter(cards[receivedCardNum].stackOrder - 1)
           gameState.cards[receivedCardNum].setDepth(cards[receivedCardNum].depth)
         }
 
