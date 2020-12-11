@@ -39,23 +39,23 @@ export default class Card extends Phaser.GameObjects.Container {
 
     //event listeners
       this.dragHistory = []
-      this.on('dragstart', () => this.dragStart(true))
-      this.on('drag', (ptr,dragX,dragY)=>this.drag(ptr, dragX, dragY));
+      this.on('dragstart', ()=>this.dragStart(true))
+      this.on('drag', (ptr)=>this.drag(ptr));
       this.on('dragend', this.dragEnd);
-      this.on('pointerover', (ptr,localX,localY)=>this.hover(ptr,localX,localY))
-      this.on('pointerout', (ptr)=>this.unhover(ptr))
+      this.on('pointerover', this.hover)
+      this.on('pointerout', this.unhover)
 
       this.stackCounter.on('dragstart', ()=> this.dragStart())
-      this.stackCounter.on('drag', (ptr,dragX,dragY)=> this.drag(ptr, ptr.worldX + 32.5, ptr.worldY + 77.5, true));
+      this.stackCounter.on('drag', (ptr)=>this.drag(ptr, true));
       this.stackCounter.on('dragend', () => this.dragEnd());
 
       const buttonArray = [this.rotateButton, this.flipButton, this.shuffleButton, this.stackCounter]
       buttonArray.forEach( button => {
-        button.on('pointerover', (ptr,localX,localY)=>this.hover(ptr,localX,localY));
-        button.on('pointerout', (ptr)=>this.unhover(ptr));
+        button.on('pointerover', ()=>this.hover());
+        button.on('pointerout', ()=>this.unhover());
       })
 
-      this.rotateButton.on('drag', (ptr,dragX,dragY)=>this.spin(ptr, dragX, dragY));
+      this.rotateButton.on('drag', (ptr)=>this.spin(ptr));
       this.rotateButton.on('dragend', (ptr)=>this.dragEnd(ptr));
       this.flipButton.on('pointerdown',()=>this.startFlip())
       this.flipButton.on('pointerup',()=>this.flip())
@@ -105,7 +105,7 @@ export default class Card extends Phaser.GameObjects.Container {
 
     //sort function just sorts by stack order
     return cardsInStack.sort( (a,b) => a.stackOrder - b.stackOrder)
-    
+
   }
 
   giveNextStackNumber(stackNumber = this.stackNumber) {
@@ -122,7 +122,7 @@ export default class Card extends Phaser.GameObjects.Container {
     if (unhoverOldStack) this.unhover(null, this.cardNumber);
   }
 
-  drag (ptr, dragX, dragY, dragStack = false) {
+  drag ({ worldX: dragX, worldY: dragY }, dragStack = false) {
     if (!dragStack) {
       this.stackNumber = this.cardNumber;
       this.stackOrder = 1;
@@ -162,22 +162,20 @@ export default class Card extends Phaser.GameObjects.Container {
         this.socket.emit('removeCardFromHand', {card: this, room: this.gameState.room, player: `player${this.playerNumber}`});
       }
     } else {
+      let dx = 0
+      let dy = 0
       const { dragHistory } = this
       dragHistory.push([dragX, dragY]);
-      let newXv = 0;
-      let newYv = 0;
       if(dragHistory.length > 2) {
-        const [lastX, lastY] = dragHistory[dragHistory.length - 1];
-        const [penX, penY] = dragHistory[dragHistory.length - 2];
-        const dx = (lastX - penX) * 50;
-        const dy = (lastY - penY) * 50;
-        newXv = dx;
-        newYv = dy;
+        dragHistory.shift()
+        const [lastX, lastY] = dragHistory[1];
+        const [penX, penY] = dragHistory[0];
+        dx = (lastX - penX);
+        dy = (lastY - penY);
       }
       this.getCardsInStack().forEach( card => {
-        card.body.setVelocity(newXv, newYv)
-        card.x = dragX;
-        card.y = dragY;
+        card.x += dx;
+        card.y += dy;
         this.socket.emit('sendCard', { card, room: this.gameState.room, otherPlayerDragging: true });
       });
     }
@@ -262,7 +260,7 @@ export default class Card extends Phaser.GameObjects.Container {
     })
   }
 
-  hover (ptr,localX,localY) {
+  hover () {
     if(this.otherPlayerDragging) return
     this.getCardsInStack().forEach( card => {
       card.flipButton.setVisible(true)
@@ -320,7 +318,7 @@ export default class Card extends Phaser.GameObjects.Container {
       card.setDepth(cardDepth + card.stackOrder)
       this.socket.emit('sendCard', { card, room: this.gameState.room });
     })
-    
+
   }
 
   setRevealed(_revealed) {
