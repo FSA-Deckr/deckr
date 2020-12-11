@@ -2,10 +2,12 @@ const AgoraRTC = require('agora-rtc-sdk')
 
 // const {RtcTokenBuilder, RtcRole} = require('agora-access-token');
 
-const startVideo = function(channelNum){
 
-    const appId = keys[channelNum].appId
-    const appCertificate = keys[channelNum].appCertificate
+
+const startVideo = function(agoraKeys,playerNumber){
+
+    const appId = agoraKeys.appId
+    const appCertificate = agoraKeys.appCertificate
     const channelName = 'deckr';
     const uid = 0;
     const role = RtcRole.PUBLISHER;
@@ -32,6 +34,10 @@ const startVideo = function(channelNum){
         let streamDiv = document.createElement("div");
     // Assigns the elementId to the div.
         streamDiv.id = elementId;
+        
+    // Assigns the className to the div.
+
+        streamDiv.className = `player${playerNumber}`
     // Takes care of the lateral inversion
         streamDiv.style.transform = "rotateY(180deg)";
     // Adds the div to the container.

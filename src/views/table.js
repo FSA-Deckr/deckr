@@ -9,6 +9,7 @@ const { initialChips } = require('../Constants');
 async function attemptToRenderTable(tableNumber) {
     let gameTable = await axios.get(`/api/game/${tableNumber}`)
     let playerNumber = gameTable.data.playerNumber
+    let agoraKeys = gameTable.data.gameTable
     if (gameTable.status === 206) {
         window.location.pathname = '/home'
         console.log('Sorry, this game is full')
@@ -18,14 +19,14 @@ async function attemptToRenderTable(tableNumber) {
         console.log('Sorry, this game was not found')
     }
     else {
-        await renderTable(tableNumber, playerNumber);
+        await renderTable(tableNumber, playerNumber,agoraKeys);
     }
 }
 
-async function renderTable(tableNumber,playerNumber) {
-    const root = document.getElementById('root');
+async function renderTable(tableNumber,playerNumber,agoraKeys) {
+    const table = document.getElementById('table');
     const buttonControls = document.getElementById('buttonControls');
-
+    const root = document.getElementById('root')
     //this just updates db with info when a player Xs out
     window.addEventListener("beforeunload", async function(e) {
         await axios.put('/api/player', {gameTableId: null, playerNumber: null})
@@ -41,9 +42,8 @@ async function renderTable(tableNumber,playerNumber) {
         console.log('Incoming message:', data);
     });
     const canvas = 'canvas'
-
-    root.innerHTML = `<div>You are in room ${tableNumber}</div>
-    <div id='me'></div>
+    root.innerHTML = `<div>You are in room ${tableNumber}</div>`
+    table.innerHTML = `
     <div id="remote-container"></div>
     <div id='game'>
         <canvas id= '${canvas}'></canvas>
@@ -60,6 +60,7 @@ async function renderTable(tableNumber,playerNumber) {
             <div id='cardCollect'>Collect Cards</div>
         </div>
     </div>
+    <div id='me'></div>
 
     `
     playerIndicator.innerHTML = `
@@ -67,7 +68,7 @@ async function renderTable(tableNumber,playerNumber) {
     `
 
     const game = new DeckrTable(socket, room, playerNumber)
-    // startVideo(channelNum)
+    startVideo(agoraKeys,playerNumber)
 }
 
 module.exports = {attemptToRenderTable, renderTable}
