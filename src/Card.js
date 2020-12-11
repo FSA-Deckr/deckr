@@ -96,10 +96,16 @@ export default class Card extends Phaser.GameObjects.Container {
   }
 
   getCardsInStack(stackNumber = this.stackNumber) {
-    return Object.keys(this.gameState.cards)
-    .map( key => this.gameState.cards[key])
-    .filter( card => card.stackNumber === stackNumber)
-    .sort( (a,b) => a.stackOrder - b.stackOrder)
+
+    let cardsInStack = []
+    for (let cardNumber in this.gameState.cards) {
+      let card = this.gameState.cards[cardNumber]
+      if (card.stackNumber === stackNumber) cardsInStack.push(card)
+    }
+
+    //sort function just sorts by stack order
+    return cardsInStack.sort( (a,b) => a.stackOrder - b.stackOrder)
+    
   }
 
   giveNextStackNumber(stackNumber = this.stackNumber) {
