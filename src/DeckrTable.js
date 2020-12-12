@@ -433,8 +433,19 @@ export class DeckrTable extends Phaser.Game {
 
       //receive new player stream ID and update DIV
       socket.on('playerJoiningAs', ({streamId, newPlayerNumber})=>{
-        newVideoDiv = document.getElementById(streamId)
-        console.log(newVideoDiv)
+        let streamDiv
+        const remoteContainer = document.getElementById('game')
+        if(document.getElementById(streamId)) {
+            streamDiv = document.getElementById(streamId)
+        } else {
+            streamDiv = document.createElement("div");
+            streamDiv.id = streamId;
+            remoteContainer.appendChild(streamDiv);
+        }
+        const divPositions = ['rightDiv','topDiv','leftDiv']
+        const divIx = -1+(+newPlayerNumber-playerNumber+4)%4
+        streamDiv.className = `${divPositions[divIx]} videoStream playerColor${newPlayerNumber}`
+        console.log(streamDiv.className)
       })
     }
 

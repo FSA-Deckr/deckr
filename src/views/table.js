@@ -44,8 +44,8 @@ async function renderTable(tableNumber,playerNumber,agoraKeys) {
     const canvas = 'canvas'
     root.innerHTML = `<div>You are in room ${tableNumber}</div>`
     table.innerHTML = `
-    <div id="remote-container"></div>
     <div id='game'>
+        <div id="topPlaceHolder"></div>
         <canvas id= '${canvas}'></canvas>
         <div id='bank'>
             <div id='dealButton'>Deal A Card</div>
@@ -59,8 +59,8 @@ async function renderTable(tableNumber,playerNumber,agoraKeys) {
             <div id='chipCollect'>Collect Chips</div>
             <div id='cardCollect'>Collect Cards</div>
         </div>
+        <div id='myVideo' class='videoStream playerColor${playerNumber}'></div>
     </div>
-    <div id='me'></div>
 
     `
     playerIndicator.innerHTML = `

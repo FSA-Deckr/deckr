@@ -25,23 +25,23 @@ const startVideo = function(agoraKeys,playerNumber,socket, room){
     };
     // Query the container to which the remote stream belong.
 
-    let remoteContainer = document.getElementById('remote-container');
+    let remoteContainer = document.getElementById('game');
 
     // Add video streams to the container.
     function addVideoStream(elementId){
-    // Creates a new div for every stream
-        let streamDiv = document.createElement("div");
-    // Assigns the elementId to the div.
-        streamDiv.id = elementId;
-
+        // Creates a new div for every stream
+        let streamDiv
+        if(document.getElementById(elementId)) {
+            streamDiv = document.getElementById(elementId)
+        } else {
+            streamDiv = document.createElement("div");
+            streamDiv.id = elementId;
+            remoteContainer.appendChild(streamDiv);
+        }
     // Assigns the className to the div.
 
-        streamDiv.className = `player${playerNumber}`
-        socket.emit('joiningAs',{streamId: elementId, playerNumber, room})
     // Takes care of the lateral inversion
-        streamDiv.style.transform = "rotateY(180deg)";
-    // Adds the div to the container.
-        remoteContainer.appendChild(streamDiv);
+    streamDiv.style.transform = "rotateY(180deg)";
     };
 
     // Remove the video stream from the container.
@@ -64,11 +64,12 @@ const startVideo = function(agoraKeys,playerNumber,socket, room){
             audio: true,
             video: true,
         });
-        console.log(uid)
+        localStream.setVideoProfile('120p_1')
+        socket.emit('joiningAs',{streamId: uid, playerNumber, room})
     // Initialize the local stream
         localStream.init(()=>{
             // Play the local stream
-            localStream.play('me');
+            localStream.play('myVideo');
             // Publish the local stream
             client.publish(localStream, handleError);
         } , handleError);

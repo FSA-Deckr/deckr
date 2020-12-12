@@ -75,30 +75,12 @@ input{
 input:focus {
     outline-width: 0;
 }
-
-#me{
-    position: relative;
-    float:top;
-    width: 25%;
-    margin: 0 auto;
-    display: block;
-}
-#me video{
-    position: relative !important;
-}
-#remote-container{
-    display: flex;
-    float:top;
-}
-#remote-container video{
-    width: 25%;
-    position: relative !important;
-}
 #game {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
+    position: relative;
 }
 #bank{
     width:800px;
@@ -198,3 +180,50 @@ input:focus {
     background-color: white;
     cursor: pointer;
 }
+
+.rightDiv {
+    position: absolute;
+    right: 0px;
+    top: 400px;
+}
+.topDiv {
+    position: absolute;
+    margin: auto;
+    top: 0px;
+}
+.leftDiv {
+    position: absolute;
+    left: 0px;
+    top: 400px;
+}
+.videoStream {
+    width: 240px;
+    height: 180px;
+    border-radius: 5px;
+    border: solid 2px;
+}
+.playerColor1 {
+    border-color: #ff1100;
+}
+.playerColor2 {
+    border-color: #0400ff;
+}
+.playerColor3 {
+    border-color: #ff9d00;
+}
+.playerColor4 {
+    border-color: #9500ff;
+}
+#myVideo{
+    position: relative;
+    float:top;
+    margin: 0 auto;
+    display: block;
+}
+#topPlaceHolder {
+    width: 0px;
+    height: 180px;
+}
+/* #me video{
+    position: relative !important;
+} */
