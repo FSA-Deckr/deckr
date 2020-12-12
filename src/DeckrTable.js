@@ -1,7 +1,10 @@
 import Phaser from 'phaser'
 import Chip from './Chip'
 import Card from './Card'
-import { canvasWidth, canvasHeight, cardDimensions, chipRadius, activeDepth, initialChips, chipNames, newItemRange, chipOffset, newItemRandom, cardOffset } from './Constants'
+import { canvasWidth, canvasHeight, cardDimensions, chipRadius, 
+        activeDepth, initialChips, chipNames, newItemRange, 
+        chipOffset, newItemRandom, cardOffset } from './Constants'
+import { shuffleDeck } from './utility'
 
 export class DeckrTable extends Phaser.Game {
   constructor(socket, room, _playerNumber){
@@ -430,6 +433,24 @@ export class DeckrTable extends Phaser.Game {
         //update the card button count HTML
         dealButton.innerText = `Deal A Card (${gameState.deck.length})`
       })
+
+      //receive new player stream ID and update DIV
+      socket.on('playerJoiningAs', ({streamId, newPlayerNumber, relay})=>{
+        let streamDiv
+        const remoteContainer = document.getElementById('game')
+        if(document.getElementById(streamId)) {
+            streamDiv = document.getElementById(streamId)
+        } else {
+            streamDiv = document.createElement("div");
+            streamDiv.id = streamId;
+            remoteContainer.appendChild(streamDiv);
+        }
+        const divPositions = ['rightDiv','topDiv','leftDiv']
+        const divIx = -1+(+newPlayerNumber-playerNumber+4)%4
+        streamDiv.className = `${divPositions[divIx]} videoStream playerColor${newPlayerNumber}`
+        //need to alert new player of my id
+        if(relay)socket.emit('joiningAs',{streamId: myVideo.getAttribute('localId'), playerNumber, room, relay:false})
+      })
     }
 
     //fill deck w random numbers
@@ -442,17 +463,5 @@ export class DeckrTable extends Phaser.Game {
       return _deck
     }
 
-    //fisher-yates array shuffle
-    const shuffleDeck = array => {
-      let currentIndex = array.length, temporaryValue, randomIndex;
-      while (0 !== currentIndex) {
-        randomIndex = Math.floor(Math.random() * currentIndex);
-        currentIndex -= 1;
-        temporaryValue = array[currentIndex];
-        array[currentIndex] = array[randomIndex];
-        array[randomIndex] = temporaryValue;
-      }
-      return array;
-    }
   }
 }
