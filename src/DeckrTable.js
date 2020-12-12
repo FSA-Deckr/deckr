@@ -56,6 +56,7 @@ export class DeckrTable extends Phaser.Game {
       this.load.image('board','board.jpg')
       this.load.image('deckCount', 'blankButton.png')
       this.load.image('shuffle', 'shuffleButton.png')
+      this.load.image('glow', 'glow.png')
       //probably not the cleanest way to make a shuffled deck but whatever
       gameState.deck = makeDeck(52)
       shuffleDeck(gameState.deck)
@@ -256,6 +257,7 @@ export class DeckrTable extends Phaser.Game {
           gameState.cards[receivedCard.cardNumber].otherPlayerDragging = receivedCard.otherPlayerDragging
           gameState.cards[receivedCard.cardNumber].stackNumber = receivedCard.stackNumber
           gameState.cards[receivedCard.cardNumber].stackOrder = receivedCard.stackOrder
+          gameState.cards[receivedCard.cardNumber].showCounter(receivedCard.stackOrder - 1)
           gameState.cards[receivedCard.cardNumber].setDepth(receivedCard.depth)
         }
       })
@@ -290,6 +292,7 @@ export class DeckrTable extends Phaser.Game {
           gameState.cards[receivedCardNum].body.setVelocity(cards[receivedCardNum].velocity.x,cards[receivedCardNum].velocity.y)
           gameState.cards[receivedCardNum].stackNumber = cards[receivedCardNum].stackNumber
           gameState.cards[receivedCardNum].stackOrder = cards[receivedCardNum].stackOrder
+          gameState.cards[receivedCardNum].showCounter(cards[receivedCardNum].stackOrder - 1)
           gameState.cards[receivedCardNum].setDepth(cards[receivedCardNum].depth)
         }
 

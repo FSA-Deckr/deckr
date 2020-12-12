@@ -1,18 +1,19 @@
 import Phaser from 'phaser'
-import { boardDrag, cardDimensions, hoverButtonRadius, cardBackFrame, cardDepth, activeDepth, hoverOffset, canvasHeight, inHandAdjustment, canvasWidth, inHandRange } from './Constants'
+import { boardDrag, cardDimensions, hoverButtonRadius, cardBackFrame, cardDepth, activeDepth, canvasHeight, inHandAdjustment, canvasWidth, inHandRange, textOffset } from './Constants'
 export default class Card extends Phaser.GameObjects.Container {
   constructor(scene, x, y, physicsGroup, cardNumber, orientation = Math.PI/2) {
     super(scene, x, y)
     //add images to container
     this.shadow = scene.add.image(0,0,'shadow')
     this.card = scene.add.sprite(0,0,'cardSprite')
+    this.glow = scene.add.image(0,0,'glow').setVisible(false)
     this.card.setFrame(cardBackFrame)
-    this.flipButton = scene.add.image(cardDimensions.width/2 - hoverButtonRadius + hoverOffset, hoverButtonRadius - cardDimensions.height/2 - hoverOffset,'flip').setVisible(false)
-    this.rotateButton = scene.add.image(hoverButtonRadius - cardDimensions.width/2 + hoverOffset, cardDimensions.height/2 - hoverButtonRadius - hoverOffset,'rotate').setVisible(false)
-    this.shuffleButton = scene.add.image(cardDimensions.width/2 - hoverButtonRadius + hoverOffset, cardDimensions.height/2 - hoverButtonRadius - hoverOffset,'shuffle').setVisible(false)
-    this.stackCounter = scene.add.image(hoverButtonRadius - cardDimensions.width/2, hoverButtonRadius - cardDimensions.height/2,'deckCount').setVisible(true)
-    // this.count = scene.add.text(hoverButtonRadius - cardDimensions.width/2, hoverButtonRadius - cardDimensions.height/2, Number(10), { fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif', color: 'rgb(0, 0, 0)' }).setVisible(true)
-    this.add([this.shadow,this.card,this.flipButton,this.rotateButton,this.shuffleButton,this.stackCounter])
+    this.flipButton = scene.add.image(cardDimensions.width/2 - hoverButtonRadius, hoverButtonRadius - cardDimensions.height/2,'flip').setVisible(false)
+    this.rotateButton = scene.add.image(hoverButtonRadius - cardDimensions.width/2, cardDimensions.height/2 - hoverButtonRadius,'rotate').setVisible(false)
+    this.shuffleButton = scene.add.image(cardDimensions.width/2 - hoverButtonRadius, cardDimensions.height/2 - hoverButtonRadius,'shuffle').setVisible(false)
+    this.stackCounter = scene.add.image(hoverButtonRadius - cardDimensions.width/2, hoverButtonRadius - cardDimensions.height/2,'deckCount').setVisible(false)
+    this.count = scene.add.text(hoverButtonRadius - cardDimensions.width/2, hoverButtonRadius - cardDimensions.height/2, Number(0), { fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif', color: 'rgb(0, 0, 0)' }).setVisible(false).setOrigin(0.5,0.5)
+    this.add([this.glow, this.shadow,this.card,this.flipButton,this.rotateButton,this.shuffleButton,this.stackCounter, this.count])
 
     //socket and room info for emit events
     this.gameState = scene.game.gameState;
@@ -120,17 +121,19 @@ export default class Card extends Phaser.GameObjects.Container {
   dragStart(unhoverOldStack = false) {
     if(!this.otherPlayerDragging) this.playerPickedUp = true
     if (unhoverOldStack) this.unhover(null, this.cardNumber);
+    this.glow.setVisible(true)
   }
 
   drag ({ worldX: dragX, worldY: dragY }, dragStack = false) {
     if (!dragStack) {
       this.stackNumber = this.cardNumber;
       this.stackOrder = 1;
+      this.showCounter(0)
     }
 
     if(!this.playerPickedUp) return
     this.setDepth(activeDepth)
-
+    this.glow.setVisible(true)
     //if a card is in your hand
     if (this.inHand) {
       //lock it to the bottom
@@ -251,35 +254,36 @@ export default class Card extends Phaser.GameObjects.Container {
       this.socket.emit('addCardToHand', {card: this, room: this.gameState.room, player: `player${this.playerNumber}`});
     }
 
-    this.getCardsInStack().forEach( card => {
+    this.getCardsInStack().forEach( (card,ix) => {
       card.dragHistory = [];
       card.setDepth(cardDepth + card.stackOrder)
       card.spinning = false;
       this.socket.emit('sendCard' , { card, room: this.gameState.room, otherPlayerDragging: false })
       this.playerPickedUp = false;
+      card.showCounter(ix)
     })
   }
 
   hover () {
     if(this.otherPlayerDragging) return
+    this.glow.setVisible(true)
     this.getCardsInStack().forEach( card => {
       card.flipButton.setVisible(true)
       card.rotateButton.setVisible(true)
       card.shuffleButton.setVisible(true)
-      card.stackCounter.setPosition(hoverButtonRadius - cardDimensions.width/2 + hoverOffset, hoverButtonRadius - cardDimensions.height/2 - hoverOffset)
-      card.card.setPosition(hoverOffset,-hoverOffset)
+      card.stackCounter.setPosition(hoverButtonRadius - cardDimensions.width/2, hoverButtonRadius - cardDimensions.height/2)
     })
   }
 
   unhover (ptr, cardNumberToExclude = undefined) {
     if(!this.spinning) {
+      this.glow.setVisible(false)
       this.getCardsInStack().forEach( card => {
         if (card.cardNumber !== cardNumberToExclude) {
           card.flipButton.setVisible(false)
           card.rotateButton.setVisible(false)
           card.shuffleButton.setVisible(false)
           card.stackCounter.setPosition(hoverButtonRadius - cardDimensions.width/2, hoverButtonRadius - cardDimensions.height/2)
-          card.card.setPosition(0,0)
         }
       })
     }
@@ -324,5 +328,11 @@ export default class Card extends Phaser.GameObjects.Container {
   setRevealed(_revealed) {
     this.revealed = _revealed
     !this.revealed ? this.card.setFrame(cardBackFrame) : this.card.setFrame(this.cardNumber)
+  }
+
+  showCounter(stackPosition) {
+    this.stackCounter.setVisible(stackPosition > 0)
+    this.count.setVisible(stackPosition > 0)
+    this.count.setText(stackPosition + 1)
   }
 }
