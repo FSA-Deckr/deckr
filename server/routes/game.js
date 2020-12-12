@@ -1,5 +1,28 @@
 const router = require('express').Router();
 const {GameTable, PlayerSession} = require('../db');
+let keys = null
+try {
+    keys = require('../../apikey')
+} catch(ex) {
+    console.log('ok')
+}
+
+//getting keys from heroku config
+
+const agoraKeys = keys || {
+        1:{
+            appId : process.env.APPID,
+            appCertificate: process.env.APPCERTIFICATE
+        },
+        2:{
+            appId : process.env.APPID_2,
+            appCertificate: process.env.APPCERTIFICATE_2
+        },
+        3:{
+            appId : process.env.APPID_3,
+            appCertificate: process.env.APPCERTIFICATE_3
+        }
+    }
 
 //this post request creates a new game room
 router.post('/', async (req, res, next) => {
@@ -56,7 +79,8 @@ router.get('/:gameId', async (req, res, next) => {
             const playerNums = gameUsers.length ? gameUsers.map( user => user.playerNumber) : [];
             //if the player refreshes after being on a table
             if (req.gameTableId === req.params.gameId) {
-                res.status(200).json({gameTable: gameTable.id, playerNumber})
+                //hard coding the first key for now, since we have limited keys
+                res.status(200).json({gameTable: agoraKeys[1], playerNumber})
             }
             else {
                 //if table full
@@ -75,7 +99,8 @@ router.get('/:gameId', async (req, res, next) => {
                     await player.update({gameTableId: gameTable.id, playerNumber: newPlayerNum})
                     req.gameTableNum = req.params.gameId;
                     req.playerNumber = newPlayerNum;
-                    res.status(200).json({gameTable: gameTable.id, playerNumber: req.playerNumber})
+                //hard coding the first key for now, since we have limited keys
+                    res.status(200).json({gameTable: agoraKeys[1], playerNumber: req.playerNumber})
                 }
             }
         }
