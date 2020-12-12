@@ -9,6 +9,7 @@ const { initialChips } = require('../Constants');
 async function attemptToRenderTable(tableNumber) {
     let gameTable = await axios.get(`/api/game/${tableNumber}`)
     let playerNumber = gameTable.data.playerNumber
+    let agoraKeys = gameTable.data.gameTable
     if (gameTable.status === 206) {
         window.location.pathname = '/home'
         console.log('Sorry, this game is full')
@@ -18,14 +19,14 @@ async function attemptToRenderTable(tableNumber) {
         console.log('Sorry, this game was not found')
     }
     else {
-        await renderTable(tableNumber, playerNumber);
+        await renderTable(tableNumber, playerNumber,agoraKeys);
     }
 }
 
-async function renderTable(tableNumber,playerNumber) {
-    const root = document.getElementById('root');
+async function renderTable(tableNumber,playerNumber,agoraKeys) {
+    const table = document.getElementById('table');
     const buttonControls = document.getElementById('buttonControls');
-
+    const root = document.getElementById('root')
     //this just updates db with info when a player Xs out
     window.addEventListener("beforeunload", async function(e) {
         await axios.put('/api/player', {gameTableId: null, playerNumber: null})
@@ -41,11 +42,10 @@ async function renderTable(tableNumber,playerNumber) {
         console.log('Incoming message:', data);
     });
     const canvas = 'canvas'
-
-    root.innerHTML = `<div>You are in room ${tableNumber}</div>
-    <div id='me'></div>
-    <div id="remote-container"></div>
+    root.innerHTML = `<div>You are in room ${tableNumber}</div>`
+    table.innerHTML = `
     <div id='game'>
+        <div id="topPlaceHolder"></div>
         <canvas id= '${canvas}'></canvas>
         <div id='bank'>
             <div id='dealButton'>Deal A Card</div>
@@ -59,6 +59,7 @@ async function renderTable(tableNumber,playerNumber) {
             <div id='chipCollect'>Collect Chips</div>
             <div id='cardCollect'>Collect Cards</div>
         </div>
+        <div id='myVideo' class='videoStream playerColor${playerNumber}'></div>
     </div>
 
     `
@@ -67,7 +68,7 @@ async function renderTable(tableNumber,playerNumber) {
     `
 
     const game = new DeckrTable(socket, room, playerNumber)
-    // startVideo(channelNum)
+    startVideo(agoraKeys,playerNumber,socket, tableNumber)
 }
 
 module.exports = {attemptToRenderTable, renderTable}

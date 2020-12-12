@@ -1,11 +1,10 @@
 const AgoraRTC = require('agora-rtc-sdk')
 
-// const {RtcTokenBuilder, RtcRole} = require('agora-access-token');
+const {RtcTokenBuilder, RtcRole} = require('agora-access-token');
 
-const startVideo = function(channelNum){
-
-    const appId = keys[channelNum].appId
-    const appCertificate = keys[channelNum].appCertificate
+const startVideo = function(agoraKeys,playerNumber,socket, room){
+    const appId = agoraKeys.appId
+    const appCertificate = agoraKeys.appCertificate
     const channelName = 'deckr';
     const uid = 0;
     const role = RtcRole.PUBLISHER;
@@ -24,18 +23,23 @@ const startVideo = function(channelNum){
     };
     // Query the container to which the remote stream belong.
 
-    let remoteContainer = document.getElementById('remote-container');
+    let remoteContainer = document.getElementById('game');
 
     // Add video streams to the container.
     function addVideoStream(elementId){
-    // Creates a new div for every stream
-        let streamDiv = document.createElement("div");
-    // Assigns the elementId to the div.
-        streamDiv.id = elementId;
+        // Creates a new div for every stream
+        let streamDiv
+        if(document.getElementById(elementId)) {
+            streamDiv = document.getElementById(elementId)
+        } else {
+            streamDiv = document.createElement("div");
+            streamDiv.id = elementId;
+            remoteContainer.appendChild(streamDiv);
+        }
+    // Assigns the className to the div.
+
     // Takes care of the lateral inversion
-        streamDiv.style.transform = "rotateY(180deg)";
-    // Adds the div to the container.
-        remoteContainer.appendChild(streamDiv);
+    streamDiv.style.transform = "rotateY(180deg)";
     };
 
     // Remove the video stream from the container.
@@ -58,13 +62,15 @@ const startVideo = function(channelNum){
             audio: true,
             video: true,
         });
+        localStream.setVideoProfile('120p_1')
+        socket.emit('joiningAs',{streamId: uid, playerNumber, room, relay:true})
     // Initialize the local stream
         localStream.init(()=>{
-
-        // Play the local stream
-        localStream.play('me');
-        // Publish the local stream
-        client.publish(localStream, handleError);
+            // Play the local stream
+            localStream.play('myVideo');
+            document.getElementById('myVideo').setAttribute('localId',uid)
+            // Publish the local stream
+            client.publish(localStream, handleError);
         } , handleError);
     }, handleError);
 

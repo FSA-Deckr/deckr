@@ -1,32 +1,86 @@
 *{
     font-family: sans-serif;
 }
-h1,h4{
+
+body{
+    background-image: url("./board.jpg");
+    align-items: center;
+}
+#root{
+    width: 33.3%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+h1{
+    text-shadow: 3px 3px 5px #070707;
+    font-size: 75px;
+    color: whitesmoke;
     text-align: center;
+    margin-top: 20%;
+    margin-bottom: 15%;
 }
-#me{
+
+button{
+    box-shadow: 3px 3px 5px #070707;
+    background-color: rgb(49, 9, 9);
+    display:block;
+    color: whitesmoke;
+    border-radius: 8px;
+    text-align: center;
+    border: none;
+    padding: 20px;
+    text-decoration: none;
     position: relative;
-    float:top;
-    width: 25%;
-    margin: 0 auto;
-    display: block;
+    line-height: 0.1;
+    margin-left: auto;
+    margin-right: auto;
 }
-#me video{
-    position: relative !important;
+#newRoom{
+    font-size: 25px;
 }
-#remote-container{
-    display: flex;
-    float:top;
+#logInButton{
+    font-size: 20px;
+    margin-top: 20%;
 }
-#remote-container video{
-    width: 25%;
-    position: relative !important;
+form{
+    margin: 25%;
+}
+label{
+    height: 40px;
+    text-shadow: 3px 3px 5px #070707;
+    text-align: center;
+    text-shadow: 2px 2px #070707;
+    display:block;
+    position:relative;
+    color: whitesmoke;
+    font-size: 30px;
+
+}
+input{
+    padding:5px;
+    font-size: 18px;
+    color:whitesmoke;
+    text-align: center;
+    box-shadow: 3px 3px 5px #070707;
+    display:block;
+    position:relative;
+    background: transparent;
+    border-radius: 8px;
+    border-color: whitesmoke;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 20%;
+}
+input:focus {
+    outline-width: 0;
 }
 #game {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
+    position: relative;
 }
 #bank{
     width:800px;
@@ -126,3 +180,50 @@ h1,h4{
     background-color: white;
     cursor: pointer;
 }
+
+.rightDiv {
+    position: absolute;
+    right: 0px;
+    top: 400px;
+}
+.topDiv {
+    position: absolute;
+    margin: auto;
+    top: 0px;
+}
+.leftDiv {
+    position: absolute;
+    left: 0px;
+    top: 400px;
+}
+.videoStream {
+    width: 240px;
+    height: 180px;
+    border-radius: 5px;
+    border: solid 2px;
+}
+.playerColor1 {
+    border-color: #ff1100;
+}
+.playerColor2 {
+    border-color: #0400ff;
+}
+.playerColor3 {
+    border-color: #ff9d00;
+}
+.playerColor4 {
+    border-color: #9500ff;
+}
+#myVideo{
+    position: relative;
+    float:top;
+    margin: 0 auto;
+    display: block;
+}
+#topPlaceHolder {
+    width: 0px;
+    height: 180px;
+}
+/* #me video{
+    position: relative !important;
+} */
