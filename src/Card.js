@@ -2,6 +2,8 @@ import Phaser from 'phaser'
 import { boardDrag, cardDimensions, hoverButtonRadius, cardBackFrame, 
         cardDepth, activeDepth, canvasHeight, inHandAdjustment, 
         canvasWidth, inHandRange, textOffset, magnetRadius } from './Constants'
+import { shuffleDeck } from './utility'
+
 export default class Card extends Phaser.GameObjects.Container {
   constructor(scene, x, y, physicsGroup, cardNumber, orientation = Math.PI/2) {
     super(scene, x, y)
@@ -58,10 +60,16 @@ export default class Card extends Phaser.GameObjects.Container {
         button.on('pointerout', ()=>this.unhover());
       })
 
+      this.rotateButton.on('dragstart', ()=> this.dragStart())
       this.rotateButton.on('drag', (ptr)=>this.spin(ptr));
-      this.rotateButton.on('dragend', (ptr)=>this.dragEnd(ptr));
+      this.rotateButton.on('dragend', (ptr)=> {
+        this.afterSpin = true;
+        this.dragEnd(ptr)
+      });
       this.flipButton.on('pointerdown',()=>this.startFlip())
       this.flipButton.on('pointerup',()=>this.flip())
+
+      this.shuffleButton.on('pointerup', ()=>this.shuffle())
 
     //card status variables
     this.cardNumber = cardNumber;
@@ -72,6 +80,7 @@ export default class Card extends Phaser.GameObjects.Container {
     this.addToHand = false;
     this.inHand = false;
     this.playerPickedUp = false;
+    this.afterSpin = false;
     //this.stackNumber should always be the number of the card at the bottom of a given stack.
     //I.e., card 5 is stacked on card 18, and card 19 is stacked on card 5, all 3 cards will have stackNumber of 18.
     this.stackNumber = cardNumber
@@ -264,6 +273,7 @@ export default class Card extends Phaser.GameObjects.Container {
     this.getCardsInStack().forEach( (card,ix) => {
       card.dragHistory = [];
       card.setDepth(cardDepth + card.stackOrder)
+      console.log('card spinning becoming false!')
       card.spinning = false;
       this.socket.emit('sendCard' , { card, room: this.gameState.room, otherPlayerDragging: false })
       this.playerPickedUp = false;
@@ -283,6 +293,12 @@ export default class Card extends Phaser.GameObjects.Container {
   }
 
   unhover (ptr, cardNumberToExclude = undefined) {
+    if (this.afterSpin) {
+      this.getCardsInStack().forEach( card => {
+        card.afterSpin = false;
+      })
+      return;
+    }
     if(!this.spinning) {
       this.glow.setVisible(false)
       this.getCardsInStack().forEach( card => {
@@ -297,11 +313,16 @@ export default class Card extends Phaser.GameObjects.Container {
   }
 
   spin(ptr) {
-    this.setDepth(activeDepth)
-    this.spinning = true
-    //some trig to spin the card relative to the pointer position
-    this.rotation = Phaser.Math.Angle.Between(this.x, this.y, ptr.worldX, ptr.worldY) - 3*Math.PI/4
-    this.socket.emit('sendCard', { card:this, room: this.gameState.room });
+
+    this.getCardsInStack().forEach( card => {
+      card.setDepth(activeDepth + card.stackOrder)
+      card.spinning = true
+      //some trig to spin the card relative to the pointer position
+      card.rotation = Phaser.Math.Angle.Between(card.x, card.y, ptr.worldX, ptr.worldY) - 3*Math.PI/4
+      this.socket.emit('sendCard', { card, room: this.gameState.room });
+    })
+
+
   }
 
   startFlip() {
@@ -357,4 +378,18 @@ export default class Card extends Phaser.GameObjects.Container {
     this.count.setVisible(stackPosition > 0)
     this.count.setText(stackPosition + 1)
   }
+
+  shuffle() {
+    let arr = this.getCardsInStack()
+    let shuffledDeck = shuffleDeck(arr)
+
+    shuffledDeck.forEach( (card, ix, arr) => {
+      card.stackNumber = arr[0].cardNumber;
+      card.stackOrder = ix + 1
+      card.setDepth(cardDepth + card.stackOrder);
+      card.showCounter(ix)
+      this.socket.emit('sendCard', { card, room: this.gameState.room });
+    })
+  }
+
 }
