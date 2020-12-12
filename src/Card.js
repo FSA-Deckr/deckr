@@ -2,6 +2,8 @@ import Phaser from 'phaser'
 import { boardDrag, cardDimensions, hoverButtonRadius, cardBackFrame, 
         cardDepth, activeDepth, canvasHeight, inHandAdjustment, 
         canvasWidth, inHandRange, textOffset, magnetRadius } from './Constants'
+import { shuffleDeck } from './utility'
+
 export default class Card extends Phaser.GameObjects.Container {
   constructor(scene, x, y, physicsGroup, cardNumber, orientation = Math.PI/2) {
     super(scene, x, y)
@@ -62,6 +64,8 @@ export default class Card extends Phaser.GameObjects.Container {
       this.rotateButton.on('dragend', (ptr)=>this.dragEnd(ptr));
       this.flipButton.on('pointerdown',()=>this.startFlip())
       this.flipButton.on('pointerup',()=>this.flip())
+
+      this.shuffleButton.on('pointerup', ()=>this.shuffle())
 
     //card status variables
     this.cardNumber = cardNumber;
@@ -139,7 +143,6 @@ export default class Card extends Phaser.GameObjects.Container {
     //if a card is in your hand
     if (this.inHand) {
 
-      console.log('in hand with depth', this.depth);
       //lock it to the bottom
       switch(this.playerNumber) {
         case 2:
@@ -358,4 +361,18 @@ export default class Card extends Phaser.GameObjects.Container {
     this.count.setVisible(stackPosition > 0)
     this.count.setText(stackPosition + 1)
   }
+
+  shuffle() {
+    let arr = this.getCardsInStack()
+    let shuffledDeck = shuffleDeck(arr)
+
+    shuffledDeck.forEach( (card, ix, arr) => {
+      card.stackNumber = arr[0].cardNumber;
+      card.stackOrder = ix + 1
+      card.setDepth(cardDepth + card.stackOrder);
+      card.showCounter(ix)
+      this.socket.emit('sendCard', { card, room: this.gameState.room });
+    })
+  }
+
 }
