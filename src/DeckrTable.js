@@ -53,9 +53,7 @@ export class DeckrTable extends Phaser.Game {
     this.gameState.playerBanks[this.playerNumber] = initialChips
 
     function preload() {
-      this.load.image('chip','chip.png')
       this.load.spritesheet('chipSprite','chipSpriteSheet.png', { frameWidth: chipRadius * 2, frameHeight: chipRadius * 2})
-      this.load.image('shadow','shadow.png')
       this.load.spritesheet('cardSprite','cardSpriteSheet.png', { frameWidth: cardDimensions.width, frameHeight: cardDimensions.height})
       this.load.image('flip','flip.png')
       this.load.image('rotate','rotate.png')
