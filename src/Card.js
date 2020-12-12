@@ -60,8 +60,12 @@ export default class Card extends Phaser.GameObjects.Container {
         button.on('pointerout', ()=>this.unhover());
       })
 
+      this.rotateButton.on('dragstart', ()=> this.dragStart())
       this.rotateButton.on('drag', (ptr)=>this.spin(ptr));
-      this.rotateButton.on('dragend', (ptr)=>this.dragEnd(ptr));
+      this.rotateButton.on('dragend', (ptr)=> {
+        this.afterSpin = true;
+        this.dragEnd(ptr)
+      });
       this.flipButton.on('pointerdown',()=>this.startFlip())
       this.flipButton.on('pointerup',()=>this.flip())
 
@@ -76,6 +80,7 @@ export default class Card extends Phaser.GameObjects.Container {
     this.addToHand = false;
     this.inHand = false;
     this.playerPickedUp = false;
+    this.afterSpin = false;
     //this.stackNumber should always be the number of the card at the bottom of a given stack.
     //I.e., card 5 is stacked on card 18, and card 19 is stacked on card 5, all 3 cards will have stackNumber of 18.
     this.stackNumber = cardNumber
@@ -268,6 +273,7 @@ export default class Card extends Phaser.GameObjects.Container {
     this.getCardsInStack().forEach( (card,ix) => {
       card.dragHistory = [];
       card.setDepth(cardDepth + card.stackOrder)
+      console.log('card spinning becoming false!')
       card.spinning = false;
       this.socket.emit('sendCard' , { card, room: this.gameState.room, otherPlayerDragging: false })
       this.playerPickedUp = false;
@@ -287,6 +293,12 @@ export default class Card extends Phaser.GameObjects.Container {
   }
 
   unhover (ptr, cardNumberToExclude = undefined) {
+    if (this.afterSpin) {
+      this.getCardsInStack().forEach( card => {
+        card.afterSpin = false;
+      })
+      return;
+    }
     if(!this.spinning) {
       this.glow.setVisible(false)
       this.getCardsInStack().forEach( card => {
