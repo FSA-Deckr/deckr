@@ -67,7 +67,7 @@ async function renderTable(tableNumber,playerNumber) {
     `
 
     const game = new DeckrTable(socket, room, playerNumber)
-    // startVideo(channelNum)
+    startVideo(channelNum)
 }
 
 module.exports = {attemptToRenderTable, renderTable}

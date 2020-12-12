@@ -10,6 +10,7 @@ h1,h4{
     width: 25%;
     margin: 0 auto;
     display: block;
+    border-radius: 20px;
 }
 #me video{
     position: relative !important;
