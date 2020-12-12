@@ -1,6 +1,12 @@
 const router = require('express').Router();
 const {GameTable, PlayerSession} = require('../db');
-const keys = require('../../apikey')
+let keys = null
+try {
+    keys = require('../../apikey')
+} catch(ex) {
+    console.log('ok')
+}
+
 //getting keys from heroku config
 
 const agoraKeys = keys || {
@@ -73,6 +79,7 @@ router.get('/:gameId', async (req, res, next) => {
             const playerNums = gameUsers.length ? gameUsers.map( user => user.playerNumber) : [];
             //if the player refreshes after being on a table
             if (req.gameTableId === req.params.gameId) {
+                //hard coding the first key for now, since we have limited keys
                 res.status(200).json({gameTable: agoraKeys[1], playerNumber})
             }
             else {
@@ -92,6 +99,7 @@ router.get('/:gameId', async (req, res, next) => {
                     await player.update({gameTableId: gameTable.id, playerNumber: newPlayerNum})
                     req.gameTableNum = req.params.gameId;
                     req.playerNumber = newPlayerNum;
+                //hard coding the first key for now, since we have limited keys
                     res.status(200).json({gameTable: agoraKeys[1], playerNumber: req.playerNumber})
                 }
             }
