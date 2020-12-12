@@ -1,5 +1,7 @@
 import Phaser from 'phaser'
-import { boardDrag, cardDimensions, hoverButtonRadius, cardBackFrame, cardDepth, activeDepth, canvasHeight, inHandAdjustment, canvasWidth, inHandRange, textOffset } from './Constants'
+import { boardDrag, cardDimensions, hoverButtonRadius, cardBackFrame, 
+        cardDepth, activeDepth, canvasHeight, inHandAdjustment, 
+        canvasWidth, inHandRange, textOffset, magnetRadius } from './Constants'
 export default class Card extends Phaser.GameObjects.Container {
   constructor(scene, x, y, physicsGroup, cardNumber, orientation = Math.PI/2) {
     super(scene, x, y)
@@ -136,6 +138,8 @@ export default class Card extends Phaser.GameObjects.Container {
     this.glow.setVisible(true)
     //if a card is in your hand
     if (this.inHand) {
+
+      console.log('in hand with depth', this.depth);
       //lock it to the bottom
       switch(this.playerNumber) {
         case 2:
@@ -207,7 +211,7 @@ export default class Card extends Phaser.GameObjects.Container {
     const closestCard = this.getClosestCardNotInStack();
     const distanceToClosestCard = closestCard && Math.sqrt(Math.pow((this.x - closestCard.x),2) + Math.pow((this.y - closestCard.y),2))
 
-    if (distanceToClosestCard && distanceToClosestCard < 20) {
+    if (distanceToClosestCard && distanceToClosestCard < magnetRadius) {
       this.getCardsInStack().forEach( card => {
         card.body.setVelocity(0,0);
         card.x = closestCard.x;
@@ -235,7 +239,6 @@ export default class Card extends Phaser.GameObjects.Container {
       delete this.gameState.cards[this.cardNumber];
       this.inHand = true;
       this.setRotation((4 * (Math.PI/2)) - ((this.playerNumber - 1) * (Math.PI/2)));
-      this.setRevealed(true);
       this.body.setCollideWorldBounds(false);
       switch(this.playerNumber) {
         case 2:
@@ -251,7 +254,12 @@ export default class Card extends Phaser.GameObjects.Container {
           this.y = canvasHeight + inHandAdjustment;
           break;
       }
+      this.setDepth(cardDepth);
       this.socket.emit('addCardToHand', {card: this, room: this.gameState.room, player: `player${this.playerNumber}`});
+    }
+    else if (this.inHand) {
+      //needs to be called explicity (and not sent on socket) because not part of game scene anymore
+      this.setDepth(cardDepth)
     }
 
     this.getCardsInStack().forEach( (card,ix) => {
@@ -299,29 +307,44 @@ export default class Card extends Phaser.GameObjects.Container {
 
   startFlip() {
     if(this.otherPlayerDragging) return
-    this.getCardsInStack().forEach( card => {
-      card.setDepth(activeDepth + card.stackOrder)
-    //mark that a click down (without drag) begins in the reveal zone
-      card.startFlipClickedDown = true
-    })
+    if (this.inHand) {
+      this.setDepth(activeDepth);
+      this.startFlipClickedDown = true;
+    }
+    else {
+      this.getCardsInStack().forEach( card => {
+        card.setDepth(activeDepth + card.stackOrder)
+      //mark that a click down (without drag) begins in the reveal zone
+        card.startFlipClickedDown = true
+      })
+    }
   }
 
   flip() {
     if(this.otherPlayerDragging) return
     let stackSizePlusOne = this.giveNextStackNumber();
     let newStackNumber = this.cardNumber;
-
-    this.getCardsInStack().forEach( card => {
-      if(card.startFlipClickedDown) {
-        card.revealed ? card.card.setFrame(cardBackFrame) : card.card.setFrame(card.cardNumber)
-        card.revealed = !card.revealed
+    if (this.inHand) {
+      if(this.startFlipClickedDown) {
+        this.revealed ? this.card.setFrame(cardBackFrame) : this.card.setFrame(this.cardNumber)
+        this.revealed = !this.revealed
       }
-      card.startFlipClickedDown = false
-      card.stackOrder = stackSizePlusOne - card.stackOrder;
-      card.stackNumber = newStackNumber;
-      card.setDepth(cardDepth + card.stackOrder)
-      this.socket.emit('sendCard', { card, room: this.gameState.room });
-    })
+      this.startFlipClickedDown = false
+      this.setDepth(cardDepth)
+    }
+    else {
+      this.getCardsInStack().forEach( card => {
+        if(card.startFlipClickedDown) {
+          card.revealed ? card.card.setFrame(cardBackFrame) : card.card.setFrame(card.cardNumber)
+          card.revealed = !card.revealed
+        }
+        card.startFlipClickedDown = false
+        card.stackOrder = stackSizePlusOne - card.stackOrder;
+        card.stackNumber = newStackNumber;
+        card.setDepth(cardDepth + card.stackOrder)
+        this.socket.emit('sendCard', { card, room: this.gameState.room });
+      })
+    }
 
   }
 

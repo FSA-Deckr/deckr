@@ -12,6 +12,7 @@ export const hoverOffset = 10
 export const inHandAdjustment = 30
 export const inHandRange = 100
 export const textOffset = 8
+export const magnetRadius = 35;
 
 //display z-index/depth variables
 export const chipDepth = 1
