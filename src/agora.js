@@ -4,8 +4,7 @@ const {RtcTokenBuilder, RtcRole} = require('agora-access-token');
 
 
 
-const startVideo = function(agoraKeys,playerNumber){
-
+const startVideo = function(agoraKeys,playerNumber,socket, room){
     const appId = agoraKeys.appId
     const appCertificate = agoraKeys.appCertificate
     const channelName = 'deckr';
@@ -38,6 +37,7 @@ const startVideo = function(agoraKeys,playerNumber){
     // Assigns the className to the div.
 
         streamDiv.className = `player${playerNumber}`
+        socket.emit('joiningAs',{streamId: elementId, playerNumber, room})
     // Takes care of the lateral inversion
         streamDiv.style.transform = "rotateY(180deg)";
     // Adds the div to the container.
@@ -64,13 +64,13 @@ const startVideo = function(agoraKeys,playerNumber){
             audio: true,
             video: true,
         });
+        console.log(uid)
     // Initialize the local stream
         localStream.init(()=>{
-
-        // Play the local stream
-        localStream.play('me');
-        // Publish the local stream
-        client.publish(localStream, handleError);
+            // Play the local stream
+            localStream.play('me');
+            // Publish the local stream
+            client.publish(localStream, handleError);
         } , handleError);
     }, handleError);
 

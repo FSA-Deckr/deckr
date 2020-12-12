@@ -430,6 +430,12 @@ export class DeckrTable extends Phaser.Game {
         //update the card button count HTML
         dealButton.innerText = `Deal A Card (${gameState.deck.length})`
       })
+
+      //receive new player stream ID and update DIV
+      socket.on('playerJoiningAs', ({streamId, newPlayerNumber})=>{
+        newVideoDiv = document.getElementById(streamId)
+        console.log(newVideoDiv)
+      })
     }
 
     //fill deck w random numbers
