@@ -139,7 +139,6 @@ export default class Card extends Phaser.GameObjects.Container {
     //if a card is in your hand
     if (this.inHand) {
 
-      console.log('in hand with depth', this.depth);
       //lock it to the bottom
       switch(this.playerNumber) {
         case 2:
