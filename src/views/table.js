@@ -42,7 +42,7 @@ async function renderTable(tableNumber,playerNumber,agoraKeys) {
         console.log('Incoming message:', data);
     });
     const canvas = 'canvas'
-    root.innerHTML = `<div>You are in room ${tableNumber}</div>`
+    root.innerHTML = ''
     table.innerHTML = `
     <div id='game'>
         <canvas id= '${canvas}'></canvas>
@@ -63,6 +63,8 @@ async function renderTable(tableNumber,playerNumber,agoraKeys) {
             <div id='myVideo' class='videoStream playerColor${playerNumber}'>
         </div>
         </div>
+        <div id="boardLogo">deckr</div>
+        <div id="tableNumber">${tableNumber}</div>
     </div>
     `
 

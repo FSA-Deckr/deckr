@@ -11,8 +11,10 @@
     margin-left: auto;
     margin-right: auto;
 }
-
-h1{
+canvas {
+    border-radius: 20px;
+}
+.logo {
     text-shadow: 3px 3px 5px #070707;
     font-size: 75px;
     color: whitesmoke;
@@ -85,7 +87,6 @@ input:focus {
 #bank{
     width:800px;
     height:100px;
-    background-color: #0e4223;
     display: flex;
     justify-content: space-around;
     align-items: center;
@@ -183,17 +184,17 @@ input:focus {
 
 .rightDiv {
     position: absolute;
-    left: calc(50% + 400px);
-    bottom: 0px;
+    left: calc(50% + 430px);
+    bottom: 100px;
 }
 .topDiv {
     position: absolute;
-    left: calc(50% + 400px);
+    left: calc(50% + 430px);
     top: 0px;
 }
 .leftDiv {
     position: absolute;
-    left: calc(50% - 640px);
+    left: calc(50% - 670px);
     top: 0px;
 }
 .videoStream {
@@ -216,10 +217,26 @@ input:focus {
 }
 #myVideoContainer{
     position: absolute;
-    left: calc(50% - 640px);
-    bottom: 0px;
+    left: calc(50% - 670px);
+    bottom: 100px;
 }
 .videoContainer {
     font-size: 20px;
+    color: whitesmoke;
+}
+#boardLogo {
+    position: absolute;
+    left: calc(50% + 450px);
+    top: 40%;
+    text-shadow: 3px 3px 5px #070707;
+    font-size: 55px;
+    color: whitesmoke;
+}
+#tableNumber {
+    position: absolute;
+    left: calc(50% - 665px);
+    top: 40%;
+    text-shadow: 3px 3px 5px #070707;
+    font-size: 55px;
     color: whitesmoke;
 }

@@ -5,7 +5,7 @@ function renderLobby() {
 
     root.innerHTML =
     `
-    <h1>deckr</h1>
+    <h1 class='logo'>deckr</h1>
     <button id="newRoom">Create a table</button>
     <form id = "logInForm">
         <label>Join a table</label>
