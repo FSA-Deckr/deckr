@@ -183,18 +183,18 @@ input:focus {
 
 .rightDiv {
     position: absolute;
-    right: 0px;
-    top: 400px;
+    left: calc(50% + 400px);
+    bottom: 0px;
 }
 .topDiv {
     position: absolute;
-    margin: auto;
+    left: calc(50% + 400px);
     top: 0px;
 }
 .leftDiv {
     position: absolute;
-    left: 0px;
-    top: 400px;
+    left: calc(50% - 640px);
+    top: 0px;
 }
 .videoStream {
     width: 240px;
@@ -214,16 +214,12 @@ input:focus {
 .playerColor4 {
     border-color: #9500ff;
 }
-#myVideo{
-    position: relative;
-    float:top;
-    margin: 0 auto;
-    display: block;
+#myVideoContainer{
+    position: absolute;
+    left: calc(50% - 640px);
+    bottom: 0px;
 }
-#topPlaceHolder {
-    width: 0px;
-    height: 180px;
+.videoContainer {
+    font-size: 20px;
+    color: whitesmoke;
 }
-/* #me video{
-    position: relative !important;
-} */

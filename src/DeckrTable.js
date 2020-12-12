@@ -216,6 +216,7 @@ export class DeckrTable extends Phaser.Game {
         }
         for(const player in gameState.hands) {
           gameState.hands[player] = {}
+          this.updateHands();
         }
         //sometimes cards in hand aren't phaser object but rather socket representations of them, so this makes sure all cards in the phaser world are killed
         this.cardsPhysicsGroup.clear(true,true)
@@ -232,15 +233,29 @@ export class DeckrTable extends Phaser.Game {
           if(thisPlayerChips < +chipName.substring(4)) document.getElementById(chipName).className = 'greyOut chipImg'
           else document.getElementById(chipName).className = 'chipImg'
         })
-        /////////////////////////////////////
-        // for now, update playerBanks Div //
-        /////////////////////////////////////
-        playerBankDiv.innerHTML = `
-        <p>Player 1 Bank: $ ${gameState.playerBanks[1]}</p>
-        <p>Player 2 Bank: $ ${gameState.playerBanks[2]}</p>
-        <p>Player 3 Bank: $ ${gameState.playerBanks[3]}</p>
-        <p>Player 4 Bank: $ ${gameState.playerBanks[4]}</p>
-        `
+        const bankEl1 = document.getElementById('bankEl1')
+        const bankEl2 = document.getElementById('bankEl2')
+        const bankEl3 = document.getElementById('bankEl3')
+        const bankEl4 = document.getElementById('bankEl4')
+
+        //update player bank HTML
+        if(bankEl1) {bankEl1.innerHTML = `Bank: $${gameState.playerBanks[1]}`}
+        if(bankEl2) {bankEl2.innerHTML = `Bank: $${gameState.playerBanks[2]}`}
+        if(bankEl3) {bankEl3.innerHTML = `Bank: $${gameState.playerBanks[3]}`}
+        if(bankEl4) {bankEl4.innerHTML = `Bank: $${gameState.playerBanks[4]}`}
+      }
+
+      this.updateHands = () => {
+        const handEl1 = document.getElementById('handEl1')
+        const handEl2 = document.getElementById('handEl2')
+        const handEl3 = document.getElementById('handEl3')
+        const handEl4 = document.getElementById('handEl4')
+
+        //update player hand HTML
+        if(handEl1) {handEl1.innerHTML = `Hand: ${Object.keys(gameState.hands.player1).length}`}
+        if(handEl2) {handEl2.innerHTML = `Hand: ${Object.keys(gameState.hands.player2).length}`}
+        if(handEl3) {handEl3.innerHTML = `Hand: ${Object.keys(gameState.hands.player3).length}`}
+        if(handEl4) {handEl4.innerHTML = `Hand: ${Object.keys(gameState.hands.player4).length}`}
       }
 
       //clicking HTML elements for chips adds a chip w that value to the board
@@ -284,7 +299,6 @@ export class DeckrTable extends Phaser.Game {
         const { cards, chips, deck, hands, playerBanks } = receivedGameState;
         //update the deck
         gameState.deck = deck;
-
         //for each receivedCard in gamestate, make new card if it doesn't exist
         for(let receivedCardNum in cards) {
           // adds cards to table
@@ -346,18 +360,21 @@ export class DeckrTable extends Phaser.Game {
 
         //update HTML for player banks
         this.updateBanks();
+        this.updateHands();
       })
 
       socket.on('addCardToHand', (cardState) => {
         gameState.hands[cardState.player][cardState.card.cardNumber] = cardState.card;
         gameState.cards[cardState.card.cardNumber].destroy();
         delete gameState.cards[cardState.card.cardNumber];
+        this.updateHands();
       })
 
       socket.on('removeCardFromHand', (cardState) => {
         const removedCard = new Card(this, cardState.card.x, cardState.card.y, this.cardsPhysicsGroup, cardState.card.cardNumber);
         gameState.cards[removedCard.cardNumber] = removedCard;
         delete gameState.hands[cardState.player][cardState.card.cardNumber];
+        this.updateHands();
       })
 
       //emit pointer position whenever moved in world
@@ -433,22 +450,41 @@ export class DeckrTable extends Phaser.Game {
         gameState.deck = receivedDeck
         //update the card button count HTML
         dealButton.innerText = `Deal A Card (${gameState.deck.length})`
+        this.updateHands();
       })
 
       //receive new player stream ID and update DIV
       socket.on('playerJoiningAs', ({streamId, newPlayerNumber, relay})=>{
         let streamDiv
+        const divPositions = ['rightDiv','topDiv','leftDiv']
+        const divIx = -1+(+newPlayerNumber-playerNumber+4)%4
         const remoteContainer = document.getElementById('game')
         if(document.getElementById(streamId)) {
             streamDiv = document.getElementById(streamId)
         } else {
-            streamDiv = document.createElement("div");
-            streamDiv.id = streamId;
-            remoteContainer.appendChild(streamDiv);
+          const streamContainer = document.createElement("div")
+          streamDiv = document.createElement("div");
+          streamDiv.id = streamId;
+          streamContainer.appendChild(streamDiv)
+          remoteContainer.appendChild(streamContainer);
+          const newPlayerP = document.createElement('p')
+          const newPlayerBank = document.createElement('p')
+          const newPlayerHand = document.createElement('p')
+          newPlayerP.innerText = `Player ${newPlayerNumber}`
+          newPlayerBank.innerText = `Bank: $${gameState.playerBanks[newPlayerNumber]}`
+          newPlayerBank.id = `bankEl${newPlayerNumber}`
+          newPlayerHand.innerText = `Hand: 0 cards`
+          newPlayerHand.id = `handEl${newPlayerNumber}`
+          if(divIx === 0) {
+            //prepend the card info
+            streamDiv.parentNode.prepend(newPlayerP, newPlayerBank, newPlayerHand)
+          } else {
+            //append the card info
+            streamDiv.parentNode.append(newPlayerP, newPlayerBank, newPlayerHand)
+          }
         }
-        const divPositions = ['rightDiv','topDiv','leftDiv']
-        const divIx = -1+(+newPlayerNumber-playerNumber+4)%4
-        streamDiv.className = `${divPositions[divIx]} videoStream playerColor${newPlayerNumber}`
+        streamDiv.parentNode.className = `${divPositions[divIx]} videoContainer`
+        streamDiv.className = `videoStream playerColor${newPlayerNumber}`
         //need to alert new player of my id
         if(relay)socket.emit('joiningAs',{streamId: myVideo.getAttribute('localId'), playerNumber, room, relay:false})
       })

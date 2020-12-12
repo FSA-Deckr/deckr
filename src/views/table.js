@@ -45,7 +45,6 @@ async function renderTable(tableNumber,playerNumber,agoraKeys) {
     root.innerHTML = `<div>You are in room ${tableNumber}</div>`
     table.innerHTML = `
     <div id='game'>
-        <div id="topPlaceHolder"></div>
         <canvas id= '${canvas}'></canvas>
         <div id='bank'>
             <div id='dealButton'>Deal A Card</div>
@@ -59,16 +58,16 @@ async function renderTable(tableNumber,playerNumber,agoraKeys) {
             <div id='chipCollect'>Collect Chips</div>
             <div id='cardCollect'>Collect Cards</div>
         </div>
-        <div id='myVideo' class='videoStream playerColor${playerNumber}'></div>
+        <div id='myVideoContainer' class='videoContainer'>
+            <p>You are Player ${playerNumber}</p>
+            <div id='myVideo' class='videoStream playerColor${playerNumber}'>
+        </div>
+        </div>
     </div>
-
-    `
-    playerIndicator.innerHTML = `
-    <p>You are player #${playerNumber}</p>
     `
 
     const game = new DeckrTable(socket, room, playerNumber)
-    // startVideo(agoraKeys,playerNumber,socket, tableNumber)
+    startVideo(agoraKeys,playerNumber,socket, tableNumber)
 }
 
 module.exports = {attemptToRenderTable, renderTable}
