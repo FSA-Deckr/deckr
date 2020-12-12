@@ -3,7 +3,7 @@ const axios = require('axios')
 function renderLobby() {
     const root = document.getElementById('root');
 
-    root.innerHTML = 
+    root.innerHTML =
     `
     <h1>deckr</h1>
     <button id="newRoom">Create a table</button>
@@ -23,7 +23,7 @@ function renderLobby() {
     const joinRoomButton = document.getElementById('logInForm')
     joinRoomButton.addEventListener("submit", async function(e) {
         e.preventDefault()
-        let roomNugmber = document.getElementById('roomNumber')
+        let roomNumber = document.getElementById('roomNumber')
         if (roomNumber.value) window.location.pathname = `/${roomNumber.value}/`
         roomNumber.value = ''
     })
