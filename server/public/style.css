@@ -2,8 +2,8 @@
     font-family: sans-serif;
 }
 
-body{
-    background-image: url("./board.jpg");
+#deckrBody{
+    background-image: url("./felt-tile.png");
     align-items: center;
 }
 #root{

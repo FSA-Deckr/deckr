@@ -1,8 +1,8 @@
 import Phaser from 'phaser'
 import Chip from './Chip'
 import Card from './Card'
-import { canvasWidth, canvasHeight, cardDimensions, chipRadius, 
-        activeDepth, initialChips, chipNames, newItemRange, 
+import { canvasWidth, canvasHeight, cardDimensions, chipRadius,
+        activeDepth, initialChips, chipNames, newItemRange,
         chipOffset, newItemRandom, cardOffset } from './Constants'
 import { shuffleDeck } from './utility'
 
@@ -22,6 +22,9 @@ export class DeckrTable extends Phaser.Game {
     }
 
     super(cfg)
+
+    //change body bg when table rendered
+    deckrBody.setAttribute("style", "background: radial-gradient(circle at 50%, #50353C, #50353C 30%, #2D1D22);");
 
     //the deck is just an array of numbers representing the cards 0-51
     let chipsPhysicsGroup
@@ -56,7 +59,7 @@ export class DeckrTable extends Phaser.Game {
       this.load.spritesheet('cardSprite','cardSpriteSheet.png', { frameWidth: cardDimensions.width, frameHeight: cardDimensions.height})
       this.load.image('flip','flip.png')
       this.load.image('rotate','rotate.png')
-      this.load.image('board','board.jpg')
+      this.load.image('board','felt-square.png')
       this.load.image('deckCount', 'blankButton.png')
       this.load.image('shuffle', 'shuffleButton.png')
       this.load.image('glow', 'glow.png')
