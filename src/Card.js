@@ -301,11 +301,16 @@ export default class Card extends Phaser.GameObjects.Container {
   }
 
   spin(ptr) {
-    this.setDepth(activeDepth)
-    this.spinning = true
-    //some trig to spin the card relative to the pointer position
-    this.rotation = Phaser.Math.Angle.Between(this.x, this.y, ptr.worldX, ptr.worldY) - 3*Math.PI/4
-    this.socket.emit('sendCard', { card:this, room: this.gameState.room });
+
+    this.getCardsInStack().forEach( card => {
+      card.setDepth(activeDepth + card.stackOrder)
+      card.spinning = true
+      //some trig to spin the card relative to the pointer position
+      card.rotation = Phaser.Math.Angle.Between(card.x, card.y, ptr.worldX, ptr.worldY) - 3*Math.PI/4
+      this.socket.emit('sendCard', { card, room: this.gameState.room });
+    })
+
+
   }
 
   startFlip() {
