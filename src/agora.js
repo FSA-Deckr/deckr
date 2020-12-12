@@ -63,11 +63,12 @@ const startVideo = function(agoraKeys,playerNumber,socket, room){
             video: true,
         });
         localStream.setVideoProfile('120p_1')
-        socket.emit('joiningAs',{streamId: uid, playerNumber, room})
+        socket.emit('joiningAs',{streamId: uid, playerNumber, room, relay:true})
     // Initialize the local stream
         localStream.init(()=>{
             // Play the local stream
             localStream.play('myVideo');
+            document.getElementById('myVideo').setAttribute('localId',uid)
             // Publish the local stream
             client.publish(localStream, handleError);
         } , handleError);

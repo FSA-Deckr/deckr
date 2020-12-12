@@ -55,8 +55,8 @@ const setSocketServer = (server) => {
             this.to(room).emit('receiveBankChip', {chipNumber, playerNumber})
         })
 
-        socket.on('joiningAs', function({streamId, playerNumber, room}){
-            this.to(room).emit('playerJoiningAs',{streamId, newPlayerNumber: playerNumber})
+        socket.on('joiningAs', function({streamId, playerNumber, room, relay}){
+            this.to(room).emit('playerJoiningAs',{streamId, newPlayerNumber: playerNumber, relay})
         })
     });
 }
