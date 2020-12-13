@@ -24,6 +24,7 @@
     "chalk": "^4.1.0",
     "cookie-parser": "^1.4.5",
     "express": "^4.17.1",
+    "express-sslify": "^1.2.0",
     "morgan": "^1.10.0",
     "pg": "^8.5.1",
     "sequelize": "^6.3.5",

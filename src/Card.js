@@ -352,7 +352,7 @@ export default class Card extends Phaser.GameObjects.Container {
       this.setDepth(cardDepth)
     }
     else {
-      this.getCardsInStack().forEach( card => {
+      this.getCardsInStack().forEach( (card) => {
         if(card.startFlipClickedDown) {
           card.revealed ? card.card.setFrame(cardBackFrame) : card.card.setFrame(card.cardNumber)
           card.revealed = !card.revealed
@@ -361,6 +361,7 @@ export default class Card extends Phaser.GameObjects.Container {
         card.stackOrder = stackSizePlusOne - card.stackOrder;
         card.stackNumber = newStackNumber;
         card.setDepth(cardDepth + card.stackOrder)
+        card.showCounter(card.stackOrder - 1);
         this.socket.emit('sendCard', { card, room: this.gameState.room });
       })
     }
