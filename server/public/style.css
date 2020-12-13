@@ -1,6 +1,14 @@
 *{
     font-family: sans-serif;
 }
+#loading{
+    text-shadow: 3px 3px 5px #070707;
+    font-size: 75px;
+    color: whitesmoke;
+    text-align: center;
+    margin-top: 20%;
+    margin-bottom: 15%;
+}
 
 #deckrBody{
     background-image: url("./felt-tile.png");
