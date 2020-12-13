@@ -1,6 +1,6 @@
 import Phaser from 'phaser'
-import { boardDrag, cardDimensions, hoverButtonRadius, cardBackFrame, 
-        cardDepth, activeDepth, canvasHeight, inHandAdjustment, 
+import { boardDrag, cardDimensions, hoverButtonRadius, cardBackFrame,
+        cardDepth, activeDepth, canvasHeight, inHandAdjustment,
         canvasWidth, inHandRange, textOffset, magnetRadius } from './Constants'
 import { shuffleDeck } from './utility'
 
@@ -8,7 +8,6 @@ export default class Card extends Phaser.GameObjects.Container {
   constructor(scene, x, y, physicsGroup, cardNumber, orientation = Math.PI/2) {
     super(scene, x, y)
     //add images to container
-    this.shadow = scene.add.image(0,0,'shadow')
     this.card = scene.add.sprite(0,0,'cardSprite')
     this.glow = scene.add.image(0,0,'glow').setVisible(false)
     this.card.setFrame(cardBackFrame)
@@ -17,7 +16,7 @@ export default class Card extends Phaser.GameObjects.Container {
     this.shuffleButton = scene.add.image(cardDimensions.width/2 - hoverButtonRadius, cardDimensions.height/2 - hoverButtonRadius,'shuffle').setVisible(false)
     this.stackCounter = scene.add.image(hoverButtonRadius - cardDimensions.width/2, hoverButtonRadius - cardDimensions.height/2,'deckCount').setVisible(false)
     this.count = scene.add.text(hoverButtonRadius - cardDimensions.width/2, hoverButtonRadius - cardDimensions.height/2, Number(0), { fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif', color: 'rgb(0, 0, 0)' }).setVisible(false).setOrigin(0.5,0.5)
-    this.add([this.glow, this.shadow,this.card,this.flipButton,this.rotateButton,this.shuffleButton,this.stackCounter, this.count])
+    this.add([this.glow, this.card,this.flipButton,this.rotateButton,this.shuffleButton,this.stackCounter, this.count])
 
     //socket and room info for emit events
     this.gameState = scene.game.gameState;
@@ -353,7 +352,7 @@ export default class Card extends Phaser.GameObjects.Container {
       this.setDepth(cardDepth)
     }
     else {
-      this.getCardsInStack().forEach( card => {
+      this.getCardsInStack().forEach( (card) => {
         if(card.startFlipClickedDown) {
           card.revealed ? card.card.setFrame(cardBackFrame) : card.card.setFrame(card.cardNumber)
           card.revealed = !card.revealed
@@ -362,6 +361,7 @@ export default class Card extends Phaser.GameObjects.Container {
         card.stackOrder = stackSizePlusOne - card.stackOrder;
         card.stackNumber = newStackNumber;
         card.setDepth(cardDepth + card.stackOrder)
+        card.showCounter(card.stackOrder - 1);
         this.socket.emit('sendCard', { card, room: this.gameState.room });
       })
     }

@@ -32,9 +32,11 @@ const startVideo = function(agoraKeys,playerNumber,socket, room){
         if(document.getElementById(elementId)) {
             streamDiv = document.getElementById(elementId)
         } else {
+            const streamContainer = document.createElement("div")
             streamDiv = document.createElement("div");
             streamDiv.id = elementId;
-            remoteContainer.appendChild(streamDiv);
+            streamContainer.appendChild(streamDiv)
+            remoteContainer.appendChild(streamContainer);
         }
     // Assigns the className to the div.
 
@@ -45,7 +47,8 @@ const startVideo = function(agoraKeys,playerNumber,socket, room){
     // Remove the video stream from the container.
     function removeVideoStream(elementId) {
         let remoteDiv = document.getElementById(elementId);
-        if (remoteDiv) remoteDiv.parentNode.removeChild(remoteDiv);
+        if (remoteDiv) remoteDiv.parentNode.innerHTML = ''//removeChild(remoteDiv);
+        //also remove all other nodes here
     };
 
 

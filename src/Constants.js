@@ -5,7 +5,7 @@ export const boardDrag = 0.85
 
 //card and chip variables
 export const chipRadius = 25
-export const cardDimensions = {width:125, height:175}
+export const cardDimensions = {width:100, height:140}
 export const hoverButtonRadius = 20
 export const cardBackFrame = 52
 export const hoverOffset = 10
@@ -28,6 +28,6 @@ export const initialChips = 1000
 export const chipNames = ['chip1','chip5','chip25','chip50','chip100','chip500']
 export const newItemRange = 200
 export const newItemRandom = 10
-export const chipOffset = 80
-export const cardOffset = 220
+export const chipOffset = 65
+export const cardOffset = 165
 export const chipBankRange = 40
