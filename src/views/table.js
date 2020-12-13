@@ -42,10 +42,9 @@ async function renderTable(tableNumber,playerNumber,agoraKeys) {
         console.log('Incoming message:', data);
     });
     const canvas = 'canvas'
-    root.innerHTML = `<div>You are in room ${tableNumber}</div>`
+    root.innerHTML = ''
     table.innerHTML = `
     <div id='game'>
-        <div id="topPlaceHolder"></div>
         <canvas id= '${canvas}'></canvas>
         <div id='bank'>
             <div id='dealButton'>Deal A Card</div>
@@ -59,12 +58,14 @@ async function renderTable(tableNumber,playerNumber,agoraKeys) {
             <div id='chipCollect'>Collect Chips</div>
             <div id='cardCollect'>Collect Cards</div>
         </div>
-        <div id='myVideo' class='videoStream playerColor${playerNumber}'></div>
+        <div id='myVideoContainer' class='videoContainer'>
+            <p>You are Player ${playerNumber}</p>
+            <div id='myVideo' class='videoStream playerColor${playerNumber}'>
+        </div>
+        </div>
+        <div id="boardLogo">deckr</div>
+        <div id="tableNumber">${tableNumber}</div>
     </div>
-
-    `
-    playerIndicator.innerHTML = `
-    <p>You are player #${playerNumber}</p>
     `
 
     const game = new DeckrTable(socket, room, playerNumber)
