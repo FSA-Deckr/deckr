@@ -68,11 +68,7 @@ async function renderTable(tableNumber,playerNumber,agoraKeys) {
     `
 
     const game = new DeckrTable(socket, room, playerNumber)
-<<<<<<< HEAD
-    startVideo(channelNum)
-=======
     startVideo(agoraKeys,playerNumber,socket, tableNumber)
->>>>>>> cce4c284da7c966085be41f5c73746a569d33a6b
 }
 
 module.exports = {attemptToRenderTable, renderTable}

@@ -1,6 +1,9 @@
 *{
     font-family: sans-serif;
 }
+#loading{
+    
+}
 
 body{
     background-image: url("./board.jpg");
@@ -32,17 +35,9 @@ button{
     padding: 20px;
     text-decoration: none;
     position: relative;
-<<<<<<< HEAD
-    float:top;
-    width: 25%;
-    margin: 0 auto;
-    display: block;
-    border-radius: 20px;
-=======
     line-height: 0.1;
     margin-left: auto;
     margin-right: auto;
->>>>>>> cce4c284da7c966085be41f5c73746a569d33a6b
 }
 #newRoom{
     font-size: 25px;
