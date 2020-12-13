@@ -7,8 +7,11 @@ const authentication = require('./middleware/authentication')
 const cookieParser = require('cookie-parser')
 const io = require('socket.io');
 const { setSocketServer }  = require('./socketServer');
+const enforce = require('express-sslify')
 
 const app = express();
+
+if (app.get("env")==="production") app.use(enforce.HTTPS({ trustProtoHeader: true }));
 
 app.use(morgan('dev'));
 app.use(express.json());
