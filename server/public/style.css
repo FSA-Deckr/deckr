@@ -46,12 +46,19 @@ button{
     margin-left: auto;
     margin-right: auto;
 }
+
+#logInForm {
+    margin-top: 15%;
+}
+
 #newRoom{
     font-size: 25px;
+    cursor: pointer;
 }
 #logInButton{
     font-size: 20px;
-    margin-top: 20%;
+    margin-top: 7%;
+    cursor: pointer;
 }
 form{
     margin: 25%;
@@ -80,7 +87,7 @@ input{
     border-color: whitesmoke;
     margin-left: auto;
     margin-right: auto;
-    margin-top: 20%;
+    margin-top: 5%;
 }
 input:focus {
     outline-width: 0;
