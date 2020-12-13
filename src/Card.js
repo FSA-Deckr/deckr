@@ -374,7 +374,6 @@ export default class Card extends Phaser.GameObjects.Container {
   }
 
   showCounter(stackPosition) {
-    console.log('in show counter', stackPosition)
     this.stackCounter.setVisible(stackPosition > 0)
     this.count.setVisible(stackPosition > 0)
     this.count.setText(stackPosition + 1)
