@@ -40,14 +40,16 @@ export default class Card extends Phaser.GameObjects.Container {
     this.body.setBounce(1,1)
     this.body.setCollideWorldBounds(true)
     this.rotation = orientation
+    this.pointerOverCard = false
+    this.pointerOverButton = false
 
     //event listeners
       this.dragHistory = []
       this.on('dragstart', ()=>this.dragStart(true))
       this.on('drag', (ptr)=>this.drag(ptr));
       this.on('dragend', this.dragEnd);
-      this.on('pointerover', this.hover)
-      this.on('pointerout', this.unhover)
+      this.on('pointerover', ()=>{this.pointerOverCard = true; this.hover()})
+      this.on('pointerout', ()=>{this.pointerOverCard = false; this.unhover()})
 
       this.stackCounter.on('dragstart', ()=> this.dragStart())
       this.stackCounter.on('drag', (ptr)=>this.drag(ptr, true));
@@ -55,13 +57,13 @@ export default class Card extends Phaser.GameObjects.Container {
 
       const buttonArray = [this.rotateButton, this.flipButton, this.shuffleButton, this.stackCounter]
       buttonArray.forEach( button => {
-        button.on('pointerover', ()=>this.hover());
-        button.on('pointerout', ()=>this.unhover());
+        button.on('pointerover', ()=>{this.pointerOverButton = true; this.hover()});
+        button.on('pointerout', ()=>{this.pointerOverButton = false; this.unhover()});
       })
 
       this.rotateButton.on('dragstart', ()=> this.dragStart())
       this.rotateButton.on('drag', (ptr)=>this.spin(ptr));
-      this.rotateButton.on('dragend', (ptr)=> this.dragEnd(ptr));
+      this.rotateButton.on('dragend', (ptr)=> {this.dragEnd(ptr)});
       this.flipButton.on('pointerdown',()=>this.startFlip())
       this.flipButton.on('pointerup',()=>this.flip())
 
@@ -267,6 +269,11 @@ export default class Card extends Phaser.GameObjects.Container {
       this.setDepth(cardDepth)
     }
 
+    if(this.spinning) {
+      this.spinning = false
+      this.unhover()
+    }
+
     this.getCardsInStack().forEach( (card,ix) => {
       card.dragHistory = [];
       card.setDepth(cardDepth + card.stackOrder)
@@ -275,10 +282,6 @@ export default class Card extends Phaser.GameObjects.Container {
       this.playerPickedUp = false;
       card.showCounter(ix)
     })
-    if(this.spinning) {
-      this.spinning = false
-      this.unhover()
-    }
   }
 
   hover () {
@@ -293,7 +296,7 @@ export default class Card extends Phaser.GameObjects.Container {
   }
 
   unhover (ptr, cardNumberToExclude = undefined) {
-    if(!this.spinning) {
+    if(!this.spinning && !this.pointerOverCard && !this.pointerOverButton) {
       this.glow.setVisible(false)
       this.getCardsInStack().forEach( card => {
         if (card.cardNumber !== cardNumberToExclude) {
@@ -307,7 +310,6 @@ export default class Card extends Phaser.GameObjects.Container {
   }
 
   spin(ptr) {
-
     this.getCardsInStack().forEach( card => {
       card.setDepth(activeDepth + card.stackOrder)
       card.spinning = true
@@ -315,8 +317,6 @@ export default class Card extends Phaser.GameObjects.Container {
       card.rotation = Phaser.Math.Angle.Between(card.x, card.y, ptr.worldX, ptr.worldY) - 3*Math.PI/4
       this.socket.emit('sendCard', { card, room: this.gameState.room });
     })
-
-
   }
 
   startFlip() {
