@@ -47,8 +47,13 @@ const startVideo = function(agoraKeys,playerNumber,socket, room){
     // Remove the video stream from the container.
     function removeVideoStream(elementId) {
         let remoteDiv = document.getElementById(elementId);
-        if (remoteDiv) remoteDiv.parentNode.innerHTML = ''//removeChild(remoteDiv);
-        //also remove all other nodes here
+        if (remoteDiv) {
+            const container = remoteDiv.parentNode
+            while(container.firstChild) {
+                container.removeChild(container.lastChild)
+            }
+            container.remove()
+        }
     };
 
 

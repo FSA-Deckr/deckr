@@ -21,6 +21,8 @@
 }
 canvas {
     border-radius: 20px;
+    border: 3px solid white;
+    box-shadow: 0 5px 40px black;
 }
 .logo {
     text-shadow: 3px 3px 5px #070707;
@@ -30,7 +32,6 @@ canvas {
     margin-top: 20%;
     margin-bottom: 15%;
 }
-
 #newRoom{
     font-size: 25px;
     box-shadow: 3px 3px 5px #070707;
@@ -43,9 +44,17 @@ canvas {
     padding: 20px;
     text-decoration: none;
     position: relative;
-    line-height: 0.1;
+    line-height: 0.5em;
     margin-left: auto;
     margin-right: auto;
+    transition: all 0.3s ease 0s;
+}
+button:hover, button:focus {
+    letter-spacing: 1px;
+    box-shadow: 3px 3px 10px #070707;
+}
+#logInForm {
+    margin-top: 15%;
 }
 #logInButton{
     font-size: 20px;
@@ -75,7 +84,7 @@ label{
     display:block;
     position:relative;
     color: whitesmoke;
-    font-size: 30px;
+    font-size: 1.6rem;
 
 }
 input{
@@ -86,12 +95,11 @@ input{
     box-shadow: 3px 3px 5px #070707;
     display:block;
     position:relative;
-    background: transparent;
     border-radius: 8px;
     border-color: whitesmoke;
     margin-left: auto;
     margin-right: auto;
-    margin-top: 20%;
+    margin-top: 5%;
 }
 input:focus {
     outline-width: 0;
@@ -102,6 +110,7 @@ input:focus {
     justify-content: space-between;
     align-items: center;
     position: relative;
+    margin-top: 2rem;
 }
 #bank{
     width:800px;
@@ -111,29 +120,39 @@ input:focus {
     align-items: center;
     border-radius: 0px 0px 15px 15px;
 }
-#dealButton {
+.bank-bar-button {
     display: flex;
     align-items: center;
     justify-content: center;
     border: white 1px solid;
     color: white;
-    font-size: 1rem;
+    font-size: 0.9rem;
+    font-weight: bold;
     height: 50px;
     width: 75px;
     text-align: center;
     border-radius: 5px;
+    transition: all 0.3s ease 0s;
 }
-#dealButton:hover {
+.bank-bar-button:hover {
     color:black;
     background-color: white;
     cursor: pointer;
+    box-shadow: 0 5px 30px black;
 }
 .chipImg {
     display: inline-block;
     height: 50px;
     width: 50px;
     cursor: pointer;
+    border-radius: 50%;
+    transition: all 0.3s ease 0s;
 }
+
+.chipImg:hover {
+    box-shadow: 0 0 20px black;
+}
+
 #chip1 {
     background: url('chipSpriteSheet.png');
 }
@@ -165,40 +184,6 @@ input:focus {
     height: 50px;
     width: 75px;
     border-radius: 5px;
-}
-#chipCollect {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: white 1px solid;
-    color: white;
-    font-size: 1rem;
-    height: 50px;
-    width: 75px;
-    text-align: center;
-    border-radius: 5px;
-}
-#chipCollect:hover {
-    color:black;
-    background-color: white;
-    cursor: pointer;
-}
-#cardCollect {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: white 1px solid;
-    color: white;
-    font-size: 1rem;
-    height: 50px;
-    width: 75px;
-    text-align: center;
-    border-radius: 5px;
-}
-#cardCollect:hover {
-    color:black;
-    background-color: white;
-    cursor: pointer;
 }
 
 .rightDiv {
@@ -247,17 +232,42 @@ input:focus {
     position: absolute;
     left: calc(50% + 450px);
     top: 40%;
+}
+
+#boardLogo a {
+    text-decoration: none;
     text-shadow: 3px 3px 5px #070707;
     font-size: 55px;
     color: whitesmoke;
+    opacity: 0.5;
+    font-weight: bold;
+    transition: all 0.3s ease 0s;
 }
+
+#boardLogo a:hover {
+    opacity: 0.8;
+}
+
 #tableNumber {
     position: absolute;
     left: calc(50% - 665px);
     top: 40%;
+    opacity: 0.5;
+}
+
+#tableNumber p:last-child {
     text-shadow: 3px 3px 5px #070707;
-    font-size: 55px;
+    font-size: 40px;
     color: whitesmoke;
+    margin: 0;
+    font-weight: bold;
+}
+
+#tableNumber p:first-child {
+    text-shadow: 3px 3px 5px #070707;
+    font-size: 26px;
+    color: whitesmoke;
+    margin: 0 0 5px 0;
 }
 .media-control{
     display: flex;
