@@ -132,53 +132,42 @@ const startVideo = function(agoraKeys,playerNumber,socket, room){
 }
 
 
+document.getElementById('mic-btn')
+  
 
-
-function enableUiControls(localStream) {
-
-    $("#mic-btn").prop("disabled", false);
-    $("#video-btn").prop("disabled", false);
-
-  
-    $("#mic-btn").click(function(){
-      toggleMic(localStream);
-    });
-  
-    $("#video-btn").click(function(){
-      toggleVideo(localStream);
-    });
-  
-}
-  
-  
-  function toggleVisibility(elementID, visible) {
-    if (visible) {
-      $(elementID).attr("style", "display:block");
-    } else {
-      $(elementID).attr("style", "display:none");
-    }
+  function enableUiControls(localStream) {
+    document.getElementById('mic-btn').addEventListener("click",() =>{toggleMic(localStream)})
+    document.getElementById('video-btn').addEventListener("click",() =>{toggleVideo(localStream)})
   }
   
   function toggleMic(localStream) {
-
-    $("#mic-icon").toggleClass('fas fa-microphone').toggleClass('fas fa-microphone-slash'); // toggle the mic icon
-    if ($("#mic-icon").hasClass('fas fa-microphone')) {
+    let mic = document.getElementById("mic-icon")
+    if (mic.className === 'fas fa-microphone'){
+      mic.className = 'fas fa-microphone-slash';
+    } else {
+      mic.className = 'fas fa-microphone';
+    }
+    // toggle the mic icon
+    if (mic.classList.contains('fa-microphone')) {
       localStream.enableAudio(); // enable the local mic
-      toggleVisibility("#mute-overlay", false); // hide the muted mic icon
     } else {
       localStream.disableAudio(); // mute the local mic
-      toggleVisibility("#mute-overlay", true); // show the muted mic icon
     }
   }
   
   function toggleVideo(localStream) {
-    $("#video-icon").toggleClass('fa-video').toggleClass('fa-video-slash'); // toggle the video icon
-    if ($("#video-icon").hasClass('fa-video')) {
-      localStream.enableVideo(); // enable the local video
-      toggleVisibility("#no-local-video", false); // hide the user icon when video is enabled
+    let video = document.getElementById("video-icon")
+    if (video.className === 'fas fa-video'){
+      video.className = 'fas fa-video-slash';
     } else {
+      video.className = 'fas fa-video';
+    }
+    // toggle the video icon
+    if (video.classList.contains('fa-video')) {
+      localStream.enableVideo(); // enable the local video
+    } else
+    {
       localStream.disableVideo(); // disable the local video
-      toggleVisibility("#no-local-video", true); // show the user icon when video is disabled
     }
   }
 
