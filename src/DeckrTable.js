@@ -3,7 +3,8 @@ import Chip from './Chip'
 import Card from './Card'
 import { canvasWidth, canvasHeight, cardDimensions, chipRadius,
         activeDepth, initialChips, chipNames, newItemRange,
-        chipOffset, newItemRandom, cardOffset } from './Constants'
+        chipOffset, newItemRandom, cardOffset, playerColors,
+        playerSemicircles, semicircleRadius, semicircleOpacity } from './Constants'
 import { shuffleDeck } from './utility'
 
 export class DeckrTable extends Phaser.Game {
@@ -86,6 +87,7 @@ export class DeckrTable extends Phaser.Game {
           break;
       }
       this.add.image(canvasWidth/2, canvasHeight/2, 'board');
+      this.add.circle(playerSemicircles[playerNumber-1].x, playerSemicircles[playerNumber-1].y, semicircleRadius, playerColors[playerNumber], semicircleOpacity);
 
       //make Phaser physics groups
       chipsPhysicsGroup = this.physics.add.group();
@@ -388,13 +390,7 @@ export class DeckrTable extends Phaser.Game {
           pointers[pointerNumber].x = x
           pointers[pointerNumber].y = y
         } else {
-          const ptrColors = {
-            1:0xff1100,
-            2:0x0400ff,
-            3:0xff9d00,
-            4:0x9500ff
-          }
-          const newPointer = this.add.circle(x,y,10,ptrColors[pointerNumber])
+          const newPointer = this.add.circle(x,y,10,playerColors[pointerNumber])
           newPointer.setAlpha(0.5)
           newPointer.setDepth(activeDepth + 1)
           pointers[pointerNumber] = newPointer
@@ -462,6 +458,7 @@ export class DeckrTable extends Phaser.Game {
         if(document.getElementById(streamId)) {
             streamDiv = document.getElementById(streamId)
         } else {
+          this.add.circle(playerSemicircles[newPlayerNumber-1].x, playerSemicircles[newPlayerNumber-1].y, semicircleRadius, playerColors[newPlayerNumber], semicircleOpacity);
           const streamContainer = document.createElement("div")
           streamDiv = document.createElement("div");
           streamDiv.id = streamId;
