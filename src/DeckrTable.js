@@ -47,6 +47,7 @@ export class DeckrTable extends Phaser.Game {
       room: room,
       playerBanks: {}
     };
+    let disableButtons = false
     const { gameState, playerNumber, pointers, drawnCircles } = this
 
     //counter for unique chip numbers
@@ -196,6 +197,7 @@ export class DeckrTable extends Phaser.Game {
 
       //collect all chips on table for player
       const collectAllChips = () => {
+        disableButtons = true
         let totalValue = 0
         chipCollider.active = false
         //loop through chips in gamestate, add up value and add to player's bank
@@ -210,6 +212,7 @@ export class DeckrTable extends Phaser.Game {
         window.setTimeout(() => {
           chipsPhysicsGroup.clear(true,true)
           chipCollider.active = true;
+          disableButtons = false
         }, collectionAnimationMilis);
         gameState.playerBanks[this.game.playerNumber] += totalValue
         //emit event to collect chips and update player banks
@@ -220,6 +223,7 @@ export class DeckrTable extends Phaser.Game {
 
       //collect all cards on table, shuffle
       const collectAllCards = () => {
+        disableButtons = true
         for(const cardNum in gameState.cards) {
           //must destroy the phaser obj and delete the key in gamestate
           gameState.cards[cardNum].body.setDrag(0)
@@ -236,6 +240,7 @@ export class DeckrTable extends Phaser.Game {
         gameState.deck = makeDeck(52)
         shuffleDeck(gameState.deck)
         socket.emit("sendCollectCards", { deck: gameState.deck, room: gameState.room, playerNumber});
+        disableButtons = false
       }
 
       //update the HTML for player banks
@@ -272,17 +277,17 @@ export class DeckrTable extends Phaser.Game {
       }
 
       //clicking HTML elements for chips adds a chip w that value to the board
-      chip1.onclick = () => addAChip(1)
-      chip5.onclick = () => addAChip(5)
-      chip25.onclick = () => addAChip(25)
-      chip50.onclick = () => addAChip(50)
-      chip100.onclick = () => addAChip(100)
-      chip500.onclick = () => addAChip(500)
+      chip1.onclick = () => {if(!disableButtons) addAChip(1)}
+      chip5.onclick = () => {if(!disableButtons) addAChip(5)}
+      chip25.onclick = () => {if(!disableButtons) addAChip(25)}
+      chip50.onclick = () => {if(!disableButtons) addAChip(50)}
+      chip100.onclick = () => {if(!disableButtons) addAChip(100)}
+      chip500.onclick = () => {if(!disableButtons) addAChip(500)}
 
       //deal card, collect chips, collect cards into deck
-      dealButton.onclick = () => dealACard(gameState.deck)
-      chipCollect.onclick = () => collectAllChips()
-      cardCollect.onclick = () => collectAllCards()
+      dealButton.onclick = () => {if(!disableButtons) dealACard(gameState.deck)}
+      chipCollect.onclick = () => {if(!disableButtons) collectAllChips()}
+      cardCollect.onclick = () => {if(!disableButtons) collectAllCards()}
 
       socket.on('receiveCard', (receivedCard) => {
         //put all cards where they belong and with their rotations and reveal status
@@ -418,6 +423,7 @@ export class DeckrTable extends Phaser.Game {
 
       //if someone's collected the chips, delete them all from screen
       socket.on('receiveCollectChips', ({playerBanks, receivedPlayerNum})=>{
+        disableButtons = true
         chipCollider.active = false
         for(const chipNum in gameState.chips) {
           //must destroy the phaser obj and delete the key in gamestate
@@ -429,6 +435,7 @@ export class DeckrTable extends Phaser.Game {
         window.setTimeout(() => {
           chipsPhysicsGroup.clear(true,true)
           chipCollider.active = true;
+          disableButtons = false
         }, collectionAnimationMilis);
         //update the gamestate
         gameState.playerBanks = playerBanks
@@ -452,6 +459,7 @@ export class DeckrTable extends Phaser.Game {
 
       //if someone's collected the cards, delete them all from screen and update the deck
       socket.on('receiveCollectCards', ({receivedDeck, receivedPlayerNum})=>{
+        disableButtons = true
         for(const cardNum in gameState.cards) {
           //must destroy the phaser obj and delete the key in gamestate
           gameState.cards[cardNum].body.setDrag(0)
@@ -462,7 +470,10 @@ export class DeckrTable extends Phaser.Game {
         for(const player in gameState.hands) {
           gameState.hands[player] = {}
         }
-        window.setTimeout(() => this.cardsPhysicsGroup.clear(true,true), collectionAnimationMilis);
+        window.setTimeout(() => {
+          this.cardsPhysicsGroup.clear(true,true)
+          disableButtons = false
+        }, collectionAnimationMilis);
         gameState.deck = receivedDeck
         //update the card button count HTML
         dealButton.innerText = `Deal A Card (${gameState.deck.length})`
