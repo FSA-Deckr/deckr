@@ -47,7 +47,7 @@ async function renderTable(tableNumber,playerNumber,agoraKeys) {
     <div id='game'>
         <canvas id= '${canvas}'></canvas>
         <div id='bank'>
-            <div id='dealButton'>Deal A Card</div>
+            <div class='bank-bar-button' id='dealButton'>Deal A Card</div>
             <div id='chip1' class='chipImg'></div>
             <div id='chip5' class='chipImg'></div>
             <div id='chip25' class='chipImg'></div>
@@ -55,16 +55,19 @@ async function renderTable(tableNumber,playerNumber,agoraKeys) {
             <div id='chip100' class='chipImg'></div>
             <div id='chip500' class='chipImg'></div>
             <div id='chipCount'>$<span id='playerChips'>${initialChips}</span></div>
-            <div id='chipCollect'>Collect Chips</div>
-            <div id='cardCollect'>Collect Cards</div>
+            <div class='bank-bar-button' id='chipCollect'>Collect Chips</div>
+            <div class='bank-bar-button' id='cardCollect'>Collect Cards</div>
         </div>
         <div id='myVideoContainer' class='videoContainer'>
             <p>You are Player ${playerNumber}</p>
             <div id='myVideo' class='videoStream playerColor${playerNumber}'>
         </div>
         </div>
-        <div id="boardLogo">deckr</div>
-        <div id="tableNumber">${tableNumber}</div>
+        <div id="boardLogo"><a href='/home'>deckr</a></div>
+        <div id="tableNumber">
+            <p>Room code:</p>
+            <p>${tableNumber}</p>
+        </div>
     </div>
     `
 
