@@ -291,3 +291,5 @@ input:focus {
     border: none;
     padding: 20px;
 }
+#video-btn:focus {outline:0;}
+#mic-btn:focus {outline:0;}

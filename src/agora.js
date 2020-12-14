@@ -150,9 +150,6 @@ function enableUiControls(localStream) {
   
 }
   
-  function toggleBtn(btn){
-    btn.toggleClass('btn-dark').toggleClass('btn-danger');
-  }
   
   function toggleVisibility(elementID, visible) {
     if (visible) {
@@ -163,7 +160,7 @@ function enableUiControls(localStream) {
   }
   
   function toggleMic(localStream) {
-    toggleBtn($("#mic-btn")); // toggle button colors
+
     $("#mic-icon").toggleClass('fas fa-microphone').toggleClass('fas fa-microphone-slash'); // toggle the mic icon
     if ($("#mic-icon").hasClass('fas fa-microphone')) {
       localStream.enableAudio(); // enable the local mic
@@ -175,7 +172,6 @@ function enableUiControls(localStream) {
   }
   
   function toggleVideo(localStream) {
-    toggleBtn($("#video-btn")); // toggle button colors
     $("#video-icon").toggleClass('fa-video').toggleClass('fa-video-slash'); // toggle the video icon
     if ($("#video-icon").hasClass('fa-video')) {
       localStream.enableVideo(); // enable the local video
