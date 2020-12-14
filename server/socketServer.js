@@ -8,9 +8,7 @@ const setSocketServer = (server) => {
     socketServer.on('connection', function(socket) {
         // once a client has connected, we expect to get a ping from them saying what room they want to join
         socket.on('room', function(room) {
-            console.log(chalk.yellow('the room is', room))
             this.join(room);
-            this.to(room).emit('message', `the is a message from the websocket to people in ${room}?`);
         });
 
         socket.on('sendGameState', function(gameState) {

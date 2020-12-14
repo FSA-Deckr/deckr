@@ -9,7 +9,9 @@ router.put('/', async (req, res, next) => {
                 id: req.cookies.sid
             }
         })
-        await player.update({gameTableId: req.body.gameTableId, playerNumber: req.body.playerNumber})
+        
+        let currTableId = player.gameTableId
+        await player.update({gameTableId: req.body.gameTableId, playerNumber: req.body.playerNumber, prevTableId: currTableId})
         res.sendStatus(200)
 
     }

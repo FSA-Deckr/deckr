@@ -3,10 +3,9 @@ const io = require('socket.io-client');
 const renderLobby = require('./lobby');
 const startVideo = require('../agora')
 const {DeckrTable} = require('../DeckrTable');
-const { initialChips } = require('../Constants');
-
 
 async function attemptToRenderTable(tableNumber) {
+
     let gameTable = await axios.get(`/api/game/${tableNumber}`)
     let playerNumber = gameTable.data.playerNumber
     let agoraKeys = gameTable.data.gameTable
@@ -34,6 +33,7 @@ async function renderTable(tableNumber,playerNumber,agoraKeys) {
 
     const socket = io('/');
     const room = tableNumber
+    const initialBank = await axios.get(`/api/game/${tableNumber}/bank/${playerNumber}`)
     socket.on('connect', function() {
         //send room number to connect to it
         socket.emit('room', tableNumber);
@@ -54,7 +54,7 @@ async function renderTable(tableNumber,playerNumber,agoraKeys) {
             <div id='chip50' class='chipImg'></div>
             <div id='chip100' class='chipImg'></div>
             <div id='chip500' class='chipImg'></div>
-            <div id='chipCount'>$<span id='playerChips'>${initialChips}</span></div>
+            <div id='chipCount'>$<span id='playerChips'>${initialBank.data.bank}</span></div>
             <div class='bank-bar-button' id='chipCollect'>Collect Chips</div>
             <div class='bank-bar-button' id='cardCollect'>Collect Cards</div>
         </div>
@@ -71,7 +71,7 @@ async function renderTable(tableNumber,playerNumber,agoraKeys) {
     </div>
     `
 
-    const game = new DeckrTable(socket, room, playerNumber)
+    const game = new DeckrTable(socket, room, playerNumber, initialBank.data.bank)
     startVideo(agoraKeys,playerNumber,socket, tableNumber)
 }
 

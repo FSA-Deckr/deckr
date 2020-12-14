@@ -29,18 +29,18 @@ app.use((req,res,next) => {
 })
 
 app.use((req, res, next) => {
-    res.status(404).send('Page not found');
+    res.sendStatus(404)
 })
 
 
 app.use((err, req, res, next) => {
-    res.status(500).send('Error:' + err.message);
+    res.sendStatus(500)
   });
 
 const init = async () => {
 try {
     await db.sync({force: true});
-    const port = process.env.PORT || 8080;
+    const port = process.env.PORT || 8081;
     const server = app.listen(port, () => console.log(`listening on port ${port}`));
     setSocketServer(io(server))
 }

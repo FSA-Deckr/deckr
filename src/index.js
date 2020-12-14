@@ -1,6 +1,5 @@
 const renderLobby = require('./views/lobby');
 const {attemptToRenderTable} = require('./views/table');
-// import DeckrTable from './phaser'
 
 if (window.location.pathname === '/home/') {
     renderLobby();
