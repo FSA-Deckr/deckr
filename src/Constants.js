@@ -13,6 +13,7 @@ export const inHandAdjustment = 15
 export const inHandRange = 100
 export const textOffset = 8
 export const magnetRadius = 35;
+export const collectionAnimationMilis = 300
 
 //display z-index/depth variables
 export const chipDepth = 1
