@@ -290,7 +290,6 @@ export default class Card extends Phaser.GameObjects.Container {
     this.getCardsInStack().forEach( card => {
       card.flipButton.setVisible(true)
       card.rotateButton.setVisible(true)
-      card.shuffleButton.setVisible(true)
       card.stackCounter.setPosition(hoverButtonRadius - cardDimensions.width/2, hoverButtonRadius - cardDimensions.height/2)
     })
   }
@@ -302,7 +301,6 @@ export default class Card extends Phaser.GameObjects.Container {
         if (card.cardNumber !== cardNumberToExclude) {
           card.flipButton.setVisible(false)
           card.rotateButton.setVisible(false)
-          card.shuffleButton.setVisible(false)
           card.stackCounter.setPosition(hoverButtonRadius - cardDimensions.width/2, hoverButtonRadius - cardDimensions.height/2)
         }
       })
@@ -371,6 +369,7 @@ export default class Card extends Phaser.GameObjects.Container {
   showCounter(stackPosition) {
     this.stackCounter.setVisible(stackPosition > 0)
     this.count.setVisible(stackPosition > 0)
+    this.shuffleButton.setVisible(stackPosition > 0)
     this.count.setText(stackPosition + 1)
   }
 
