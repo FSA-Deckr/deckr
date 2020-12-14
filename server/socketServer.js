@@ -41,12 +41,12 @@ const setSocketServer = (server) => {
             this.to(room).emit('newPlayer', playerNumber)
         })
 
-        socket.on('sendCollectChips', function({room, playerBanks}){
-            this.to(room).emit('receiveCollectChips', playerBanks)
+        socket.on('sendCollectChips', function({room, playerBanks, playerNumber}){
+            this.to(room).emit('receiveCollectChips', {playerBanks, receivedPlayerNum: playerNumber})
         })
 
-        socket.on('sendCollectCards', function({deck, room}){
-            this.to(room).emit('receiveCollectCards', deck)
+        socket.on('sendCollectCards', function({deck, room, playerNumber}){
+            this.to(room).emit('receiveCollectCards', {receivedDeck: deck, receivedPlayerNum: playerNumber})
         })
 
         socket.on('bankChip', function({room, chipNumber, playerNumber}){
