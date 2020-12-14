@@ -32,6 +32,7 @@ export class DeckrTable extends Phaser.Game {
     this.socket = socket;
     this.playerNumber = _playerNumber
     this.pointers = {}
+    this.drawnCircles = {}
     this.gameState = {
       deck: [],
       cards: {},
@@ -45,7 +46,7 @@ export class DeckrTable extends Phaser.Game {
       room: room,
       playerBanks: {}
     };
-    const { gameState, playerNumber, pointers } = this
+    const { gameState, playerNumber, pointers, drawnCircles } = this
 
     //counter for unique chip numbers
     this.currentChipNumber = 0
@@ -87,7 +88,7 @@ export class DeckrTable extends Phaser.Game {
           break;
       }
       this.add.image(canvasWidth/2, canvasHeight/2, 'board');
-      this.add.circle(playerSemicircles[playerNumber-1].x, playerSemicircles[playerNumber-1].y, semicircleRadius, playerColors[playerNumber], semicircleOpacity);
+      drawnCircles[playerNumber] = this.add.circle(playerSemicircles[playerNumber-1].x, playerSemicircles[playerNumber-1].y, semicircleRadius, playerColors[playerNumber], semicircleOpacity);
 
       //make Phaser physics groups
       chipsPhysicsGroup = this.physics.add.group();
@@ -458,7 +459,7 @@ export class DeckrTable extends Phaser.Game {
         if(document.getElementById(streamId)) {
             streamDiv = document.getElementById(streamId)
         } else {
-          this.add.circle(playerSemicircles[newPlayerNumber-1].x, playerSemicircles[newPlayerNumber-1].y, semicircleRadius, playerColors[newPlayerNumber], semicircleOpacity);
+          if(!drawnCircles[newPlayerNumber]) drawnCircles[newPlayerNumber] = this.add.circle(playerSemicircles[newPlayerNumber-1].x, playerSemicircles[newPlayerNumber-1].y, semicircleRadius, playerColors[newPlayerNumber], semicircleOpacity);
           const streamContainer = document.createElement("div")
           streamDiv = document.createElement("div");
           streamDiv.id = streamId;
