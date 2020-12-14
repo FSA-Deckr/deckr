@@ -65,6 +65,7 @@ const startVideo = function(agoraKeys,playerNumber,socket, room){
             audio: true,
             video: true,
         });
+        enableUiControls(localStream)
         localStream.setVideoProfile('120p_1')
         socket.emit('joiningAs',{streamId: uid, playerNumber, room, relay:true})
     // Initialize the local stream
@@ -104,7 +105,82 @@ const startVideo = function(agoraKeys,playerNumber,socket, room){
         stream.close();
         removeVideoStream(streamId);
     });
+
+
+
+      client.on("mute-audio", function (evt) {
+        console.log("Remote stream: " +  evt.uid + "has muted audio");
+      });
+      
+      client.on("unmute-audio", function (evt) {
+        console.log("Remote stream: " +  evt.uid + "has muted audio");
+      });
+      
+      // show user icon whenever a remote has disabled their video
+      client.on("mute-video", function (evt) {
+        console.log("Remote stream: " +  evt.uid + "has muted video");
+      });
+      
+      client.on("unmute-video", function (evt) {
+        console.log("Remote stream: " +  evt.uid + "has un-muted video");
+      });
 }
+
+
+
+
+function enableUiControls(localStream) {
+
+    $("#mic-btn").prop("disabled", false);
+    $("#video-btn").prop("disabled", false);
+
+  
+    $("#mic-btn").click(function(){
+      toggleMic(localStream);
+    });
+  
+    $("#video-btn").click(function(){
+      toggleVideo(localStream);
+    });
+  
+}
+  
+  function toggleBtn(btn){
+    btn.toggleClass('btn-dark').toggleClass('btn-danger');
+  }
+  
+  function toggleVisibility(elementID, visible) {
+    if (visible) {
+      $(elementID).attr("style", "display:block");
+    } else {
+      $(elementID).attr("style", "display:none");
+    }
+  }
+  
+  function toggleMic(localStream) {
+    toggleBtn($("#mic-btn")); // toggle button colors
+    $("#mic-icon").toggleClass('fas fa-microphone').toggleClass('fas fa-microphone-slash'); // toggle the mic icon
+    if ($("#mic-icon").hasClass('fas fa-microphone')) {
+      localStream.enableAudio(); // enable the local mic
+      toggleVisibility("#mute-overlay", false); // hide the muted mic icon
+    } else {
+      localStream.disableAudio(); // mute the local mic
+      toggleVisibility("#mute-overlay", true); // show the muted mic icon
+    }
+  }
+  
+  function toggleVideo(localStream) {
+    toggleBtn($("#video-btn")); // toggle button colors
+    $("#video-icon").toggleClass('fa-video').toggleClass('fa-video-slash'); // toggle the video icon
+    if ($("#video-icon").hasClass('fa-video')) {
+      localStream.enableVideo(); // enable the local video
+      toggleVisibility("#no-local-video", false); // hide the user icon when video is enabled
+    } else {
+      localStream.disableVideo(); // disable the local video
+      toggleVisibility("#no-local-video", true); // show the user icon when video is disabled
+    }
+  }
+
 
 module.exports = startVideo
 

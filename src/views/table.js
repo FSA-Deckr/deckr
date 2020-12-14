@@ -62,6 +62,16 @@ async function renderTable(tableNumber,playerNumber,agoraKeys) {
             <p>You are Player ${playerNumber}</p>
             <div id='myVideo' class='videoStream playerColor${playerNumber}'>
         </div>
+
+        <div class = 'media-control'>
+        <button id="mic-btn" type="button" class="btn btn-block btn-dark btn-lg">
+        <i id="mic-icon" class="fas fa-microphone"></i>
+        </button>
+        <button id="video-btn"  type="button" class="btn btn-block btn-dark btn-lg">
+        <i id="video-icon" class="fas fa-video"></i>
+        </button>
+        <div>
+
         </div>
         <div id="boardLogo">deckr</div>
         <div id="tableNumber">${tableNumber}</div>
