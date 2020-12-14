@@ -24,7 +24,7 @@ export class DeckrTable extends Phaser.Game {
     super(cfg)
 
     //change body bg when table rendered
-    deckrBody.setAttribute("style", "background: radial-gradient(circle at 50%, #50353C, #50353C 30%, #2D1D22);");
+    deckrBody.setAttribute("style", "background: radial-gradient(circle at 50%, #50353C, #2D1D22);");
 
     //the deck is just an array of numbers representing the cards 0-51
     let chipsPhysicsGroup
