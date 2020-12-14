@@ -4,7 +4,8 @@ import Card from './Card'
 import { canvasWidth, canvasHeight, cardDimensions, chipRadius,
         activeDepth, initialChips, chipNames, newItemRange,
         chipOffset, newItemRandom, cardOffset, playerColors,
-        playerSemicircles, semicircleRadius, semicircleOpacity } from './Constants'
+        playerSemicircles, semicircleRadius, semicircleOpacity,
+        collectionAnimationMilis } from './Constants'
 import { shuffleDeck } from './utility'
 
 export class DeckrTable extends Phaser.Game {
@@ -95,7 +96,7 @@ export class DeckrTable extends Phaser.Game {
       this.cardsPhysicsGroup = this.physics.add.group()
 
       //detect collision between chips, with a callback that induces spin
-      this.physics.add.collider(chipsPhysicsGroup, chipsPhysicsGroup, function(chipA, chipB) {
+      const chipCollider = this.physics.add.collider(chipsPhysicsGroup, chipsPhysicsGroup, function(chipA, chipB) {
         const ax = chipA.body.x
         const ay = chipA.body.y
         const bx = chipB.body.x
@@ -196,16 +197,23 @@ export class DeckrTable extends Phaser.Game {
       //collect all chips on table for player
       const collectAllChips = () => {
         let totalValue = 0
+        chipCollider.active = false
         //loop through chips in gamestate, add up value and add to player's bank
         for(const chipNum in gameState.chips) {
           totalValue += gameState.chips[chipNum].chipValue
           //must destroy the phaser obj and delete the key in gamestate
-          gameState.chips[chipNum].destroy()
+          gameState.chips[chipNum].body.setDrag(0)
+          gameState.chips[chipNum].body.setCollideWorldBounds(false)
+          this.physics.moveTo(gameState.chips[chipNum],playerSemicircles[playerNumber -1].x,playerSemicircles[playerNumber - 1].y,null,collectionAnimationMilis)
           delete gameState.chips[chipNum]
         }
+        window.setTimeout(() => {
+          chipsPhysicsGroup.clear(true,true)
+          chipCollider.active = true;
+        }, collectionAnimationMilis);
         gameState.playerBanks[this.game.playerNumber] += totalValue
         //emit event to collect chips and update player banks
-        socket.emit("sendCollectChips", { room:gameState.room, playerBanks: gameState.playerBanks});
+        socket.emit("sendCollectChips", { room:gameState.room, playerBanks: gameState.playerBanks, playerNumber});
         //update the HTML for player banks
         this.updateBanks();
       }
@@ -214,7 +222,9 @@ export class DeckrTable extends Phaser.Game {
       const collectAllCards = () => {
         for(const cardNum in gameState.cards) {
           //must destroy the phaser obj and delete the key in gamestate
-          gameState.cards[cardNum].destroy()
+          gameState.cards[cardNum].body.setDrag(0)
+          gameState.cards[cardNum].body.setCollideWorldBounds(false)
+          this.physics.moveTo(gameState.cards[cardNum],playerSemicircles[playerNumber -1].x,playerSemicircles[playerNumber - 1].y,null,collectionAnimationMilis)
           delete gameState.cards[cardNum]
         }
         for(const player in gameState.hands) {
@@ -222,10 +232,10 @@ export class DeckrTable extends Phaser.Game {
           this.updateHands();
         }
         //sometimes cards in hand aren't phaser object but rather socket representations of them, so this makes sure all cards in the phaser world are killed
-        this.cardsPhysicsGroup.clear(true,true)
+        window.setTimeout(() => this.cardsPhysicsGroup.clear(true,true), collectionAnimationMilis);
         gameState.deck = makeDeck(52)
         shuffleDeck(gameState.deck)
-        socket.emit("sendCollectCards", { deck: gameState.deck, room: gameState.room});
+        socket.emit("sendCollectCards", { deck: gameState.deck, room: gameState.room, playerNumber});
       }
 
       //update the HTML for player banks
@@ -407,12 +417,19 @@ export class DeckrTable extends Phaser.Game {
       })
 
       //if someone's collected the chips, delete them all from screen
-      socket.on('receiveCollectChips', (playerBanks)=>{
+      socket.on('receiveCollectChips', ({playerBanks, receivedPlayerNum})=>{
+        chipCollider.active = false
         for(const chipNum in gameState.chips) {
           //must destroy the phaser obj and delete the key in gamestate
-          gameState.chips[chipNum].destroy()
+          gameState.chips[chipNum].body.setDrag(0)
+          gameState.chips[chipNum].body.setCollideWorldBounds(false)
+          this.physics.moveTo(gameState.chips[chipNum],playerSemicircles[receivedPlayerNum -1].x,playerSemicircles[receivedPlayerNum - 1].y,null,collectionAnimationMilis)
           delete gameState.chips[chipNum]
         }
+        window.setTimeout(() => {
+          chipsPhysicsGroup.clear(true,true)
+          chipCollider.active = true;
+        }, collectionAnimationMilis);
         //update the gamestate
         gameState.playerBanks = playerBanks
 
@@ -434,16 +451,18 @@ export class DeckrTable extends Phaser.Game {
       })
 
       //if someone's collected the cards, delete them all from screen and update the deck
-      socket.on('receiveCollectCards', (receivedDeck)=>{
+      socket.on('receiveCollectCards', ({receivedDeck, receivedPlayerNum})=>{
         for(const cardNum in gameState.cards) {
           //must destroy the phaser obj and delete the key in gamestate
-          gameState.cards[cardNum].destroy()
+          gameState.cards[cardNum].body.setDrag(0)
+          gameState.cards[cardNum].body.setCollideWorldBounds(false)
+          this.physics.moveTo(gameState.cards[cardNum],playerSemicircles[receivedPlayerNum -1].x,playerSemicircles[receivedPlayerNum - 1].y,null,collectionAnimationMilis)
           delete gameState.cards[cardNum]
         }
         for(const player in gameState.hands) {
           gameState.hands[player] = {}
         }
-        this.cardsPhysicsGroup.clear(true,true)
+        window.setTimeout(() => this.cardsPhysicsGroup.clear(true,true), collectionAnimationMilis);
         gameState.deck = receivedDeck
         //update the card button count HTML
         dealButton.innerText = `Deal A Card (${gameState.deck.length})`
