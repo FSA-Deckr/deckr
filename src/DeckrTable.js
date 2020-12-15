@@ -247,6 +247,12 @@ export class DeckrTable extends Phaser.Game {
       //update the HTML for player banks
       this.updateBanks = () => {
         const thisPlayerChips = gameState.playerBanks[this.game.playerNumber]
+        if (Number(playerChips.innerHTML) < thisPlayerChips) {
+          chipCount.className = 'glowing';
+          window.setTimeout(() => {
+            chipCount.className = ''
+          }, 2000)
+        }
         playerChips.innerText = thisPlayerChips
         chipNames.forEach(chipName => {
           if(thisPlayerChips < +chipName.substring(4)) document.getElementById(chipName).className = 'greyOut chipImg'
