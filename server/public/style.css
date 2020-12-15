@@ -48,6 +48,7 @@ canvas {
     margin-left: auto;
     margin-right: auto;
     transition: all 0.3s ease 0s;
+    cursor: pointer;
 }
 button:hover, button:focus {
     letter-spacing: 1px;
@@ -72,6 +73,7 @@ button:hover, button:focus {
     line-height: 0.1;
     margin-left: auto;
     margin-right: auto;
+    cursor: pointer;
 }
 form{
     margin: 25%;
