@@ -32,8 +32,9 @@ canvas {
     margin-top: 20%;
     margin-bottom: 15%;
 }
-
-button{
+#newRoom{
+    font-size: 25px;
+    box-shadow: 3px 3px 5px #070707;
     background-color: rgb(49, 9, 9);
     display:block;
     color: whitesmoke;
@@ -48,26 +49,29 @@ button{
     margin-right: auto;
     transition: all 0.3s ease 0s;
 }
-
 button:hover, button:focus {
     letter-spacing: 1px;
     box-shadow: 3px 3px 10px #070707;
 }
-
 #logInForm {
     margin-top: 15%;
 }
-
-#newRoom{
-    font-size: 1.6rem;
-    cursor: pointer;
-    font-weight: bold;
-}
 #logInButton{
-    font-size: 1rem;
-    margin-top: 7%;
-    cursor: pointer;
-    font-weight: bold;
+    font-size: 20px;
+    margin-top: 20%;
+    box-shadow: 3px 3px 5px #070707;
+    background-color: rgb(49, 9, 9);
+    display:block;
+    color: whitesmoke;
+    border-radius: 8px;
+    text-align: center;
+    border: none;
+    padding: 20px;
+    text-decoration: none;
+    position: relative;
+    line-height: 0.1;
+    margin-left: auto;
+    margin-right: auto;
 }
 form{
     margin: 25%;
@@ -265,3 +269,27 @@ input:focus {
     color: whitesmoke;
     margin: 0 0 5px 0;
 }
+.media-control{
+    display: flex;
+    justify-content: space-evenly;
+}
+
+#mic-btn{
+    box-shadow: 3px 3px 5px #070707;
+    background-color: rgb(49, 9, 9);
+    color: whitesmoke;
+    border-radius: 8px;
+    border: none;
+    padding: 20px;
+}
+
+#video-btn{
+    box-shadow: 3px 3px 5px #070707;
+    background-color: rgb(49, 9, 9);
+    color: whitesmoke;
+    border-radius: 8px;
+    border: none;
+    padding: 20px;
+}
+#video-btn:focus {outline:0;}
+#mic-btn:focus {outline:0;}
