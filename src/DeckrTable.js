@@ -257,11 +257,27 @@ export class DeckrTable extends Phaser.Game {
         const bankEl3 = document.getElementById('bankEl3')
         const bankEl4 = document.getElementById('bankEl4')
 
-        //update player bank HTML
-        if(bankEl1) {bankEl1.innerHTML = `Bank: $${gameState.playerBanks[1]}`}
-        if(bankEl2) {bankEl2.innerHTML = `Bank: $${gameState.playerBanks[2]}`}
-        if(bankEl3) {bankEl3.innerHTML = `Bank: $${gameState.playerBanks[3]}`}
-        if(bankEl4) {bankEl4.innerHTML = `Bank: $${gameState.playerBanks[4]}`}
+        const bankArray = [];
+
+        for (let x = 1; x <= 4; x++) {
+          if (`bankEl${x}` !== null) bankArray.push(eval(`bankEl${x}`))
+        }
+
+        bankArray.forEach( (bank, ind) => {
+          if (bank) {
+            const num = ind + 1;
+            const currAmount = bank.innerHTML.substring(7)
+            const newAmount = gameState.playerBanks[num]
+            bank.innerHTML = `Bank: $${newAmount}`
+            if (Number(currAmount) < newAmount) {
+              bank.className = 'glowing';
+              window.setTimeout(() => {
+                bank.className = ''
+              }, 2000)
+            }
+            
+          }
+        })
 
         axios.put(`/api/game/${gameState.room}/bank`, gameState.playerBanks)
       }
