@@ -70,6 +70,7 @@ const startVideo = function(agoraKeys,playerNumber,socket, room){
             audio: true,
             video: true,
         });
+        enableUiControls(localStream)
         localStream.setVideoProfile('120p_1')
         socket.emit('joiningAs',{streamId: uid, playerNumber, room, relay:true})
     // Initialize the local stream
@@ -109,7 +110,67 @@ const startVideo = function(agoraKeys,playerNumber,socket, room){
         stream.close();
         removeVideoStream(streamId);
     });
+
+
+
+      client.on("mute-audio", function (evt) {
+        console.log("Remote stream: " +  evt.uid + "has muted audio");
+      });
+      
+      client.on("unmute-audio", function (evt) {
+        console.log("Remote stream: " +  evt.uid + "has muted audio");
+      });
+      
+      // show user icon whenever a remote has disabled their video
+      client.on("mute-video", function (evt) {
+        console.log("Remote stream: " +  evt.uid + "has muted video");
+      });
+      
+      client.on("unmute-video", function (evt) {
+        console.log("Remote stream: " +  evt.uid + "has un-muted video");
+      });
 }
+
+
+document.getElementById('mic-btn')
+  
+
+  function enableUiControls(localStream) {
+    document.getElementById('mic-btn').addEventListener("click",() =>{toggleMic(localStream)})
+    document.getElementById('video-btn').addEventListener("click",() =>{toggleVideo(localStream)})
+  }
+  
+  function toggleMic(localStream) {
+    let mic = document.getElementById("mic-icon")
+    if (mic.className === 'fas fa-microphone'){
+      mic.className = 'fas fa-microphone-slash';
+    } else {
+      mic.className = 'fas fa-microphone';
+    }
+    // toggle the mic icon
+    if (mic.classList.contains('fa-microphone')) {
+      localStream.enableAudio(); // enable the local mic
+    } else {
+      localStream.disableAudio(); // mute the local mic
+    }
+  }
+  
+  function toggleVideo(localStream) {
+    let video = document.getElementById("video-icon")
+    if (video.className === 'fas fa-video'){
+      video.className = 'fas fa-video-slash';
+    } else {
+      video.className = 'fas fa-video';
+    }
+    // toggle the video icon
+    if (video.classList.contains('fa-video')) {
+      localStream.enableVideo(); // enable the local video
+    } else
+    {
+      localStream.disableVideo(); // disable the local video
+    }
+  }
+
 
 module.exports = startVideo
 
