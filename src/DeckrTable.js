@@ -7,9 +7,10 @@ import { canvasWidth, canvasHeight, cardDimensions, chipRadius,
         playerSemicircles, semicircleRadius, semicircleOpacity,
         collectionAnimationMilis } from './Constants'
 import { shuffleDeck } from './utility'
+import axios from 'axios'
 
 export class DeckrTable extends Phaser.Game {
-  constructor(socket, room, _playerNumber){
+  constructor(socket, room, _playerNumber, initialBank){
     //phaser game object config
     const cfg = {
       type: Phaser.CANVAS,
@@ -54,7 +55,7 @@ export class DeckrTable extends Phaser.Game {
     this.currentChipNumber = 0
 
     //player chip total
-    this.gameState.playerBanks[this.playerNumber] = initialChips
+    this.gameState.playerBanks[this.playerNumber] = initialBank
 
     function preload() {
       this.load.spritesheet('chipSprite','chipSpriteSheet.png', { frameWidth: chipRadius * 2, frameHeight: chipRadius * 2})
@@ -246,6 +247,12 @@ export class DeckrTable extends Phaser.Game {
       //update the HTML for player banks
       this.updateBanks = () => {
         const thisPlayerChips = gameState.playerBanks[this.game.playerNumber]
+        if (Number(playerChips.innerHTML) < thisPlayerChips) {
+          chipCount.className = 'glowing';
+          window.setTimeout(() => {
+            chipCount.className = ''
+          }, 2000)
+        }
         playerChips.innerText = thisPlayerChips
         chipNames.forEach(chipName => {
           if(thisPlayerChips < +chipName.substring(4)) document.getElementById(chipName).className = 'greyOut chipImg'
@@ -256,11 +263,29 @@ export class DeckrTable extends Phaser.Game {
         const bankEl3 = document.getElementById('bankEl3')
         const bankEl4 = document.getElementById('bankEl4')
 
-        //update player bank HTML
-        if(bankEl1) {bankEl1.innerHTML = `Bank: $${gameState.playerBanks[1]}`}
-        if(bankEl2) {bankEl2.innerHTML = `Bank: $${gameState.playerBanks[2]}`}
-        if(bankEl3) {bankEl3.innerHTML = `Bank: $${gameState.playerBanks[3]}`}
-        if(bankEl4) {bankEl4.innerHTML = `Bank: $${gameState.playerBanks[4]}`}
+        const bankArray = [];
+
+        for (let x = 1; x <= 4; x++) {
+          if (`bankEl${x}` !== null) bankArray.push(eval(`bankEl${x}`))
+        }
+
+        bankArray.forEach( (bank, ind) => {
+          if (bank) {
+            const num = ind + 1;
+            const currAmount = bank.innerHTML.substring(7)
+            const newAmount = gameState.playerBanks[num]
+            bank.innerHTML = `Bank: $${newAmount}`
+            if (Number(currAmount) < newAmount) {
+              bank.className = 'glowing';
+              window.setTimeout(() => {
+                bank.className = ''
+              }, 2000)
+            }
+            
+          }
+        })
+
+        axios.put(`/api/game/${gameState.room}/bank`, gameState.playerBanks)
       }
 
       this.updateHands = () => {
@@ -414,8 +439,9 @@ export class DeckrTable extends Phaser.Game {
       })
 
       //send game state if you are player 1 and a new player joins
-      socket.on('newPlayer', (newPlayerNumber)=>{
-        gameState.playerBanks[newPlayerNumber] = initialChips
+      socket.on('newPlayer', async (newPlayerNumber)=>{
+        const initialChips = await axios.get(`/api/game/${gameState.room}/bank/${newPlayerNumber}`)
+        gameState.playerBanks[newPlayerNumber] = initialChips.data.bank
         //update HTML for player banks
         this.updateBanks();
         if(playerNumber===1) socket.emit("sendGameState", gameState);

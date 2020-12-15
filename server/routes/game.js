@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const {GameTable, PlayerSession} = require('../db');
+
 let keys = null
 try {
     keys = require('../../apikey')
@@ -56,7 +57,6 @@ router.post('/', async (req, res, next) => {
 //204 if the table doesn't exist
 router.get('/:gameId', async (req, res, next) => {
     try {
-
         const gameTable = await GameTable.findOne({
             where: {
                 accessCode: req.params.gameId
@@ -77,31 +77,26 @@ router.get('/:gameId', async (req, res, next) => {
             })
 
             const playerNums = gameUsers.length ? gameUsers.map( user => user.playerNumber) : [];
-            //if the player refreshes after being on a table
-            if (req.gameTableId === req.params.gameId) {
-                //hard coding the first key for now, since we have limited keys
-                res.status(200).json({gameTable: agoraKeys[1], playerNumber})
+            //if table full
+            if (playerNums.length === 4) {
+                res.sendStatus(206)
             }
+            //if table not full
             else {
-                //if table full
-                if (playerNums.length === 4) {
-                    res.sendStatus(206)
-                }
-                //if table not full
-                else {
-                    let newPlayerNum;
-                    for (let testNum = 1; testNum <= 4; testNum++) {
-                        if (!playerNums.includes(testNum)) {
-                            newPlayerNum = testNum;
-                            break;
-                        }
+                let newPlayerNum;
+                for (let testNum = 1; testNum <= 4; testNum++) {
+                    if (!playerNums.includes(testNum)) {
+                        newPlayerNum = testNum;
+                        break;
                     }
-                    await player.update({gameTableId: gameTable.id, playerNumber: newPlayerNum})
-                    req.gameTableNum = req.params.gameId;
-                    req.playerNumber = newPlayerNum;
-                //hard coding the first key for now, since we have limited keys
-                    res.status(200).json({gameTable: agoraKeys[1], playerNumber: req.playerNumber})
                 }
+                //if the player refreshes after being on a table, or comes back after exiting out
+                const bank = player.prevTableId === gameTable.id ? player.bank : 1000
+                await player.update({gameTableId: gameTable.id, playerNumber: newPlayerNum, bank})
+                req.gameTableId = gameTable.id;
+                req.playerNumber = newPlayerNum;
+            //hard coding the first key for now, since we have limited keys
+                res.json({gameTable: agoraKeys[1], playerNumber: req.playerNumber})
             }
         }
         //if no game table found
@@ -114,6 +109,52 @@ router.get('/:gameId', async (req, res, next) => {
     }
 
 
+})
+
+
+router.put('/:gameId/bank', async (req, res, next) => {
+    try {
+        const gameTable = await GameTable.findOne({
+            where: {
+                accessCode: req.params.gameId
+            }
+        })
+
+        const gameUsers = await PlayerSession.findAll({
+            where: {
+                gameTableId: gameTable.id
+            }
+        })
+
+        let playerBankUpdates = [];
+
+        gameUsers.forEach( user => {
+            playerBankUpdates.push(user.update({bank: req.body[user.playerNumber]}))
+        })
+
+        await Promise.all(playerBankUpdates)
+        res.sendStatus(200)
+    }
+    catch(err) {
+        next(err)
+    }
+})
+
+router.get('/:gameId/bank/:playerNumber', async (req, res, next) => {
+    const gameTable = await GameTable.findOne({
+        where: {
+            accessCode: req.params.gameId
+        }
+    })
+
+    const gameUser = await PlayerSession.findOne({
+        where: {
+            playerNumber: req.params.playerNumber,
+            gameTableId: gameTable.id
+        }
+    })
+
+    res.send({bank: gameUser.bank});
 })
 
 module.exports = router;
