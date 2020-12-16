@@ -1,5 +1,8 @@
 const router = require('express').Router();
 const {GameTable, PlayerSession} = require('../db');
+const {RtcTokenBuilder, RtcRole} = require('agora-access-token');
+
+//keys for localhost on dev
 let keys = null
 try {
     keys = require('../../apikey')
@@ -8,21 +11,18 @@ try {
 }
 
 //getting keys from heroku config
-
 const agoraKeys = keys || {
-        1:{
-            appId : process.env.APPID,
-            appCertificate: process.env.APPCERTIFICATE
-        },
-        2:{
-            appId : process.env.APPID_2,
-            appCertificate: process.env.APPCERTIFICATE_2
-        },
-        3:{
-            appId : process.env.APPID_3,
-            appCertificate: process.env.APPCERTIFICATE_3
-        }
-    }
+    appId : process.env.APPID,
+    appCertificate: process.env.APPCERTIFICATE
+}
+const appId = agoraKeys.appId
+const appCertificate = agoraKeys.appCertificate
+console.log(appId, appCertificate)
+const uid = 0;
+const role = RtcRole.PUBLISHER;
+const expirationTimeInSeconds = 3600
+const currentTimestamp = Math.floor(Date.now() / 1000)
+const privilegeExpiredTs = currentTimestamp + expirationTimeInSeconds
 
 //this post request creates a new game room
 router.post('/', async (req, res, next) => {
@@ -76,11 +76,14 @@ router.get('/:gameId', async (req, res, next) => {
                 }
             })
 
+            // Build token with uid
+            const token = RtcTokenBuilder.buildTokenWithUid(appId, appCertificate, req.params.gameId, uid, role, privilegeExpiredTs);
+
             const playerNums = gameUsers.length ? gameUsers.map( user => user.playerNumber) : [];
             //if the player refreshes after being on a table
             if (req.gameTableId === req.params.gameId) {
                 //hard coding the first key for now, since we have limited keys
-                res.status(200).json({gameTable: agoraKeys[1], playerNumber})
+                res.status(200).json({token, playerNumber})
             }
             else {
                 //if table full
@@ -100,7 +103,7 @@ router.get('/:gameId', async (req, res, next) => {
                     req.gameTableNum = req.params.gameId;
                     req.playerNumber = newPlayerNum;
                 //hard coding the first key for now, since we have limited keys
-                    res.status(200).json({gameTable: agoraKeys[1], playerNumber: req.playerNumber})
+                    res.status(200).json({token, playerNumber: req.playerNumber})
                 }
             }
         }

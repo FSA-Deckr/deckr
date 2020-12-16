@@ -1,15 +1,14 @@
 const axios = require('axios')
 const io = require('socket.io-client');
-const renderLobby = require('./lobby');
 const startVideo = require('../agora')
-const {DeckrTable} = require('../DeckrTable');
+const { DeckrTable } = require('../DeckrTable');
 const { initialChips } = require('../Constants');
 
 
 async function attemptToRenderTable(tableNumber) {
     let gameTable = await axios.get(`/api/game/${tableNumber}`)
     let playerNumber = gameTable.data.playerNumber
-    let agoraKeys = gameTable.data.gameTable
+    let token = gameTable.data.token
     if (gameTable.status === 206) {
         window.location.pathname = '/home'
         console.log('Sorry, this game is full')
@@ -19,11 +18,11 @@ async function attemptToRenderTable(tableNumber) {
         console.log('Sorry, this game was not found')
     }
     else {
-        await renderTable(tableNumber, playerNumber,agoraKeys);
+        await renderTable(tableNumber, playerNumber, token);
     }
 }
 
-async function renderTable(tableNumber,playerNumber,agoraKeys) {
+async function renderTable(tableNumber,playerNumber,token) {
     const table = document.getElementById('table');
     const buttonControls = document.getElementById('buttonControls');
     const root = document.getElementById('root')
@@ -72,7 +71,7 @@ async function renderTable(tableNumber,playerNumber,agoraKeys) {
     `
 
     const game = new DeckrTable(socket, room, playerNumber)
-    startVideo(agoraKeys,playerNumber,socket, tableNumber)
+    startVideo(token, playerNumber, socket, tableNumber)
 }
 
 module.exports = {attemptToRenderTable, renderTable}
