@@ -9,7 +9,7 @@ function renderLobby() {
     <button id="newRoom">Create a table</button>
     <form id = "logInForm">
         <label>Join a table</label>
-        <input name ="accessCode" className = "accessCode" id="roomNumber" placeholder="Table Code"/>
+        <input name ="accessCode" class= "accessCode" id="roomNumber" placeholder="Table Code"/>
         <button type ="submit" id = "logInButton" >JOIN</button>
     </form>
     `

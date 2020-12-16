@@ -10,7 +10,7 @@ const authentication = async (req, res, next) => {
       path: '/'
     });
     req.playerNumber = null;
-    req.gameTableNum = null;
+    req.gameTableId = null;
   }
 
   //case 1: no cookie upon opening page
@@ -39,8 +39,13 @@ const authentication = async (req, res, next) => {
       req.playerNumber = null;
       req.gameTableId = null;
     }
+    else {
+      req.playerNumber = session.playerNumber
+      req.gameTableId = session.gameTableId
+    }
 
   }
+
   next();
 }
 

@@ -6,6 +6,7 @@ const { initialChips } = require('../Constants');
 
 
 async function attemptToRenderTable(tableNumber) {
+
     let gameTable = await axios.get(`/api/game/${tableNumber}`)
     let playerNumber = gameTable.data.playerNumber
     let token = gameTable.data.token
@@ -33,6 +34,7 @@ async function renderTable(tableNumber,playerNumber,token) {
 
     const socket = io('/');
     const room = tableNumber
+    const initialBank = await axios.get(`/api/game/${tableNumber}/bank/${playerNumber}`)
     socket.on('connect', function() {
         //send room number to connect to it
         socket.emit('room', tableNumber);
@@ -53,15 +55,23 @@ async function renderTable(tableNumber,playerNumber,token) {
             <div id='chip50' class='chipImg'></div>
             <div id='chip100' class='chipImg'></div>
             <div id='chip500' class='chipImg'></div>
-            <div id='chipCount'>$<span id='playerChips'>${initialChips}</span></div>
+            <div id='chipCount'>$<span id='playerChips'>${initialBank.data.bank}</span></div>
             <div class='bank-bar-button' id='chipCollect'>Collect Chips</div>
             <div class='bank-bar-button' id='cardCollect'>Collect Cards</div>
         </div>
         <div id='myVideoContainer' class='videoContainer'>
             <p>You are Player ${playerNumber}</p>
-            <div id='myVideo' class='videoStream playerColor${playerNumber}'>
+            <div id='myVideo' class='videoStream playerColor${playerNumber}'></div>
+            <div class = 'media-control'>
+                <button id="mic-btn" type="button" class="btn btn-block btn-dark btn-lg">
+                    <i id="mic-icon" class="fas fa-microphone"></i>
+                </button>
+                <button id="video-btn"  type="button" class="btn btn-block btn-dark btn-lg">
+                    <i id="video-icon" class="fas fa-video"></i>
+                </button>
+            </div>
         </div>
-        </div>
+
         <div id="boardLogo"><a href='/home'>deckr</a></div>
         <div id="tableNumber">
             <p>Room code:</p>
