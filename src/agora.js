@@ -1,22 +1,7 @@
 const AgoraRTC = require('agora-rtc-sdk')
 
-const {RtcTokenBuilder, RtcRole} = require('agora-access-token');
+const startVideo = function(token, playerNumber,socket, room){
 
-const startVideo = function(agoraKeys,playerNumber,socket, room){
-    const appId = agoraKeys.appId
-    const appCertificate = agoraKeys.appCertificate
-    const channelName = 'deckr';
-    const uid = 0;
-    const role = RtcRole.PUBLISHER;
-
-    const expirationTimeInSeconds = 3600
-
-    const currentTimestamp = Math.floor(Date.now() / 1000)
-
-    const privilegeExpiredTs = currentTimestamp + expirationTimeInSeconds
-
-    // Build token with uid
-    const token = RtcTokenBuilder.buildTokenWithUid(appId, appCertificate, channelName, uid, role, privilegeExpiredTs);
 
     let handleError = function(err){
         console.log("Error: ", err);
@@ -62,10 +47,10 @@ const startVideo = function(agoraKeys,playerNumber,socket, room){
         codec: "vp8",
     });
 
-    client.init(appId);
+    client.init(token);
 
     // Join a channel
-    client.join(token, channelName, null, (uid)=>{
+    client.join(token, room, null, (uid)=>{
         let localStream = AgoraRTC.createStream({
             audio: true,
             video: true,
@@ -116,16 +101,16 @@ const startVideo = function(agoraKeys,playerNumber,socket, room){
       client.on("mute-audio", function (evt) {
         console.log("Remote stream: " +  evt.uid + "has muted audio");
       });
-      
+
       client.on("unmute-audio", function (evt) {
         console.log("Remote stream: " +  evt.uid + "has muted audio");
       });
-      
+
       // show user icon whenever a remote has disabled their video
       client.on("mute-video", function (evt) {
         console.log("Remote stream: " +  evt.uid + "has muted video");
       });
-      
+
       client.on("unmute-video", function (evt) {
         console.log("Remote stream: " +  evt.uid + "has un-muted video");
       });
@@ -133,13 +118,13 @@ const startVideo = function(agoraKeys,playerNumber,socket, room){
 
 
 document.getElementById('mic-btn')
-  
+
 
   function enableUiControls(localStream) {
     document.getElementById('mic-btn').addEventListener("click",() =>{toggleMic(localStream)})
     document.getElementById('video-btn').addEventListener("click",() =>{toggleVideo(localStream)})
   }
-  
+
   function toggleMic(localStream) {
     let mic = document.getElementById("mic-icon")
     if (mic.className === 'fas fa-microphone'){
@@ -154,7 +139,7 @@ document.getElementById('mic-btn')
       localStream.disableAudio(); // mute the local mic
     }
   }
-  
+
   function toggleVideo(localStream) {
     let video = document.getElementById("video-icon")
     if (video.className === 'fas fa-video'){
