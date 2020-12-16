@@ -1,5 +1,7 @@
 const router = require('express').Router();
 const {GameTable, PlayerSession} = require('../db');
+const {RtcTokenBuilder, RtcRole} = require('agora-access-token');
+
 
 let keys = null
 try {
@@ -11,19 +13,17 @@ try {
 //getting keys from heroku config
 
 const agoraKeys = keys || {
-        1:{
-            appId : process.env.APPID,
-            appCertificate: process.env.APPCERTIFICATE
-        },
-        2:{
-            appId : process.env.APPID_2,
-            appCertificate: process.env.APPCERTIFICATE_2
-        },
-        3:{
-            appId : process.env.APPID_3,
-            appCertificate: process.env.APPCERTIFICATE_3
-        }
-    }
+    appId : process.env.APPID,
+    appCertificate: process.env.APPCERTIFICATE
+}
+
+const appId = agoraKeys.appId;
+const appCertificate = agoraKeys.appCertificate;
+const uid = 0;
+const role = RtcRole.PUBLISHER;
+const expirationTimeInSeconds = 3600
+const currentTimestamp = Math.floor(Date.now() / 1000)
+const privilegeExpiredTs = currentTimestamp + expirationTimeInSeconds
 
 //this post request creates a new game room
 router.post('/', async (req, res, next) => {
@@ -76,6 +76,9 @@ router.get('/:gameId', async (req, res, next) => {
                 }
             })
 
+            // Build token with uid
+            const token = RtcTokenBuilder.buildTokenWithUid(appId, appCertificate, req.params.gameId, uid, role, privilegeExpiredTs);
+
             const playerNums = gameUsers.length ? gameUsers.map( user => user.playerNumber) : [];
             //if table full
             if (playerNums.length === 4) {
@@ -95,8 +98,7 @@ router.get('/:gameId', async (req, res, next) => {
                 await player.update({gameTableId: gameTable.id, playerNumber: newPlayerNum, bank})
                 req.gameTableId = gameTable.id;
                 req.playerNumber = newPlayerNum;
-            //hard coding the first key for now, since we have limited keys
-                res.json({gameTable: agoraKeys[1], playerNumber: req.playerNumber})
+                res.json({token, playerNumber: req.playerNumber})
             }
         }
         //if no game table found
