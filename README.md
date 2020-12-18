@@ -41,5 +41,3 @@ git push heroku HEAD:master
 * [Phaser](https://photonstorm.github.io/phaser3-docs/) - Game/physics engine
 * [Agora](https://docs.agora.io/en) - Video chat
 * [Socket.io](https://socket.io/docs/v3) - Websockets
-
-## Punchlist
