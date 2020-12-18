@@ -43,10 +43,3 @@ git push heroku HEAD:master
 * [Socket.io](https://socket.io/docs/v3) - Websockets
 
 ## Punchlist
-
-1. Sending gameState to new players at table (Adam)
-2. Setting up CSS/styles (Qinwei)
-3. Dealing with keys/secrets (Qinwei)
-4. Adding cards to hands (Chad)
-5. Stacking cards (John)
-6. Drawing new card sprites (Chad)
